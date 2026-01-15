@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { Button } from "./ui/button";
-import { SidebarTrigger } from "./ui/sidebar";
+import { Button } from "../ui/button";
+import { SidebarTrigger } from "../ui/sidebar";
 
 export default function AppHeader() {
   return (

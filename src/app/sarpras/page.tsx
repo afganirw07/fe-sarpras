@@ -1,5 +1,5 @@
 
-
+import Footer from "@/components/footer"
 
 export default function Sarpras(){
     return(
@@ -7,6 +7,7 @@ export default function Sarpras(){
         <section className="w-full h-screen bg-blue-500 flex justify-center items-center">
             <h1 className="text-6xl text-white font-bold text-center">Ini Landing Page</h1>
         </section>
+        <Footer/>
         </>
     )
 }

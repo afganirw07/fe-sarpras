@@ -1,6 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import AppHeader from "@/components/app-header";
+import { AppSidebar } from "@/components/navbar/app-sidebar";
+import AppHeader from "@/components/navbar/app-header";
 
 export default function LandingLayout({
   children,
