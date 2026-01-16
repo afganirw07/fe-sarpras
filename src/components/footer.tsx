@@ -29,7 +29,7 @@ export default function Footer() {
         />
       </svg>
 
-      <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+      <footer className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 text-white">
         {/* <BackgroundWave className="rotate-180"/> */}
         <div className="relative z-10 mx-auto max-w-7xl px-6  pb-16 pt-24">
           <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
@@ -46,7 +46,7 @@ export default function Footer() {
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative transform rounded-full bg-slate-800 p-3 transition-all duration-300 hover:scale-110 hover:bg-blue-600"
+                  className="group relative transform rounded-full bg-gray-800 text-white p-3 transition-all duration-300 hover:scale-110 hover:bg-blue-600"
                 >
                   <Facebook className="h-5 w-5" />
                   <div className="absolute inset-0 rounded-full bg-blue-500 opacity-0 blur-xl transition-opacity group-hover:opacity-20"></div>
@@ -55,7 +55,7 @@ export default function Footer() {
                   href="https://instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative transform rounded-full bg-slate-800 p-3 transition-all duration-300 hover:scale-110 hover:bg-pink-600"
+                  className="group relative transform rounded-full bg-gray-800 text-white p-3 transition-all duration-300 hover:scale-110 hover:bg-pink-600"
                 >
                   <Instagram className="h-5 w-5" />
                   <div className="absolute inset-0 rounded-full bg-pink-500 opacity-0 blur-xl transition-opacity group-hover:opacity-20"></div>
@@ -64,7 +64,7 @@ export default function Footer() {
                   href="https://youtube.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative transform rounded-full bg-slate-800 p-3 transition-all duration-300 hover:scale-110 hover:bg-red-600"
+                  className="group relative transform rounded-full bg-gray-800 text-white p-3 transition-all duration-300 hover:scale-110 hover:bg-red-600"
                 >
                   <Youtube className="h-5 w-5" />
                   <div className="absolute inset-0 rounded-full bg-red-500 opacity-0 blur-xl transition-opacity group-hover:opacity-20"></div>

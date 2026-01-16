@@ -5,19 +5,17 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
-  CalenderIcon,
-  ChevronDownIcon,
-  GridIcon,
-  HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  UserCircleIcon,
-} from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
+  LayoutGrid,
+  Users,
+  Database,
+  ChevronDown,
+  ArrowLeftRight,
+  Package,
+  Archive,
+   Ellipsis,
+   Layout
+} from "lucide-react";
+
 
 type NavItem = {
   name: string;
@@ -27,38 +25,41 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/dashboard", pro: false }],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/dashboard/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/dashboard/profile",
-  },
 
   {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/dashboard/form-elements", pro: false }],
+    icon: <LayoutGrid />,
+    name: "Dashboard",
+    path: "/dashboard",
   },
   {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/dashboard/basic-tables", pro: false }],
+    icon: <Users />,
+    name: "User Role",
+    path: "/role",
   },
   {
-    name: "Pages",
-    icon: <PageIcon />,
+    name: "Data Master",
+    icon: <Database />,
     subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
+      { name: "Items", path: "/items", pro: false },
+      { name: "Supplier", path: "/supplier", pro: false },
+      { name: "Warehouse", path: "/warehouse", pro: false },
+    ],
+  },
+  {
+    icon: <Package />,
+    name: "Transaction",
+    path: "/transaction",
+  },
+   {
+    icon: <ArrowLeftRight />,
+    name: "Mutation",
+    path: "/mutation",
+  },
+  {
+    name: "Data Inventaris",
+    icon: <Archive />,
+    subItems: [
+      { name: "Kategori", path: "/kategori", pro: false },
     ],
   },
 ];
@@ -102,7 +103,7 @@ const AppSidebar: React.FC = () => {
                 <span className={`menu-item-text`}>{nav.name}</span>
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
+                <ChevronDown
                   className={`ml-auto w-5 h-5 transition-transform duration-200  ${
                     openSubmenu?.type === menuType &&
                     openSubmenu?.index === index
@@ -305,7 +306,7 @@ const AppSidebar: React.FC = () => {
                 {isExpanded || isHovered || isMobileOpen ? (
                   "Menu"
                 ) : (
-                  <HorizontaLDots />
+                  <Ellipsis/>
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}
