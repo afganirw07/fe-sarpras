@@ -1,10 +1,14 @@
+
 @import 'tailwindcss';
 @import "tw-animate-css";
+
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
   --font-*: initial;
+  --font-quicksand: Quicksand, sans-serif;
+  --font-figtree: Figtree, sans-serif;
   --font-outfit: Outfit, sans-serif;
 
   --breakpoint-*: initial;
@@ -33,6 +37,14 @@
   --text-theme-sm--line-height: 20px;
   --text-theme-xs: 12px;
   --text-theme-xs--line-height: 18px;
+
+
+  /* custom collor */
+  --color-Background1: #05051E; 
+  --color-BgMesh: #222295 ;
+  --color-Black: #100c08;
+  --color-White: #f8f8ff;
+
 
   --color-current: currentColor;
   --color-transparent: transparent;
