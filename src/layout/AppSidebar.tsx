@@ -34,13 +34,13 @@ const navItems: NavItem[] = [
   {
     icon: <Users />,
     name: "User Role",
-    path: "/role",
+    path: "/dashboard/role",
   },
   {
     name: "Data Master",
     icon: <Database />,
     subItems: [
-      { name: "Items", path: "/items", pro: false },
+      { name: "Items", path: "/dashboard/items", pro: false },
       { name: "Supplier", path: "/supplier", pro: false },
       { name: "Warehouse", path: "/warehouse", pro: false },
     ],

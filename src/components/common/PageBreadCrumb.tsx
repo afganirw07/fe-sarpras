@@ -1,48 +1,64 @@
+"use client"
+
 import Link from "next/link";
 import React from "react";
+import { usePathname } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 
 interface BreadcrumbProps {
   pageTitle: string;
 }
 
 const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
+
+  const pathName = usePathname()
+  const segments = pathName
+    .split("/")
+    .filter(Boolean);
+
+    if (pathName === "/dashboard") {
+      return null;
+    }
+
+  const LABELS: Record<string, string> = {
+  dashboard: "Dashboard",
+  role: "User Role",
+  item: "item",
+  supplier: "supplier",
+  warehouse: "warehouse",
+  calendar: "Calendar",
+  tambah: "Tambah Data",
+};
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <h2
+    <div className="flex flex-wrap items-center gap-3 mb-6">
+      {/* <h2
         className="text-xl font-semibold text-gray-800 dark:text-white/90"
         x-text="pageName"
       >
         {pageTitle}
-      </h2>
+      </h2> */}
       <nav>
-        <ol className="flex items-center gap-1.5">
+        <ol className="flex items-center gap-1.5 text-sm">
           <li>
             <Link
               className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
-              href="/"
+              href="/dashboard"
             >
-              Home
-              <svg
-                className="stroke-current"
-                width="17"
-                height="16"
-                viewBox="0 0 17 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M6.0765 12.667L10.2432 8.50033L6.0765 4.33366"
-                  stroke=""
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              Dashboard
+            </Link>
+            </li>
+            {segments.slice(1).map((segment, index) => {
+              const href = "/" + segments.slice(0, index + 2).join("/");
+              return (
+           <li key={href} className="flex items-center">
+            <ChevronRight size={16} className="mx-1 h-4 w-4 text-gray-600" />
+            <Link href={href} className="inline-flex items-center gap-1.5 text-sm text-gray-900 dark:text-gray-400 font-medium">
+              {LABELS[segment] ?? segment.replace("-", " ")}
             </Link>
           </li>
-          <li className="text-sm text-gray-800 dark:text-white/90">
-            {pageTitle}
-          </li>
+              )
+            })}
         </ol>
       </nav>
     </div>
