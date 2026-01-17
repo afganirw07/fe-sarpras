@@ -14,27 +14,14 @@ import BackgroundWave from "./common/BackgroundWave";
 export default function Footer() {
   return (
     <>
-      <svg
-        viewBox="0 0 1440 140"
-        preserveAspectRatio="none"
-        className="absolute left-0 top-0 h-[140px] w-full"
-      >
-        <path
-          fill="#3B82F6"
-          d="
-      M0,0
-      Q720,140 1440,0
-      L1440,0 L0,0 Z
-    "
-        />
-      </svg>
+     
 
       <footer className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 text-white">
         {/* <BackgroundWave className="rotate-180"/> */}
         <div className="relative z-10 mx-auto max-w-7xl px-6  pb-16 pt-24">
           <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-4">
-              <h3 className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-2xl font-bold text-transparent">
+              <h3 className="bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-2xl font-bold text-transparent">
                 Sarpras Taruna Bhakti
               </h3>
               <p className="text-sm leading-relaxed text-slate-300">

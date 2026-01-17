@@ -1,23 +1,27 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/navbar/app-sidebar";
-import AppHeader from "@/components/navbar/app-header";
+import Navbar from "@/components/navbar/Navbar/navbar";
+import Footer from "@/components/footer";
+
 
 export default function LandingLayout({
   children,
+
+  
 }: {
   children: React.ReactNode;
+
 }) {
   return (
-    <SidebarProvider>
-      <div className="relative min-h-screen w-full">
-        <AppSidebar />
-        <div className="flex min-h-screen flex-col">
-          <AppHeader />
-          <main className="flex-1 w-full">
-            {children}
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
+    <>
+    <div className="min-h-screen flex flex-col w-full z-20 relative ">
+      {/* Navbar */}
+      <Navbar/>
+      {/* Main Content */}
+      <main className="flex-1 w-full flex flex-col">
+        {children}
+        <Footer/>
+      </main>
+    </div>
+        
+    </>
   );
 }

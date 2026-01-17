@@ -13,7 +13,8 @@ import {
   Package,
   Archive,
    Ellipsis,
-   Layout
+   ArrowDownUp,
+   Layers
 } from "lucide-react";
 
 
@@ -37,7 +38,7 @@ const navItems: NavItem[] = [
     path: "/dashboard/role",
   },
   {
-    name: "Data Master",
+    name: "Master Data",
     icon: <Database />,
     subItems: [
       { name: "Items", path: "/dashboard/items", pro: false },
@@ -47,12 +48,17 @@ const navItems: NavItem[] = [
   },
   {
     icon: <Package />,
-    name: "Transaction",
+    name: "Transaksi",
     path: "/transaction",
   },
    {
     icon: <ArrowLeftRight />,
-    name: "Mutation",
+    name: "Mutasi",
+    path: "/mutation",
+  },
+   {
+    icon: <ArrowDownUp />,
+    name: "Pemutihan",
     path: "/mutation",
   },
   {
@@ -267,20 +273,18 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
+            <div className="flex gap-2 text-2xl dark:hidden ">
+             <Layers size={30} 
+              className="text-blue-600"
               />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
+              <span className="font-outfit font-bold">SarprasTb</span>
+            </div>
+               <div className="hidden gap-2 text-2xl dark:flex">
+             <Layers size={30} 
+              className="text-blue-600"
               />
+              <span className="font-outfit font-bold text-white">SarprasTb</span>
+            </div>
             </>
           ) : (
             <Image
