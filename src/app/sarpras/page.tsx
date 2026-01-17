@@ -1,11 +1,10 @@
 import { GradientButton } from "@/components/ui/button/gradientButton";
 import Image from "next/image";
 import { Cpu, MousePointerClick, Link2 } from "lucide-react";
-import { ShineBorder } from "@/components/ui/shine-border";
-import { useTheme } from "next-themes"      
+import { ShineBorder } from "@/components/ui/shine-border"; 
+import { TextureOverlay } from "@/components/ui/texture-overlay"
 
 export default function Sarpras() {
-const theme = useTheme()
   const ListFitur = [
     {
       nama: "Advance System",
@@ -72,7 +71,7 @@ const theme = useTheme()
         </div>
       </section>
       <section className="bg-White relative relative flex min-h-screen w-full flex-col gap-2 px-4 py-10 md:px-10 lg:px-20 2xl:px-32 ">
-        {/* mesh bg */}
+        <TextureOverlay texture="dots" opacity={0.3}/>
         <div className="lg:w-225  lg:h-100 w-125 h-50 absolute -top-[5%] z-10 rounded-full opacity-65 blur-3xl lg:-top-[20%] ">
           {" "}
         </div>
@@ -98,7 +97,6 @@ const theme = useTheme()
                 />
               </div>
               <div className="relative z-20 mt-24 flex justify-center">
-                <ShineBorder shineColor={theme.theme === "dark" ? "white" : "black"} />
                 <div className="grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {ListFitur.map((fitur, index) => (
                     <div
@@ -125,7 +123,9 @@ const theme = useTheme()
         </div>
       </section>
       <section className="bg-White relative flex h-screen w-full flex-col items-center justify-center gap-2 px-4 py-10 md:px-10 lg:px-20 2xl:px-32 ">
-       
+        <div className="bg-BgMesh lg:w-225 lg:h-100 w-125 h-50 absolute -top-[5%] z-10 rounded-full opacity-65 blur-3xl lg:-top-[20%] ">
+          {" "}
+        </div>
       </section>
     </>
   );
