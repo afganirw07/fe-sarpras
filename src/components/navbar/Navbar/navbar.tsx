@@ -39,12 +39,12 @@ const items = [
   return (
     
    <CardNav
-  logo="SARPRAS"
+  logo="SarprasTb"
   logoAlt="Company Logo"
   items={items}
-  baseColor="#0B1220"        
-  menuColor="#F1F5F9"        
-  buttonBgColor="#1E293B"    
+  baseColor="#FFF"        
+  menuColor="#00008b "        
+  buttonBgColor="#1e90ff"    
   buttonTextColor="#FFFFFF"
   ease="power3.out"
 />

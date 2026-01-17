@@ -5,19 +5,18 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
-  BoxCubeIcon,
-  CalenderIcon,
-  ChevronDownIcon,
-  GridIcon,
-  HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  UserCircleIcon,
-} from "../icons/index";
-import SidebarWidget from "./SidebarWidget";
+  LayoutGrid,
+  Users,
+  Database,
+  ChevronDown,
+  ArrowLeftRight,
+  Package,
+  Archive,
+   Ellipsis,
+   ArrowDownUp,
+   Layers
+} from "lucide-react";
+
 
 type NavItem = {
   name: string;
@@ -27,38 +26,46 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/dashboard", pro: false }],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/dashboard/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/dashboard/profile",
-  },
 
   {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/dashboard/form-elements", pro: false }],
+    icon: <LayoutGrid />,
+    name: "Dashboard",
+    path: "/dashboard",
   },
   {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/dashboard/basic-tables", pro: false }],
+    icon: <Users />,
+    name: "Pengguna",
+    path: "/role",
   },
   {
-    name: "Pages",
-    icon: <PageIcon />,
+    name: "Master Data",
+    icon: <Database />,
     subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
+      { name: "Items", path: "/items", pro: false },
+      { name: "Supplier", path: "/supplier", pro: false },
+      { name: "Warehouse", path: "/warehouse", pro: false },
+    ],
+  },
+  {
+    icon: <Package />,
+    name: "Transaksi",
+    path: "/transaction",
+  },
+   {
+    icon: <ArrowLeftRight />,
+    name: "Mutasi",
+    path: "/mutation",
+  },
+   {
+    icon: <ArrowDownUp />,
+    name: "Pemutihan",
+    path: "/mutation",
+  },
+  {
+    name: "Data Inventaris",
+    icon: <Archive />,
+    subItems: [
+      { name: "Kategori", path: "/kategori", pro: false },
     ],
   },
 ];
@@ -102,7 +109,7 @@ const AppSidebar: React.FC = () => {
                 <span className={`menu-item-text`}>{nav.name}</span>
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
+                <ChevronDown
                   className={`ml-auto w-5 h-5 transition-transform duration-200  ${
                     openSubmenu?.type === menuType &&
                     openSubmenu?.index === index
@@ -266,20 +273,18 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
+            <div className="flex gap-2 text-2xl dark:hidden ">
+             <Layers size={30} 
+              className="text-blue-600"
               />
-              <Image
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
+              <span className="font-outfit font-bold">SarprasTb</span>
+            </div>
+               <div className="hidden gap-2 text-2xl dark:flex">
+             <Layers size={30} 
+              className="text-blue-600"
               />
+              <span className="font-outfit font-bold text-white">SarprasTb</span>
+            </div>
             </>
           ) : (
             <Image
@@ -305,7 +310,7 @@ const AppSidebar: React.FC = () => {
                 {isExpanded || isHovered || isMobileOpen ? (
                   "Menu"
                 ) : (
-                  <HorizontaLDots />
+                  <Ellipsis/>
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}

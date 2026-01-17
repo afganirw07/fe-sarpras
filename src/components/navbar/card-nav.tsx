@@ -3,7 +3,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 // use your own icon import if react-icons is not available
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Layers } from 'lucide-react';
 import Image from 'next/image';
 
 type CardNavLink = {
@@ -172,8 +172,8 @@ const CardNav: React.FC<CardNavProps> = ({
     >
       <nav
         ref={navRef}
-        className={`card-nav ${isExpanded ? 'open' : ''}  backdrop-blur-md block h-[60px] p-0 rounded-xl shadow-md relative overflow-hidden will-change-[height]`}
-        style={{ backgroundColor: `${baseColor}CC` }}
+        className={`card-nav ${isExpanded ? 'open' : ''}  block h-[60px] p-0 rounded-xl shadow-md relative overflow-hidden will-change-[height]`}
+        style={{ backgroundColor: `${baseColor}` }}
       >
         <div className="card-nav-top absolute  inset-x-0 top-0 h-[60px] flex items-center justify-between p-2 pl-[1.1rem] z-[2]">
           <div
@@ -197,12 +197,17 @@ const CardNav: React.FC<CardNavProps> = ({
           </div>
 
           <div className="logo-container flex items-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 order-1 md:order-none">
-           <h1 className="bg-linear-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent font-figtree font-bold text-2xl" >{logo}</h1>
+              <div className='flex gap-1 items-center lg:scale-120'>
+            <Layers size={20}
+            className='text-blue-600 text-lg'
+            />
+              <span className='font-outfit font-bold '>{logo}</span>
+              </div>
           </div>
 
           <button
             type="button"
-            className={` bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 card-nav-cta-button hidden md:inline-flex border-0 rounded-[calc(0.75rem-0.2rem)] px-4 items-center h-full font-medium cursor-pointer transition-colors duration-300`}
+            className={` font-quicksand font-semibold card-nav-cta-button hidden md:inline-flex border-0 rounded-[calc(0.75rem-0.2rem)] px-4 items-center h-full  cursor-pointer transition-colors duration-300`}
             style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
           >
             Masuk
