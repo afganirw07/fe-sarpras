@@ -2,7 +2,6 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
 
-
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -38,13 +37,11 @@
   --text-theme-xs: 12px;
   --text-theme-xs--line-height: 18px;
 
-
   /* custom collor */
   --color-Background1: #05051E; 
   --color-BgMesh: #87cefa ;
   --color-Black: #100c08;
   --color-White: #f5f5f5;
-
 
   --color-current: currentColor;
   --color-transparent: transparent;
@@ -805,6 +802,18 @@ span.flatpickr-weekday,
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --animate-shine: shine var(--duration) infinite linear;
+  @keyframes shine {
+  0% {
+    background-position: 0% 0%;
+    }
+  50% {
+    background-position: 100% 100%;
+    }
+  to {
+    background-position: 0% 0%;
+    }
+  }
 }
 
 /*
