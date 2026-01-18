@@ -1,8 +1,8 @@
 import { GradientButton } from "@/components/ui/button/gradientButton";
 import Image from "next/image";
 import { Cpu, MousePointerClick, Link2 } from "lucide-react";
-import { ShineBorder } from "@/components/ui/shine-border"; 
-import { TextureOverlay } from "@/components/ui/texture-overlay"
+import { BorderBeam } from "@/components/ui/border-beam";
+import { TextureOverlay } from "@/components/ui/texture-overlay";
 
 export default function Sarpras() {
   const ListFitur = [
@@ -71,40 +71,40 @@ export default function Sarpras() {
         </div>
       </section>
       <section className="bg-White relative relative flex min-h-screen w-full flex-col gap-2 px-4 py-10 md:px-10 lg:px-20 2xl:px-32 ">
-        <TextureOverlay texture="dots" opacity={0.3}/>
+        <TextureOverlay texture="dots" opacity={0.3} />
         <div className="lg:w-225  lg:h-100 w-125 h-50 absolute -top-[5%] z-10 rounded-full opacity-65 blur-3xl lg:-top-[20%] ">
           {" "}
         </div>
-        <div className="relative z-20 flex flex-col items-center gap-4 lg:gap-5">
+        <div className="relative z-20 mt-16 flex flex-col items-center gap-4 lg:gap-5">
           <div className="lg:max-w-275 flex flex-col text-center ">
             <h1 className="bg-linear-to-r font-figtree from-cyan-500 to-blue-500 bg-clip-text text-[1.7rem] font-bold text-transparent  md:text-4xl lg:text-5xl">
               Mulai Dengan Sarpras{" "}
             </h1>
             <p className="font-quicksand text-base font-semibold lg:text-xl">
               solusi modern dan intuitif untuk pengelolaan sarana prasarana di
-              sekolah{" "}
+              sekolah
             </p>
           </div>
           <div className="flex flex-col items-center justify-between gap-10 lg:flex-row">
             <div className="flex w-full justify-center">
-              <div className="hidden lg:block absolute lg:top-0 h-[662px] w-full overflow-hidden">
+              <div className="absolute hidden h-[594px] w-full overflow-hidden lg:top-0 lg:block">
                 <Image
                   src="/images/mockup/Dashboard.png"
                   alt="Dashboard UI"
                   width={1400}
                   height={900}
-                  className="mx-auto opacity-90 object-fit "
+                  className="object-fit mx-auto opacity-90 "
                 />
               </div>
-              <div className="relative z-20 mt-24 flex justify-center">
-                <div className="grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="relative z-20 mt-12 flex justify-center overflow-visible">
+                <div className="group relative z-10 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {ListFitur.map((fitur, index) => (
                     <div
                       key={index}
-                      className="rounded-2xl border border-gray-300 bg-white p-5 shadow-lg backdrop-blur-md"
+                      className="relative overflow-hidden rounded-2xl border border-gray-300 bg-white p-5 shadow-lg backdrop-blur-md transition-transform duration-200 ease-out hover:scale-[1.03]"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="rounded-full bg-gradient-to-r from-cyan-500/30 to-blue-500/30 p-3 text-blue-500">
+                        <div className="rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 p-3 text-cyan-500">
                           {fitur.logo}
                         </div>
                         <h3 className="font-figtree text-lg font-bold">
@@ -114,6 +114,12 @@ export default function Sarpras() {
                       <p className="font-quicksand mt-3 text-sm text-gray-700">
                         {fitur.penjelasan}
                       </p>
+                      <BorderBeam
+                        duration={8}
+                        size={100}
+                        colorFrom="#00BCD4"
+                        colorTo="#3b82f6"
+                      />
                     </div>
                   ))}
                 </div>
