@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 // use your own icon import if react-icons is not available
 import { ArrowUpRight, Layers } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type CardNavLink = {
   label: string;
@@ -168,7 +169,7 @@ const CardNav: React.FC<CardNavProps> = ({
 
   return (
     <div
-      className={`card-nav-container fixed left-1/2 -translate-x-1/2 w-[90%] max-w-[800px] z-99 top-[1.2em] md:top-[2em] ${className}`}
+      className={`card-nav-container fixed inset-x-0 mx-auto w-[90%] max-w-[800px] z-99 top-[1.2em] md:top-[2em] ${className}`}
     >
       <nav
         ref={navRef}
@@ -210,7 +211,7 @@ const CardNav: React.FC<CardNavProps> = ({
             className={` font-quicksand font-semibold card-nav-cta-button hidden md:inline-flex border-0 rounded-[calc(0.75rem-0.2rem)] px-4 items-center h-full  cursor-pointer transition-colors duration-300`}
             style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
           >
-            Masuk
+            <Link href={"/auth/login"}>Masuk</Link>
           </button>
         </div>
 
@@ -252,7 +253,7 @@ const CardNav: React.FC<CardNavProps> = ({
             className={`md:hidden card-nav-cta-button-mobile border-0 rounded-[calc(0.75rem-0.2rem)] px-4 py-3 font-medium cursor-pointer transition-colors duration-300 w-full`}
             style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}
           >
-            Masuk
+            <Link href={"/auth/login"}>Masuk</Link>
           </button>
         </div>
       </nav>
