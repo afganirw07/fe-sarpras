@@ -1,14 +1,13 @@
 "use client"
 
 import CardNav from '../card-nav';
-import logo from '../../../../public/images/logo/logo.svg';
 
 const Navbar = () => {
 const items = [
-  {
+{
     label: "Tentang",
-    bgColor: "#0B1240", // refined navy (dari #0D0716)
-    textColor: "#F1F5F9",
+    bgColor: "#E0F2FE", 
+    textColor: "#0C4A6E",
     links: [
       { label: "Beranda", ariaLabel: "Home" },
       { label: "Tentang Kami", ariaLabel: "About us" }
@@ -16,8 +15,8 @@ const items = [
   },
   {
     label: "Kontak",
-    bgColor: "#131A2F", // refined indigo-navy (dari #170D27)
-    textColor: "#F1F5F9",
+    bgColor: "#BAE6FD",
+    textColor: "#0C4A6E", 
     links: [
       { label: "Media Sosial", ariaLabel: "Media Social" },
       { label: "Email", ariaLabel: "Email Us" },
@@ -26,8 +25,8 @@ const items = [
   },
   {
     label: "FAQ",
-    bgColor: "#1B2440", // refined purple-navy (dari #271E37)
-    textColor: "#F8FAFC",
+    bgColor: "#7DD3FC", 
+    textColor: "#0C4A6E", 
     links: [
       { label: "FAQ", ariaLabel: "FAQ" }
     ]
