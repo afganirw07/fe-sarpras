@@ -71,7 +71,7 @@ const tableData: User[] = [
   },
 ];
 
-export default function TableRoles() {
+export default function TableItems() {
 
   const kirimAlert = (e: React.FormEvent) => {
     e.preventDefault()
