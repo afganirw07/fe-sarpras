@@ -20,7 +20,7 @@ export default function OrderStatusDonut() {
   };
 
   return (
-    <div className="rounded-2xl border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div className="rounded-2xl border border-stroke bg-white dark:bg-black p-6 pb-18 shadow-default dark:border-strokedark dark:bg-boxdark">
       <h4 className="mb-4 text-lg font-semibold text-black dark:text-white">
         Order Status
       </h4>
