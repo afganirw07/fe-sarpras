@@ -26,13 +26,13 @@ export default function LoginForm() {
           initial={{ x: -60, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
-          className="absolute right-0 top-0 h-1/2 w-full rounded-b-full bg-blue-200 dark:bg-blue-600 lg:left-0 lg:h-full lg:w-[51%] lg:rounded-l-none lg:rounded-r-full"
+          className="absolute right-0 top-0 h-1/2 w-full rounded-b-full bg-blue-200 lg:left-0 lg:h-full lg:w-[51%] lg:rounded-l-none lg:rounded-r-full"
         />
         <motion.div
           initial={{ x: -80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.7 }}
-          className="absolute right-0 top-0 h-[45%] w-full rounded-b-full bg-blue-400/70 dark:bg-blue-700 lg:left-0 lg:h-full lg:w-[48%] lg:rounded-l-none lg:rounded-r-full"
+          className="absolute right-0 top-0 h-[45%] w-full rounded-b-full bg-blue-400/70  lg:left-0 lg:h-full lg:w-[48%] lg:rounded-l-none lg:rounded-r-full"
         />
         <motion.div
           initial={{ x: -100, opacity: 0 }}
@@ -97,16 +97,16 @@ export default function LoginForm() {
                 <Lock size={20} className="text-white" />
               </div>
 
-              <h2 className="hidden text-2xl font-semibold text-gray-900 dark:text-White lg:block">
+              <h2 className="hidden text-2xl font-semibold text-gray-900  lg:block">
                 Masuk
               </h2>
 
-              <p className="mt-2 text-sm lg:text-gray-600 text-white dark:text-gray-400">
+              <p className="mt-2 text-sm lg:text-gray-600 text-white ">
                 Selamat Datang! Mohon Masuk untuk Melanjutkan
               </p>
             </div>
 
-            <div className="flex h-12 w-full items-center gap-3 rounded-full border border-gray-300 dark:border-blue-500 px-5 focus-within:border-blue-600">
+            <div className="flex h-12 w-full items-center gap-3 rounded-full border border-gray-300 px-5 focus-within:border-blue-600">
               <Mail size={16} className="text-gray-500" />
               <input
                 type="email"
@@ -116,7 +116,7 @@ export default function LoginForm() {
               />
             </div>
 
-            <div className="mt-5 flex h-14 w-full items-center gap-3 rounded-full border border-gray-300 dark:border-blue-500 px-5 focus-within:border-blue-600">
+            <div className="mt-5 flex h-14 w-full items-center gap-3 rounded-full border border-gray-300 px-5 focus-within:border-blue-600">
               <Lock size={16} className="text-gray-500" />
               <input
                 type={show ? "text" : "password"}

@@ -229,7 +229,7 @@ export default function TableRoles() {
                                 </TooltipContent>
                               </Tooltip>
 
-                              <DialogContent className="sm:max-w-[425px] bg-black">
+                              <DialogContent className="sm:max-w-[425px] bg-white dark:bg-black">
                                 <DialogHeader>
                                   <DialogTitle>Update Roles</DialogTitle>
                                   <DialogDescription>
@@ -294,7 +294,7 @@ export default function TableRoles() {
                               </TooltipContent>
                             </Tooltip>
 
-                            <AlertDialogContent className="bg-black">
+                            <AlertDialogContent className="bg-white dark:bg-black">
                               <AlertDialogHeader>
                                 <AlertDialogTitle>
                                   Are you absolutely sure?

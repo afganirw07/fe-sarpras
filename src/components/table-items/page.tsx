@@ -80,10 +80,10 @@ export default function TableItems() {
 
   return (
     <div className="flex flex-col">
-      <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-7xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
-            Data Roles
+            Data Items
           </h1>
 
           <div className="flex w-full gap-3 md:w-auto">
@@ -93,7 +93,7 @@ export default function TableItems() {
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
               />
               <input
-                placeholder="Cari user atau role..."
+                placeholder="Search item"
                 className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
               />
             </div>
@@ -101,7 +101,7 @@ export default function TableItems() {
               <form onSubmit={kirimAlert}>
                 <DialogTrigger asChild>
                   <Button type="button" className="bg-blue-500 transition duration-300 hover:bg-blue-600 text-white">
-                    + Add Role
+                    + add item
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px] dark:bg-black">
@@ -164,19 +164,49 @@ export default function TableItems() {
                       isHeader
                       className="min-w-[180px] px-5 py-3 text-start text-xs font-medium text-gray-500"
                     >
-                      Users
+                      Name
                     </TableCell>
                     <TableCell
                       isHeader
                       className="min-w-[260px] px-5 py-3 text-start text-xs font-medium text-gray-500"
                     >
-                      Role
+                      Category
                     </TableCell>
                     <TableCell
                       isHeader
                       className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
                     >
-                      Action
+                      Subcategory
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                    >
+                      Condition
+                    </TableCell>
+                     <TableCell
+                      isHeader
+                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                    >
+                      Merk
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                    >
+                      Total
+                    </TableCell>
+                     <TableCell
+                      isHeader
+                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                    >
+                      Kode 
+                    </TableCell>
+                      <TableCell
+                      isHeader
+                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                    >
+                      Action 
                     </TableCell>
                   </TableRow>
                 </TableHeader>
