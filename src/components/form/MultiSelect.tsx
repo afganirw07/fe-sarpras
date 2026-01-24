@@ -3,11 +3,10 @@ import React, { useState } from "react";
 interface Option {
   value: string;
   text: string;
-  selected: boolean;
 }
 
 interface MultiSelectProps {
-  label: string;
+  label?: string;
   options: Option[];
   defaultSelected?: string[];
   onChange?: (selected: string[]) => void;

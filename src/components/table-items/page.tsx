@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { ReactElement } from "react";
 import {
@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { Button } from "../ui/button";
-import { Search, Pencil, Trash2 } from "lucide-react";
+import { Search, Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,9 @@ import {
 } from "@/components/ui/tooltip";
 import { Label } from "../ui/label";
 import Input from "../form/input/InputField";
-import { toast, Toaster } from "sonner"
+import { toast, Toaster } from "sonner";
+import Link from "next/link";
+import TextArea from "../form/input/TextArea";
 
 interface User {
   id: number;
@@ -72,11 +74,89 @@ const tableData: User[] = [
 ];
 
 export default function TableItems() {
+  function ActionButtons() {
+    return (
+      <div className="flex justify-center gap-4">
+        {/* EDIT */}
+        <Dialog>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <button type="button">
+                  <Pencil size={16} className="cursor-pointer" />
+                </button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Edit</TooltipContent>
+          </Tooltip>
+
+          <DialogContent className="sm:max-w-[425px] dark:bg-black">
+            <DialogHeader>
+              <DialogTitle>Update Roles</DialogTitle>
+              <DialogDescription>Update role user</DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4">
+              <Input disabled />
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button className="bg-blue-500 text-white">Save changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* DELETE */}
+        <AlertDialog>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <AlertDialogTrigger asChild>
+                <button type="button">
+                  <Trash2 size={16} />
+                </button>
+              </AlertDialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Delete</TooltipContent>
+          </Tooltip>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Yakin hapus role?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tindakan ini tidak bisa dibatalkan
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction className="bg-red-600 text-white">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button">
+              <Link href={"/dashboard/items/show/id"}>
+                <SquareArrowOutUpRight size={16} />
+              </Link>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Show</TooltipContent>
+        </Tooltip>
+      </div>
+    );
+  }
 
   const kirimAlert = (e: React.FormEvent) => {
-    e.preventDefault()
-    toast.success("selamat kamu sukses")
-  }
+    e.preventDefault();
+    toast.success("selamat kamu sukses");
+  };
 
   return (
     <div className="flex flex-col">
@@ -85,8 +165,94 @@ export default function TableItems() {
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
             Data Items
           </h1>
+          <div className="flex flex-col items-center justify-end gap-2 md:flex-row">
+            <Dialog>
+              <form onSubmit={kirimAlert}>
+                <DialogTrigger asChild>
+                  <Button size={"lg"} className="font-quicksand text-md">
+                    + Add item
+                  </Button>
+                </DialogTrigger>
 
-          <div className="flex w-full gap-3 md:w-auto">
+                <DialogContent className="max-w-4xl p-6">
+                  <DialogHeader>
+                    <DialogTitle>Add Items</DialogTitle>
+                  </DialogHeader>
+
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                    <div className="grid gap-2">
+                      <Label>Kode Item</Label>
+                      <Input placeholder="Kode Item" />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label>Nama Item</Label>
+                      <Input placeholder="Nama Item" />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label>Kategori</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="a">Kategori A</SelectItem>
+                          <SelectItem value="b">Kategori B</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label>Merek</Label>
+                      <Input placeholder="Merek Item" />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label>Sub Kategori</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose Sub Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="a">Sub A</SelectItem>
+                          <SelectItem value="b">Sub B</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label>Harga Item</Label>
+                      <Input type="number" defaultValue={0} />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label>Satuan</Label>
+                      <Input placeholder="Satuan" />
+                    </div>
+
+                    <div className="row-span-2 grid gap-2">
+                      <Label>Spesifikasi</Label>
+                      <TextArea className="h-full min-h-[180px]" />
+                    </div>
+                  </div>
+
+                  <DialogFooter className="mt-6">
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button className="bg-blue-500 hover:bg-blue-600">
+                      Save
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </form>
+            </Dialog>
+            <Button size={"lg"}><Link href={"/dashboard/items/trashed"}>Trashed</Link></Button>
+          </div>
+        </div>
+        <div className="mt-20">
+          <div className="flex w-full items-end justify-end gap-3 md:w-auto">
             <div className="relative w-full md:w-72">
               <Search
                 size={18}
@@ -97,256 +263,99 @@ export default function TableItems() {
                 className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
               />
             </div>
-            <Dialog>
-              <form onSubmit={kirimAlert}>
-                <DialogTrigger asChild>
-                  <Button type="button" className="bg-blue-500 transition duration-300 hover:bg-blue-600 text-white">
-                    + add item
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px] dark:bg-black">
-                  <DialogHeader>
-                    <DialogTitle>Add Roles</DialogTitle>
-                    <DialogDescription>
-                      Add role to system here. Click save when you&apos;re done.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4">
-                    <div className="grid gap-3">
-                      <Label htmlFor="name-1">Name</Label>
-                      <Input id="name-1" name="name" className="dark:bg-black"/>
-                    </div>
-                    <div className="grid gap-3">
-                      <Label htmlFor="username-1">Role</Label>
-                      <Select>
-                        <SelectTrigger className="w-full dark:bg-black">
-                          <SelectValue placeholder="Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="light">hhh</SelectItem>
-                          <SelectItem value="dark">xixix</SelectItem>
-                          <SelectItem value="system">jaja</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button
-                      type="submit"
-                        onClick={() => toast.success("kamu berhasil")}
-                      className="bg-blue-500 transition duration-300 hover:bg-blue-600 dark:text-white"
-                    >
-                      Save changes
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </form>
-            </Dialog>
           </div>
-        </div>
 
-        <div className="mt-20 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-          <div className="relative overflow-x-auto">
-            <div className="inline-block min-w-full align-middle">
-              <Table className="w-full table-auto">
-                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                  <TableRow>
-                    <TableCell
-                      isHeader
-                      className="min-w-[60px] px-6 py-3 text-start text-xs font-medium text-gray-500"
-                    >
-                      No
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-[180px] px-5 py-3 text-start text-xs font-medium text-gray-500"
-                    >
-                      Name
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-[260px] px-5 py-3 text-start text-xs font-medium text-gray-500"
-                    >
-                      Category
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
-                    >
-                      Subcategory
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
-                    >
-                      Condition
-                    </TableCell>
-                     <TableCell
-                      isHeader
-                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
-                    >
-                      Merk
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
-                    >
-                      Total
-                    </TableCell>
-                     <TableCell
-                      isHeader
-                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
-                    >
-                      Kode 
-                    </TableCell>
+          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+            <div className="relative overflow-x-auto">
+              <div className="inline-block min-w-full align-middle">
+                <Table className="w-full table-auto">
+                  <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                    <TableRow>
                       <TableCell
-                      isHeader
-                      className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
-                    >
-                      Action 
-                    </TableCell>
-                  </TableRow>
-                </TableHeader>
-
-                <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                  {tableData.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="px-6 py-12">
-                        <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-                          {user.id}
-                        </span>
+                        isHeader
+                        className="min-w-[60px] px-6 py-3 text-start text-xs font-medium text-gray-500"
+                      >
+                        No
                       </TableCell>
-
-                      <TableCell className="px-4 py-12 text-sm text-gray-500 dark:text-white/90">
-                        {user.nama}
+                      <TableCell
+                        isHeader
+                        className="min-w-[120px] px-5 py-3 text-start text-xs font-medium text-gray-500"
+                      >
+                        Kode
                       </TableCell>
-
-                      <TableCell className="px-4 py-12">
-                        <div className="flex flex-wrap gap-2">
-                          {user.role.map((role) => {
-                            return (
-                              <span
-                                key={role}
-                                className={`rounded-full px-3 py-1 text-xs font-medium bg-blue-500 dark:bg-gray-600 text-white `}
-                              >
-                                {role}
-                              </span>
-                            );
-                          })}
-                        </div>
+                      <TableCell
+                        isHeader
+                        className="min-w-[180px] px-5 py-3 text-start text-xs font-medium text-gray-500"
+                      >
+                        Nama
                       </TableCell>
-
-                      <TableCell className="px-5 py-12">
-                        <div className="flex justify-center gap-3 md:gap-4">
-                          <Dialog>
-                            <form>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <DialogTrigger asChild>
-                                    <button type="button">
-                                      <Pencil
-                                        size={16}
-                                        className="cursor-pointer"
-                                      />
-                                    </button>
-                                  </DialogTrigger>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Edit</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <DialogContent className="sm:max-w-[425px] bg-black">
-                                <DialogHeader>
-                                  <DialogTitle>Update Roles</DialogTitle>
-                                  <DialogDescription>
-                                    Update role to system here. Click save when
-                                    you&apos;re done.
-                                  </DialogDescription>
-                                </DialogHeader>
-
-                                <div className="grid gap-4">
-                                  <div className="grid gap-3">
-                                    <Label>Name</Label>
-                                    <Input className="dark:bg-black" />
-                                  </div>
-
-                                  <div className="grid gap-3">
-                                    <Label>Role</Label>
-                                    <Select>
-                                      <SelectTrigger className="w-full dark:bg-black">
-                                        <SelectValue placeholder="Role" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="light">
-                                          hhh
-                                        </SelectItem>
-                                        <SelectItem value="dark">
-                                          xixix
-                                        </SelectItem>
-                                        <SelectItem value="system">
-                                          jaja
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-
-                                <DialogFooter>
-                                  <DialogClose asChild>
-                                    <Button variant="outline">Cancel</Button>
-                                  </DialogClose>
-                                  <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                                    Save changes
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </form>
-                          </Dialog>
-
-                          <AlertDialog>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AlertDialogTrigger asChild>
-                                  <button type="button">
-                                    <Trash2
-                                      size={16}
-                                      className="cursor-pointer text-red-700"
-                                    />
-                                  </button>
-                                </AlertDialogTrigger>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Delete</p>
-                              </TooltipContent>
-                            </Tooltip>
-
-                            <AlertDialogContent className="bg-black">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Are you absolutely sure?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction className="bg-red-700 hover:bg-red-800 text-white">
-                                  Continue
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                      <TableCell
+                        isHeader
+                        className="min-w-[100px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                      >
+                        Merek
+                      </TableCell>
+                      <TableCell
+                        isHeader
+                        className="min-w-[130px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                      >
+                        Harga
+                      </TableCell>
+                      <TableCell
+                        isHeader
+                        className="min-w-[130px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                      >
+                        Kategori
+                      </TableCell>
+                      <TableCell
+                        isHeader
+                        className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                      >
+                        Os Balance
+                      </TableCell>
+                      <TableCell
+                        isHeader
+                        className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                      >
+                        Action
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+
+                  <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
+                    {tableData.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="px-6 py-4">
+                          <span className="text-sm font-medium text-gray-800 dark:text-white/90">
+                            {user.id}
+                          </span>
+                        </TableCell>
+                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                          {user.id}
+                        </TableCell>
+                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                          {user.nama}
+                        </TableCell>
+                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                          {user.nama}
+                        </TableCell>
+                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                          {user.nama}
+                        </TableCell>
+                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                          {user.nama}
+                        </TableCell>
+                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                          {user.nama}
+                        </TableCell>
+                        <TableCell className="px-5 py-4 text-center">
+                          <ActionButtons />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </div>
         </div>

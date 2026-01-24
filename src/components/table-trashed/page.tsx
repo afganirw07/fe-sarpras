@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { Button } from "../ui/button";
-import { Search, Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
+import { Search, ArchiveRestore  } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -31,13 +31,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -73,53 +66,21 @@ const tableData: User[] = [
   },
 ];
 
-export default function TableItems() {
+export default function TableTrashed() {
   function ActionButtons() {
     return (
       <div className="flex justify-center gap-4">
-        {/* EDIT */}
-        <Dialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DialogTrigger asChild>
-                <button type="button">
-                  <Pencil size={16} className="cursor-pointer" />
-                </button>
-              </DialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Edit</TooltipContent>
-          </Tooltip>
-
-          <DialogContent className="sm:max-w-[425px] dark:bg-black">
-            <DialogHeader>
-              <DialogTitle>Update Roles</DialogTitle>
-              <DialogDescription>Update role user</DialogDescription>
-            </DialogHeader>
-
-            <div className="grid gap-4">
-              <Input disabled />
-            </div>
-
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button className="bg-blue-500 text-white">Save changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
         {/* DELETE */}
         <AlertDialog>
           <Tooltip>
             <TooltipTrigger asChild>
               <AlertDialogTrigger asChild>
-                <button type="button">
-                  <Trash2 size={16} />
-                </button>
+                <Button type="button">
+                  <ArchiveRestore size={16}/>
+                </Button>
               </AlertDialogTrigger>
             </TooltipTrigger>
-            <TooltipContent>Delete</TooltipContent>
+            <TooltipContent>Restore</TooltipContent>
           </Tooltip>
 
           <AlertDialogContent>
@@ -138,17 +99,6 @@ export default function TableItems() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button type="button">
-              <Link href={"/dashboard/items/show/id"}>
-                <SquareArrowOutUpRight size={16} />
-              </Link>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Show</TooltipContent>
-        </Tooltip>
       </div>
     );
   }
@@ -163,95 +113,10 @@ export default function TableItems() {
       <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
-            Data Supplier
+            Data Items
           </h1>
-          <div className="flex flex-col items-center justify-end gap-2 md:flex-row">
-            <Dialog>
-              <form onSubmit={kirimAlert}>
-                <DialogTrigger asChild>
-                  <Button size={"lg"} className="font-quicksand text-md">
-                    + Add item
-                  </Button>
-                </DialogTrigger>
-
-                <DialogContent className="max-w-4xl p-6">
-                  <DialogHeader>
-                    <DialogTitle>Add Items</DialogTitle>
-                  </DialogHeader>
-
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                    <div className="grid gap-2">
-                      <Label>Kode Item</Label>
-                      <Input placeholder="Kode Item" />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Nama Item</Label>
-                      <Input placeholder="Nama Item" />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Kategori</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="a">Kategori A</SelectItem>
-                          <SelectItem value="b">Kategori B</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Merek</Label>
-                      <Input placeholder="Merek Item" />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Sub Kategori</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose Sub Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="a">Sub A</SelectItem>
-                          <SelectItem value="b">Sub B</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Harga Item</Label>
-                      <Input type="number" defaultValue={0} />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Satuan</Label>
-                      <Input placeholder="Satuan" />
-                    </div>
-
-                    <div className="row-span-2 grid gap-2">
-                      <Label>Spesifikasi</Label>
-                      <TextArea className="h-full min-h-[180px]" />
-                    </div>
-                  </div>
-
-                  <DialogFooter className="mt-6">
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button className="bg-blue-500 hover:bg-blue-600">
-                      Save
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </form>
-            </Dialog>
-            <Button size={"lg"}><Link href={"/dashboard/items/trashed"}>Trashed</Link></Button>
-          </div>
         </div>
-        <div className="mt-20">
+        <div className="mt-12">
           <div className="flex w-full items-end justify-end gap-3 md:w-auto">
             <div className="relative w-full md:w-72">
               <Search
