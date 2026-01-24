@@ -51,7 +51,7 @@ export default function LoginForm() {
           initial={{ x: -80, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.7 }}
-          className="absolute right-0 top-0 h-[45%] w-full rounded-b-full bg-blue-400/70 lg:left-0 lg:h-full lg:w-[48%] lg:rounded-l-none lg:rounded-r-full"
+          className="absolute right-0 top-0 h-[45%] w-full rounded-b-full bg-blue-400/70  lg:left-0 lg:h-full lg:w-[48%] lg:rounded-l-none lg:rounded-r-full"
         />
         <motion.div
           initial={{ x: -100, opacity: 0 }}
@@ -116,11 +116,11 @@ export default function LoginForm() {
                 <Lock size={20} className="text-white" />
               </div>
 
-              <h2 className="hidden text-2xl font-semibold text-gray-900 lg:block">
+              <h2 className="hidden text-2xl font-semibold text-gray-900  lg:block">
                 Masuk
               </h2>
 
-              <p className="mt-2 text-sm lg:text-gray-600 text-white fot">
+              <p className="mt-2 text-sm lg:text-gray-600 text-white ">
                 Selamat Datang! Mohon Masuk untuk Melanjutkan
               </p>
             </div>

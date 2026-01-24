@@ -3,7 +3,11 @@ import './globals.css';
 import "flatpickr/dist/flatpickr.css";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+<<<<<<< HEAD
 import Providers from './provider';
+=======
+import { Toaster } from '@/components/ui/sonner';
+>>>>>>> ef69fce688d68595214d07568e0d2732d8175b7e
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -31,6 +35,7 @@ export default function RootLayout({
               <div className="flex">
                 <main className="flex-1 min-h-screen">
                   {children}
+                  <Toaster position='top-right'/>
                 </main>
               </div>
             </Providers>

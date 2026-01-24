@@ -42,7 +42,7 @@ const navItems: NavItem[] = [
     icon: <Database />,
     subItems: [
       { name: "Items", path: "/dashboard/items", pro: false },
-      { name: "Supplier", path: "/supplier", pro: false },
+      { name: "Supplier", path: "/dashboard/supplier", pro: false },
       { name: "Warehouse", path: "/warehouse", pro: false },
     ],
   },

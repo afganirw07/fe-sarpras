@@ -102,7 +102,7 @@ export default function Sarpras() {
 
   return (
     <>
-   <section className="bg-White/50 relative flex h-auto w-full flex-col items-center justify-start gap-2 overflow-hidden px-4 pt-42 2xl:pt-48 pb-16 md:px-10 lg:px-20 2xl:px-32">
+   <section className="bg-White/50  relative flex h-auto w-full flex-col items-center justify-start gap-2 overflow-hidden px-4 pt-42 2xl:pt-48 pb-16 md:px-10 lg:px-20 2xl:px-32">
         {/* mesh bg */}
         <div className="pointer-events-none absolute inset-0 z-20 hidden lg:block">
           {FloatingItems.map((item, index) => (
@@ -158,7 +158,7 @@ export default function Sarpras() {
                 "rgb(99, 102, 241)", 
               ]}
             >
-              <button className=" font-quicksand bg-linear-to-r active:scale-98 h-full w-full cursor-pointer rounded-full from-neutral-100 via-neutral-100 to-White px-4 py-2 font-semibold text-black shadow-[0px_2px_0px_0px_var(--color-neutral-50)_inset,0px_0.5px_1px_0px_var(--color-neutral-400)] transition-all duration-100 dark:from-black dark:via-black dark:to-neutral-900 dark:text-White dark:shadow-[0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)]">
+              <button className=" font-quicksand bg-linear-to-r active:scale-98 h-full w-full cursor-pointer rounded-full from-neutral-100 via-neutral-100 to-White px-4 py-2 font-semibold text-black shadow-[0px_2px_0px_0px_var(--color-neutral-50)_inset,0px_0.5px_1px_0px_var(--color-neutral-400)] transition-all duration-100 ck k al-900 te 0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)]">
                 Mulai Sekarang
               </button>
             </GradientButton>
@@ -189,7 +189,7 @@ export default function Sarpras() {
 
 
 
- <section className="lg:gap-8 gap-y-10 grid lg:grid-cols-2 grid-cols-1 w-full h-auto bg-linear-to-b from-White to-White/50 lg:px-20 2xl:px-42 md:px-10 px-4 lg:py-32 2xl:py-32 py-16">
+ <section className="lg:gap-8 gap-y-10 grid lg:grid-cols-2 grid-cols-1 w-full h-auto  bg-linear-to-b from-White to-White/50  lg:px-20 2xl:px-42 md:px-10 px-4 lg:py-32 2xl:py-32 py-16">
       <div className="group relative col-span-1 h-100 w-full overflow-hidden rounded-[40px] lg:h-full"> 
         <Image
           src="/images/landingPage/atk_blue.jpg"
@@ -267,7 +267,7 @@ export default function Sarpras() {
       </div>
     </section>
 
-<section className="bg-White/50 relative flex items-center justify-center h-auto w-full px-6 py-16 lg:py-32 2xl:py-32 md:px-10 lg:px-20 2xl:px-32">
+<section className="bg-White/50  relative flex items-center justify-center h-auto w-full px-6 py-16 lg:py-32 2xl:py-32 md:px-10 lg:px-20 2xl:px-32">
         <TextureOverlay texture="dots" opacity={0.2} />
         <div className="z-20 flex flex-col items-center justify-center gap-8 w-full">
           <div className="flex flex-col w-full justify-center h-fit items-center gap-2">
@@ -284,7 +284,7 @@ export default function Sarpras() {
                 {ListFitur.map((fitur, index) => (
                   <div
                     key={index}
-                    className="relative overflow-hidden rounded-2xl border border-gray-300 bg-white p-5 shadow-lg backdrop-blur-md transition-transform duration-200 ease-out hover:scale-[1.03]"
+                    className="relative overflow-hidden rounded-2xl border border-gray-300 bg-white  p-5 shadow-lg backdrop-blur-md transition-transform duration-200 ease-out hover:scale-[1.03]"
                   >
                     <div className="flex items-center gap-4">
                       <div className="rounded-full bg-linear-to-r from-cyan-500/20 to-blue-500/20 p-3 text-cyan-500">
@@ -294,7 +294,7 @@ export default function Sarpras() {
                         {fitur.nama}
                       </h3>
                     </div>
-                    <p className="font-quicksand mt-3 text-sm text-gray-700">
+                    <p className="font-quicksand mt-3 text-sm text-gray-700 te">
                       {fitur.penjelasan}
                     </p>
                     <BorderBeam
@@ -310,7 +310,7 @@ export default function Sarpras() {
         </div>
       </section>
 
-      <section className="relative w-full bg-White/50 px-6 py-16 md:px-10 md:py-20 lg:px-20 lg:py-28 2xl:px-32 2xl:py-32">
+      <section className="relative w-full  bg-White/50 px-6 py-16 md:px-10 md:py-20 lg:px-20 lg:py-28 2xl:px-32 2xl:py-32">
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-blue-100/30 blur-3xl"></div>
@@ -339,12 +339,12 @@ export default function Sarpras() {
           {faqData.map((faq, index) => (
             <AccordionItem 
               key={index}
-              className="rounded-2xl border border-gray-200 bg-white px-6 py-2 shadow-lg transition-all duration-300 hover:shadow-xl hover:border-blue-300 "
+              className="rounded-2xl border border-gray-200 bg-white  px-6 py-2 shadow-lg transition-all duration-300 hover:shadow-xl hover:border-blue-300 "
             >
-              <AccordionButton className="font-figtree text-base font-semibold text-gray-800 md:text-lg">
+              <AccordionButton className="font-figtree text-base font-semibold text-gray-800 y-200 md:text-lg">
                 {faq.question}
               </AccordionButton>
-              <AccordionPanel className="font-quicksand text-sm leading-relaxed text-gray-600 md:text-base">
+              <AccordionPanel className="font-quicksand text-sm leading-relaxed text-gray-600 y-100 md:text-base">
                 {faq.answer}
               </AccordionPanel>
             </AccordionItem>
@@ -356,7 +356,13 @@ export default function Sarpras() {
           <p className="font-quicksand mb-4 text-gray-600">
             Tidak menemukan jawaban yang Anda cari?
           </p>
+<<<<<<< HEAD
         <ContactPopover/>
+=======
+          <button className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-cyan-500 to-blue-600 r-to-r from-cyan-500 to-blue-600  px-6 py-3 font-figtree text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 md:px-8 md:py-4 md:text-base">
+            Hubungi Developer
+          </button>
+>>>>>>> ef69fce688d68595214d07568e0d2732d8175b7e
         </div>
       </div>
     </section>
