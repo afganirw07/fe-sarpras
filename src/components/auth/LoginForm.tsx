@@ -1,5 +1,6 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, Layers } from "lucide-react";
 import { Button } from "../ui/button";
@@ -11,13 +12,31 @@ import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const [show, setShow] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    router.push("/dashboard")
+    
+    const result = await signIn("credentials", {
+      userName,
+      password,
+      redirect: false
+    });
+
+    if (result?.error){
+      setError("Login gagal. nama pengguna atau kata sandi tidak sesuai")
+    } else {
+      
+      router.push("/dashboard")
+    }
+
   }
+
+
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden">
