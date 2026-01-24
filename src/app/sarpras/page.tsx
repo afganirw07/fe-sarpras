@@ -24,6 +24,8 @@ import {
   AccordionPanel 
 } from "@/components/ui/accordion";
 
+import ContactPopover from "@/components/ui/button/popoverContact";
+
 export default function Sarpras() {
 
 
@@ -151,9 +153,9 @@ export default function Sarpras() {
             <GradientButton
               containerClassName="w-fit p-2 rounded-full mx-auto"
               gradientColors={[
-                "rgb(56, 189, 248)", // cyan-400
-                "rgb(59, 130, 246)", // blue-500
-                "rgb(99, 102, 241)", // indigo-500
+                "rgb(56, 189, 248)",
+                "rgb(59, 130, 246)",
+                "rgb(99, 102, 241)", 
               ]}
             >
               <button className=" font-quicksand bg-linear-to-r active:scale-98 h-full w-full cursor-pointer rounded-full from-neutral-100 via-neutral-100 to-White px-4 py-2 font-semibold text-black shadow-[0px_2px_0px_0px_var(--color-neutral-50)_inset,0px_0.5px_1px_0px_var(--color-neutral-400)] transition-all duration-100 ck k al-900 te 0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)]">
@@ -198,7 +200,7 @@ export default function Sarpras() {
         <div className="absolute inset-0 rounded-[40px] bg-linear-to-t from-black/40 via-transparent to-transparent"></div>
         
         {/* Stats Card */}
-        <div className="absolute bottom-6 left-24 right-24 flex items-center justify-center gap-6 rounded-2xl border border-white/20 bg-white/20 p-5 shadow-2xl backdrop-blur-md ">
+        <div className="absolute bottom-6 left-15 right-15 md:left-24 md:right-24 flex items-center justify-center gap-6 rounded-2xl border border-white/20 bg-white/20 p-5 shadow-2xl backdrop-blur-md ">
           <div className="flex items-baseline gap-1.5">
             <CountUp
               from={0}
@@ -210,7 +212,7 @@ export default function Sarpras() {
             />
             <span className="font-figtree text-4xl font-bold text-white">%</span>
           </div>
-          <h1 className="font-figtree text-2xl font-bold tracking-tight text-white">Manajemen lebih efektif </h1>
+          <h1 className="font-figtree text-2xl font-bold tracking-tight text-white"> lebih efektif </h1>
         </div>
       </div>
       
@@ -354,9 +356,13 @@ export default function Sarpras() {
           <p className="font-quicksand mb-4 text-gray-600">
             Tidak menemukan jawaban yang Anda cari?
           </p>
+<<<<<<< HEAD
+        <ContactPopover/>
+=======
           <button className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-cyan-500 to-blue-600 r-to-r from-cyan-500 to-blue-600  px-6 py-3 font-figtree text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 md:px-8 md:py-4 md:text-base">
             Hubungi Developer
           </button>
+>>>>>>> ef69fce688d68595214d07568e0d2732d8175b7e
         </div>
       </div>
     </section>
