@@ -356,13 +356,7 @@ export default function Sarpras() {
           <p className="font-quicksand mb-4 text-gray-600">
             Tidak menemukan jawaban yang Anda cari?
           </p>
-<<<<<<< HEAD
         <ContactPopover/>
-=======
-          <button className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-cyan-500 to-blue-600 r-to-r from-cyan-500 to-blue-600  px-6 py-3 font-figtree text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 md:px-8 md:py-4 md:text-base">
-            Hubungi Developer
-          </button>
->>>>>>> ef69fce688d68595214d07568e0d2732d8175b7e
         </div>
       </div>
     </section>
