@@ -1,7 +1,8 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, Lock, Mail, Layers } from "lucide-react";
 import { Button } from "../ui/button";
 import Lottie from "lottie-react";
@@ -12,11 +13,24 @@ import { useRouter } from "next/navigation";
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function LoginForm() {
+
+  const { data: session } = useSession();
+
   const [show, setShow] = useState(false);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+
+  useEffect(() => {
+    if ( session?.user?.accessToken) {
+      router.push("/dashboard");
+    }
+  }, [session, router]); 
+
+  
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
