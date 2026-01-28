@@ -12,11 +12,16 @@ import Image from "next/image";
 import BackgroundWave from "./common/BackgroundWave";
 
 export default function Footer() {
+
+
+  
+
+
   return (
     <>
      
 
-      <footer className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 text-white">
+      <footer className="relative overflow-hidden bg-linear-to-br from-blue-900 via-blue-800 to-slate-900 text-white">
         {/* <BackgroundWave className="rotate-180"/> */}
         <div className="relative z-10 mx-auto max-w-7xl px-6  pb-16 pt-24">
           <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
@@ -82,17 +87,17 @@ export default function Footer() {
               </h4>
               <ul className="space-y-4">
                 <li className="flex items-start space-x-3 text-slate-300">
-                  <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-white" />
+                  <MapPin className="mt-1 h-5 w-5 shrink-0 text-white" />
                   <span className="text-sm">
                     Jalan Raya pekapuran RT 02 RW 07. Kelurahan/Desa, Curug
                   </span>
                 </li>
                 <li className="flex items-center space-x-3 text-slate-300">
-                  <Phone className="h-5 w-5 flex-shrink-0 text-white" />
+                  <Phone className="h-5 w-5 shrink-0 text-white" />
                   <span className="text-sm">(021) 8744810</span>
                 </li>
                 <li className="flex items-center space-x-3 text-slate-300">
-                  <Mail className="h-5 w-5 flex-shrink-0 text-white" />
+                  <Mail className="h-5 w-5 shrink-0 text-white" />
                   <span className="text-sm">taruna@smktarunabhakti.net</span>
                 </li>
               </ul>
@@ -121,7 +126,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl"></div>
-        <div className="pointer-events-none absolute -right-32 top-1/2 h-[28rem] w-[28rem] rounded-full bg-cyan-500/10 blur-3xl"></div>
+        <div className="pointer-events-none absolute -right-32 top-1/2 h-112 w-md rounded-full bg-cyan-500/10 blur-3xl"></div>
       </footer>
     </>
   );
