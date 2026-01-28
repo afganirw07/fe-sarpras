@@ -1,6 +1,6 @@
 import { Outfit,  Figtree, Quicksand } from 'next/font/google';
 import './globals.css';
-import "flatpickr/dist/flatpickr.css";
+import "flatpickr/dist/flatpickr";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import Providers from './provider';
