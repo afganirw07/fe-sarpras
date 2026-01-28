@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { Button } from "../ui/button";
-import { Search, ArchiveRestore } from "lucide-react";
+import { Search, Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +32,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectGroup,
+  SelectLabel,
+} from "@/components/ui/select";
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -41,6 +50,8 @@ import Input from "../form/input/InputField";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
 import TextArea from "../form/input/TextArea";
+import MultiSelect from "../form/MultiSelect";
+import { useState } from "react";
 
 interface User {
   id: number;
@@ -49,43 +60,51 @@ interface User {
 }
 
 const tableData: User[] = [
-  {
-    id: 1,
-    nama: "Afgan Irwansyah",
-    role: ["Back End", "Unit Testing", "System Analyst"],
-  },
-  {
-    id: 2,
-    nama: "Ahsan Rohsikan",
-    role: ["Front End"],
-  },
-  {
-    id: 3,
-    nama: "Zefanya Prasetiyo",
-    role: ["Front End"],
-  },
+  // {
+  //   id: 1,
+  //   nama: "Afgan Irwansyah",
+  //   role: ["Back End", "Unit Testing", "System Analyst"],
+  // },
+  // {
+  //   id: 2,
+  //   nama: "Ahsan Rohsikan",
+  //   role: ["Front End"],
+  // },
+  // {
+  //   id: 3,
+  //   nama: "Zefanya Prasetiyo",
+  //   role: ["Front End"],
+  // },
 ];
 
-export default function TableTrashed() {
+export default function TablePemutihan() {
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+
+  const options = [
+    { text: "Approver", value: "approver" },
+    { text: "Admin", value: "admin" },
+    { text: "Oprasional", value: "oprasional" },
+  ];
+
   function ActionButtons() {
     return (
       <div className="flex justify-center gap-4">
-        {/* DELETE */}
+        {/* EDIT */}
         <AlertDialog>
           <Tooltip>
             <TooltipTrigger asChild>
               <AlertDialogTrigger asChild>
                 <button type="button">
-                  <ArchiveRestore size={16} className="text-red-600" />
+                  <Trash2 size={16} />
                 </button>
               </AlertDialogTrigger>
             </TooltipTrigger>
-            <TooltipContent>Restore</TooltipContent>
+            <TooltipContent>Delete</TooltipContent>
           </Tooltip>
 
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Yakin ?</AlertDialogTitle>
+              <AlertDialogTitle>Yakin hapus role?</AlertDialogTitle>
               <AlertDialogDescription>
                 Tindakan ini tidak bisa dibatalkan
               </AlertDialogDescription>
@@ -94,7 +113,7 @@ export default function TableTrashed() {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction className="bg-red-600 text-white">
-                Restore
+                Delete
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -113,7 +132,7 @@ export default function TableTrashed() {
       <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
-            Data Items
+            Data Role
           </h1>
         </div>
         <div className="mt-12">
@@ -142,45 +161,45 @@ export default function TableTrashed() {
                       >
                         No
                       </TableCell>
+
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-[140px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
-                        Kode
+                        ID Barang
                       </TableCell>
+
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-[220px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
-                        Nama
+                        Nama Barang
                       </TableCell>
+
                       <TableCell
                         isHeader
                         className="light:border-gray-100 min-w-[160px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
-                        Merek
+                        Kondisi
                       </TableCell>
+
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-[260px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
-                        Harga
+                        Alasan Pemutihan
                       </TableCell>
+
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[120px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-[140px] border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
                       >
-                        Kategori
+                        Status
                       </TableCell>
+
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[120px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Os Balance
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[140px] rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-[100px] rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
                       >
                         Action
                       </TableCell>
@@ -188,36 +207,50 @@ export default function TableTrashed() {
                   </TableHeader>
 
                   <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                    {tableData.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="light:border-gray-100 border px-6 py-4">
-                          <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-                            {user.id}
-                          </span>
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.id}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
-                          <ActionButtons />
-                        </TableCell>
+                    {tableData.length === 0 ? (
+                      <TableRow>
+                        <td
+                          colSpan={7}
+                          className="border px-6 py-6 text-center text-sm text-gray-500"
+                        >
+                          Tidak ada Kategori
+                        </td>
                       </TableRow>
-                    ))}
+                    ) : (
+                      tableData.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="light:border-gray-100 border px-6 py-4">
+                            {item.id}
+                          </TableCell>
+
+                          <TableCell className="light:border-gray-100 border px-4 py-8 text-sm">
+                            AST-{item.id}
+                          </TableCell>
+
+                          <TableCell className="light:border-gray-100 border px-4 py-8 text-sm">
+                            Laptop Dell Latitude
+                          </TableCell>
+
+                          <TableCell className="light:border-gray-100 border px-4 py-8 text-sm">
+                            Rusak Berat
+                          </TableCell>
+
+                          <TableCell className="light:border-gray-100 border px-4 py-8 text-sm">
+                            Tidak bisa diperbaiki
+                          </TableCell>
+
+                          <TableCell className="light:border-gray-100 border px-4 py-8 text-center">
+                            <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs text-yellow-700">
+                              Diajukan
+                            </span>
+                          </TableCell>
+
+                          <TableCell className="light:border-gray-100 border px-4 py-8 text-center">
+                            <ActionButtons />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>

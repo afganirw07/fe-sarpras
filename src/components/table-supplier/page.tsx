@@ -47,7 +47,7 @@ import { Label } from "../ui/label";
 import Input from "../form/input/InputField";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import TextArea from "../form/input/TextArea";
+import { Textarea } from "../ui/textarea";
 
 interface User {
   id: number;
@@ -73,40 +73,56 @@ const tableData: User[] = [
   },
 ];
 
-export default function TableItems() {
+export default function TableSupplier() {
   function ActionButtons() {
     return (
       <div className="flex justify-center gap-4">
         {/* EDIT */}
         <Dialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DialogTrigger asChild>
-                <button type="button">
-                  <Pencil size={16} className="cursor-pointer" />
-                </button>
-              </DialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Edit</TooltipContent>
-          </Tooltip>
+          <form onSubmit={kirimAlert}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DialogTrigger asChild>
+                  <button type="button">
+                    <Pencil size={16} className="cursor-pointer" />
+                  </button>
+                </DialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Edit</TooltipContent>
+            </Tooltip>
+            <DialogContent className="max-w-xl p-6">
+              <DialogHeader>
+                <DialogTitle>Update Supplier</DialogTitle>
+              </DialogHeader>
 
-          <DialogContent className="sm:max-w-[425px] dark:bg-black">
-            <DialogHeader>
-              <DialogTitle>Update Roles</DialogTitle>
-              <DialogDescription>Update role user</DialogDescription>
-            </DialogHeader>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="grid gap-2">
+                  <Label>Nama</Label>
+                  <Input placeholder="Nama Lengkap" />
+                </div>
 
-            <div className="grid gap-4">
-              <Input disabled />
-            </div>
+                <div className="grid gap-2">
+                  <Label>Contact</Label>
+                  <Input placeholder="Nomor Telepon / Email" />
+                </div>
 
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button className="bg-blue-500 text-white">Save changes</Button>
-            </DialogFooter>
-          </DialogContent>
+                <div className="grid gap-2">
+                  <Label>Address</Label>
+                  <Textarea
+                    placeholder="Alamat Lengkap"
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="mt-6">
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button className="bg-blue-800 hover:bg-blue-900">Save</Button>
+              </DialogFooter>
+            </DialogContent>
+          </form>
         </Dialog>
 
         {/* DELETE */}
@@ -124,7 +140,7 @@ export default function TableItems() {
 
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Yakin hapus role?</AlertDialogTitle>
+              <AlertDialogTitle>Yakin hapus supplier?</AlertDialogTitle>
               <AlertDialogDescription>
                 Tindakan ini tidak bisa dibatalkan
               </AlertDialogDescription>
@@ -169,71 +185,36 @@ export default function TableItems() {
             <Dialog>
               <form onSubmit={kirimAlert}>
                 <DialogTrigger asChild>
-                  <Button size={"lg"} className="font-quicksand text-md">
-                    + Add item
+                  <Button
+                    size={"lg"}
+                    className="font-quicksand text-md bg-blue-800 text-white transition duration-300 hover:bg-blue-900"
+                  >
+                    + Add Supplier
                   </Button>
                 </DialogTrigger>
 
-                <DialogContent className="max-w-4xl p-6">
+                <DialogContent className="max-w-xl p-6">
                   <DialogHeader>
-                    <DialogTitle>Add Items</DialogTitle>
+                    <DialogTitle>Add Contact</DialogTitle>
                   </DialogHeader>
 
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div className="grid gap-2">
-                      <Label>Kode Item</Label>
-                      <Input placeholder="Kode Item" />
+                      <Label>Nama</Label>
+                      <Input placeholder="Nama Lengkap" />
                     </div>
 
                     <div className="grid gap-2">
-                      <Label>Nama Item</Label>
-                      <Input placeholder="Nama Item" />
+                      <Label>Contact</Label>
+                      <Input placeholder="Nomor Telepon / Email" />
                     </div>
 
                     <div className="grid gap-2">
-                      <Label>Kategori</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="a">Kategori A</SelectItem>
-                          <SelectItem value="b">Kategori B</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Merek</Label>
-                      <Input placeholder="Merek Item" />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Sub Kategori</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose Sub Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="a">Sub A</SelectItem>
-                          <SelectItem value="b">Sub B</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Harga Item</Label>
-                      <Input type="number" defaultValue={0} />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Satuan</Label>
-                      <Input placeholder="Satuan" />
-                    </div>
-
-                    <div className="row-span-2 grid gap-2">
-                      <Label>Spesifikasi</Label>
-                      <TextArea className="h-full min-h-[180px]" />
+                      <Label>Address</Label>
+                      <Textarea
+                        placeholder="Alamat Lengkap"
+                        className="min-h-[120px]"
+                      />
                     </div>
                   </div>
 
@@ -241,14 +222,13 @@ export default function TableItems() {
                     <DialogClose asChild>
                       <Button variant="outline">Cancel</Button>
                     </DialogClose>
-                    <Button className="bg-blue-500 hover:bg-blue-600">
+                    <Button className="bg-blue-800 hover:bg-blue-900">
                       Save
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </form>
             </Dialog>
-            <Button size={"lg"}><Link href={"/dashboard/items/trashed"}>Trashed</Link></Button>
           </div>
         </div>
         <div className="mt-20">
@@ -268,54 +248,42 @@ export default function TableItems() {
           <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
             <div className="relative overflow-x-auto">
               <div className="inline-block min-w-full align-middle">
-                <Table className="w-full table-auto">
-                  <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                <Table className="w-full table-auto ">
+                  <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
                     <TableRow>
                       <TableCell
                         isHeader
-                        className="min-w-[60px] px-6 py-3 text-start text-xs font-medium text-gray-500"
+                        className="light:border-gray-100 min-w-[80px] rounded-b-none rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         No
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="min-w-[120px] px-5 py-3 text-start text-xs font-medium text-gray-500"
+                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
-                        Kode
+                        Supplier
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="min-w-[180px] px-5 py-3 text-start text-xs font-medium text-gray-500"
+                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
-                        Nama
+                        Contact
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="min-w-[100px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                        className="light:border-gray-100 min-w-[160px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
-                        Merek
+                        Address
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="min-w-[130px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
-                        Harga
+                        School
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="min-w-[130px] px-5 py-3 text-center text-xs font-medium text-gray-500"
-                      >
-                        Kategori
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
-                      >
-                        Os Balance
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="min-w-[160px] px-5 py-3 text-center text-xs font-medium text-gray-500"
+                        className="light:border-gray-100 min-w-[140px] rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
                       >
                         Action
                       </TableCell>
@@ -325,30 +293,24 @@ export default function TableItems() {
                   <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
                     {tableData.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell className="px-6 py-4">
+                        <TableCell className="light:border-gray-100 border px-6 py-4">
                           <span className="text-sm font-medium text-gray-800 dark:text-white/90">
                             {user.id}
                           </span>
                         </TableCell>
-                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
                           {user.id}
                         </TableCell>
-                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
                           {user.nama}
                         </TableCell>
-                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
                           {user.nama}
                         </TableCell>
-                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
                           {user.nama}
                         </TableCell>
-                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="px-5 py-4 text-center">
+                        <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
                           <ActionButtons />
                         </TableCell>
                       </TableRow>

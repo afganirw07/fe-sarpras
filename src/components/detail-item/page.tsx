@@ -1,6 +1,7 @@
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
+import { Link } from "lucide-react"
 
 export default function DetailItem() {
     return (
@@ -64,7 +65,7 @@ export default function DetailItem() {
       <div className="grid gap-2">
         <Label>Item In :</Label>
         <Button variant="secondary" className="w-fit">
-          Show
+          <Link href="/dashboard/transaction/show"></Link>
         </Button>
       </div>
 

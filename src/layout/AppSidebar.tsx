@@ -43,29 +43,29 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Items", path: "/dashboard/items", pro: false },
       { name: "Supplier", path: "/dashboard/supplier", pro: false },
-      { name: "Warehouse", path: "/warehouse", pro: false },
+      { name: "Warehouse", path: "/dashboard/warehouse", pro: false },
     ],
   },
   {
     icon: <Package />,
     name: "Transaksi",
-    path: "/transaction",
+    path: "/dashboard/transaction",
   },
    {
     icon: <ArrowLeftRight />,
     name: "Mutasi",
-    path: "/mutation",
+    path: "/dashboard/mutasi",
   },
    {
     icon: <ArrowDownUp />,
     name: "Pemutihan",
-    path: "/mutation",
+    path: "/dashboard/pemutihan",
   },
   {
     name: "Data Inventaris",
     icon: <Archive />,
     subItems: [
-      { name: "Kategori", path: "/kategori", pro: false },
+      { name: "Kategori", path: "/dashboard/kategori", pro: false },
     ],
   },
 ];

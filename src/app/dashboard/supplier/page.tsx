@@ -1,10 +1,7 @@
-import TableSupplier from "@/components/table-items/page";
-import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import TableSupplier from "@/components/table-supplier/page";
 
-export default function SupplierPage () {
-    return(
-        <>
+export default function () {
+    return (
         <TableSupplier/>
-        </>
-    );
+    )
 }
