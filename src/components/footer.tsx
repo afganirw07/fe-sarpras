@@ -126,7 +126,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl"></div>
-        <div className="pointer-events-none absolute -right-32 top-1/2 h-[28rem] w-[28rem] rounded-full bg-cyan-500/10 blur-3xl"></div>
+        <div className="pointer-events-none absolute -right-32 top-1/2 h-112 w-md rounded-full bg-cyan-500/10 blur-3xl"></div>
       </footer>
     </>
   );

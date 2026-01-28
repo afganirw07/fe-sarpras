@@ -66,7 +66,7 @@ const tableData: User[] = [
   },
 ];
 
-export default function TableShow() {
+export default function TableDetailWarehouse() {
   function ActionButtons() {
     return (
       <div className="flex justify-center gap-4">
@@ -94,62 +94,47 @@ export default function TableShow() {
       <div className="w-full max-w-sm rounded-xl border p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="flex flex-col gap-6">
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
-            Detail Master Item
+            Detail
           </h1>
 
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-            <div className="grid gap-2">
-              <Label>Nama Item :</Label>
-              <Input value="PC" readOnly />
+            <div>
+              <p className="font-quicksand">Nama Warehouse: OLD SARPRAS</p>
             </div>
 
             <div className="grid gap-2">
-              <Label>Subkategori Item :</Label>
-              <Input value="PC" readOnly />
+              <p className="font-quicksand">Instansi: SMK Taruna Bhakti</p>
             </div>
 
             <div className="grid gap-2">
-              <Label>Kategori Item :</Label>
-              <Input value="ELEKTRONIK" readOnly />
+              <p className="font-quicksand">Kategori Warehouse: GUDANG</p>
             </div>
 
             <div className="grid gap-2">
-              <Label>Created By :</Label>
-              <Input value="shintanuria17" readOnly />
+              <p className="font-quicksand">Created By : </p>
             </div>
           </div>
         </div>
         <div className="mt-12">
-          <div className="flex w-full flex-col gap-3 md:w-auto">
-            <h1 className="font-quicksand text-2xl font-semibold">Data Item</h1>
-            <div className="flex flex-row gap-4">
-              <Button
-                size={"sm"}
-                className="bg-blue-800 transition duration-300 hover:bg-blue-900 text-White"
-              >
-                <QrCode /> Generate Label
-              </Button>
-              <Button
-                size={"sm"}
-                className="bg-blue-800 transition duration-300 hover:bg-blue-900 text-White"
-              >
-                <Focus /> Generate Small Label
-              </Button>
-            </div>
-            <div className="flex flex-row items-center justify-between gap-4">
-              <div className="relative w-full max-w-xs md:w-72">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
-                <input
-                  placeholder="Search item"
-                  className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
-                />
-              </div>
-              <p className="font-figtree text-base text-xs font-semibold lg:text-lg">
-                Total Item : 0 item
-              </p>
+          <div className="flex w-full flex-row justify-between gap-3 md:w-auto">
+            <Button className="bg-blue-800 transition duration-300 hover:bg-blue-900">
+              Generate Excel
+            </Button>
+            <h1 className="font-figtree text-2xl font-semibold">Data Item</h1>
+            <p className="font-quicksand text-base text-xs font-semibold lg:text-lg">
+              Total Item : 0 item
+            </p>
+          </div>
+          <div className="flex flex-row items-center justify-end gap-4">
+            <div className="relative w-full max-w-xs md:w-72">
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                placeholder="Search item"
+                className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
+              />
             </div>
           </div>
 
@@ -170,19 +155,12 @@ export default function TableShow() {
                         isHeader
                         className="w-[360px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
-                        SN Number
+                        Nama Item
                       </TableCell>
 
                       <TableCell
                         isHeader
                         className="w-[160px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
-                      >
-                        Warehouse
-                      </TableCell>
-
-                      <TableCell
-                        isHeader
-                        className="w-[120px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
                         PO Number
                       </TableCell>
@@ -196,52 +174,60 @@ export default function TableShow() {
 
                       <TableCell
                         isHeader
-                        className="w-[130px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
+                        className="w-[120px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
                         Status
                       </TableCell>
 
                       <TableCell
                         isHeader
-                        className="w-[100px] rounded-r-md border bg-blue-800 px-4 py-3 text-center text-xs font-medium text-gray-200"
+                        className="w-[130px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200 rounded-r-md"
                       >
-                        Action
+                        SN Number
                       </TableCell>
                     </TableRow>
                   </TableHeader>
 
                   <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                    {tableData.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="border px-4 py-4 text-sm">
-                          {user.id}
-                        </TableCell>
-
-                        <TableCell className="border px-4 py-4 text-sm ">
-                          {user.nama}
-                        </TableCell>
-
-                        <TableCell className="border px-4 py-4 text-sm">
-                          {user.nama}
-                        </TableCell>
-
-                        <TableCell className="border px-4 py-4 text-sm">
-                          {user.nama}
-                        </TableCell>
-
-                        <TableCell className="border px-4 py-4 text-sm">
-                          {user.nama}
-                        </TableCell>
-
-                        <TableCell className="border px-4 py-4 text-sm">
-                          {user.nama}
-                        </TableCell>
-
-                        <TableCell className="border px-4 py-4 text-center">
-                          <ActionButtons />
-                        </TableCell>
+                    {tableData.length === 0 ? (
+                      <TableRow>
+                        <td
+                          colSpan={6}
+                          className="border px-6 py-6 text-center text-sm text-gray-500"
+                        >
+                          Tidak ada Kategori
+                        </td>
                       </TableRow>
-                    ))}
+                    ) : (
+                      tableData.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="border px-4 py-4 text-sm">
+                            {user.id}
+                          </TableCell>
+
+                          <TableCell className="border px-4 py-4 text-sm ">
+                            {user.nama}
+                          </TableCell>
+
+                          <TableCell className="border px-4 py-4 text-sm">
+                            {user.nama}
+                          </TableCell>
+
+                          <TableCell className="border px-4 py-4 text-sm">
+                            {user.nama}
+                          </TableCell>
+
+                          <TableCell className="border px-4 py-4 text-sm">
+                            {user.nama}
+                          </TableCell>
+
+                          <TableCell className="border px-4 py-4 text-sm">
+                            {user.nama}
+                          </TableCell>
+                         
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
