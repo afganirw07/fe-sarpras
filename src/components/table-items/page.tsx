@@ -177,7 +177,7 @@ export default function TableItems() {
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button className="border border-gray-100 bg-blue-800 hover:bg-blue-900 transition duration-300">
+              <Button className="border border-gray-100 bg-blue-800 transition duration-300 hover:bg-blue-900">
                 Save
               </Button>
             </DialogFooter>
@@ -246,7 +246,7 @@ export default function TableItems() {
                 <DialogTrigger asChild>
                   <Button
                     size={"lg"}
-                    className="font-quicksand text-md bg-blue-800 transition duration-300 hover:bg-blue-900 text-white"
+                    className="font-quicksand text-md bg-blue-800 text-white transition duration-300 hover:bg-blue-900"
                   >
                     + Add item
                   </Button>
@@ -328,7 +328,7 @@ export default function TableItems() {
             </Dialog>
             <Button
               size={"lg"}
-              className="bg-red-800 transition duration-300 hover:bg-red-900 text-White"
+              className="text-White bg-red-800 transition duration-300 hover:bg-red-900"
             >
               <Link href={"/dashboard/items/trashed"}>Trashed</Link>
             </Button>
@@ -406,36 +406,47 @@ export default function TableItems() {
                   </TableHeader>
 
                   <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                    {tableData.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="light:border-gray-100 border px-6 py-4">
-                          <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-                            {user.id}
-                          </span>
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.id}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
-                          <ActionButtons />
-                        </TableCell>
+                    {tableData.length === 0 ? (
+                      <TableRow>
+                        <td
+                          colSpan={6}
+                          className="border px-6 py-6 text-center text-sm text-gray-500"
+                        >
+                          Tidak ada Kategori
+                        </td>
                       </TableRow>
-                    ))}
+                    ) : (
+                      tableData.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="light:border-gray-100 border px-6 py-4">
+                            <span className="text-sm font-medium text-gray-800 dark:text-white/90">
+                              {user.id}
+                            </span>
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.id}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
+                            <ActionButtons />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>

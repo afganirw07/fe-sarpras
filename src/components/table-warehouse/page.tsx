@@ -37,6 +37,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from "@/components/ui/select";
 import {
   Tooltip,
@@ -57,41 +59,11 @@ interface User {
 }
 
 const tableData: User[] = [
-  {
-    id: 1,
-    nama: "Afgan Irwansyah",
-    role: ["Back End", "Unit Testing", "System Analyst"],
-  },
-  {
-    id: 2,
-    nama: "Ahsan Rohsikan",
-    role: ["Front End"],
-  },
-  {
-    id: 3,
-    nama: "Zefanya Prasetiyo",
-    role: ["Front End"],
-  },
-  {
-    id: 3,
-    nama: "Zefanya Prasetiyo",
-    role: ["Front End"],
-  },
-  {
-    id: 3,
-    nama: "Zefanya Prasetiyo",
-    role: ["Front End"],
-  },
-  {
-    id: 3,
-    nama: "Zefanya Prasetiyo",
-    role: ["Front End"],
-  },
-  {
-    id: 3,
-    nama: "Zefanya Prasetiyo",
-    role: ["Front End"],
-  },
+  // {
+  //   id: 1,
+  //   nama: "Afgan Irwansyah",
+  //   role: ["Back End", "Unit Testing", "System Analyst"],
+  // },
 ];
 
 export default function TableWarehouse() {
@@ -100,88 +72,92 @@ export default function TableWarehouse() {
       <div className="flex justify-center gap-4">
         {/* EDIT */}
         <Dialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DialogTrigger asChild>
-                <button type="button">
-                  <Pencil size={16} className="cursor-pointer" />
-                </button>
-              </DialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Edit</TooltipContent>
-          </Tooltip>
+          <DialogTrigger asChild>
+            <Button
+              size="lg"
+              className="font-quicksand text-md bg-blue-800 text-white hover:bg-blue-900"
+            >
+              + Add Warehouse
+            </Button>
+          </DialogTrigger>
 
-          <DialogContent className="max-w-4xl p-6">
-            <DialogHeader>
-              <DialogTitle>Add Items</DialogTitle>
-            </DialogHeader>
+          <DialogContent className="w-full max-w-3xl p-8 dark:bg-black">
+            <form>
+              <DialogHeader className="mb-6">
+                <DialogTitle className="text-xl">Add Warehouse</DialogTitle>
+                <DialogDescription>Tambahkan data warehouse</DialogDescription>
+              </DialogHeader>
 
-            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-              <div className="grid gap-2">
-                <Label>Kode Item</Label>
-                <Input placeholder="Kode Item" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium">Kode Item</Label>
+                  <Select>
+                    <SelectTrigger className="h-11 w-full">
+                      <SelectValue placeholder="Pilih pengguna" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Daftar Pengguna</SelectLabel>
+                        <SelectItem value="apple">
+                          Hajid al Akthar SMK Taruna Bhakti
+                        </SelectItem>
+                        <SelectItem value="banana">Ageng Subagja</SelectItem>
+                        <SelectItem value="blueberry">
+                          Joy Widi Wibowo
+                        </SelectItem>
+                        <SelectItem value="grapes">
+                          Hafidzh Nurrohman
+                        </SelectItem>
+                        <SelectItem value="pineapple">
+                          Ian Rachmadani
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Label className="text-sm font-medium">Warehouse Type</Label>
+                  <Select>
+                    <SelectTrigger className="h-11 w-full">
+                      <SelectValue placeholder="Pilih tipe" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="kelas">Kelas</SelectItem>
+                      <SelectItem value="gudang">Gudang</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <Label className="text-sm font-medium">Instansi</Label>
+                  <Select>
+                    <SelectTrigger className="h-11 w-full">
+                      <SelectValue placeholder="Pilih instansi" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tb001">
+                        TB001 | SMP Taruna Bhakti
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="grid gap-2">
-                <Label>Nama Item</Label>
-                <Input placeholder="Nama Item" />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Kategori</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="a">Kategori A</SelectItem>
-                    <SelectItem value="b">Kategori B</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Merek</Label>
-                <Input placeholder="Merek Item" />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Sub Kategori</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose Sub Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="a">Sub A</SelectItem>
-                    <SelectItem value="b">Sub B</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Harga Item</Label>
-                <Input type="number" defaultValue={0} />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Satuan</Label>
-                <Input placeholder="Satuan" />
-              </div>
-
-              <div className="row-span-2 grid gap-2">
-                <Label>Spesifikasi</Label>
-                <Textarea className="h-full min-h-[180px]" />
-              </div>
-            </div>
-
-            <DialogFooter className="mt-6">
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button className="border border-gray-100 bg-blue-800 hover:bg-blue-900 transition duration-300">
-                Save
-              </Button>
-            </DialogFooter>
+              <DialogFooter className="mt-10 flex justify-end gap-3">
+                <DialogClose asChild>
+                  <Button variant="outline" className="px-6">
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button
+                  type="submit"
+                  className="bg-blue-800 px-6 text-white hover:bg-blue-900"
+                >
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 
@@ -241,7 +217,7 @@ export default function TableWarehouse() {
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
             Data Warehouse
           </h1>
-        <DialogAddWarehouse/>
+          <DialogAddWarehouse />
         </div>
         <div className="mt-12">
           <div className="flex w-full items-end justify-end gap-3 md:w-auto">
@@ -315,36 +291,47 @@ export default function TableWarehouse() {
                   </TableHeader>
 
                   <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                    {tableData.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="light:border-gray-100 border px-6 py-4">
-                          <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-                            {user.id}
-                          </span>
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.id}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
-                          <ActionButtons />
-                        </TableCell>
+                    {tableData.length == 0 ? (
+                      <TableRow>
+                        <td
+                          colSpan={8}
+                          className="border px-6 py-6 text-center text-sm text-gray-500"
+                        >
+                          Tidak ada Kategori
+                        </td>
                       </TableRow>
-                    ))}
+                    ) : (
+                      tableData.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="light:border-gray-100 border px-6 py-4">
+                            <span className="text-sm font-medium text-gray-800 dark:text-white/90">
+                              {user.id}
+                            </span>
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.id}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
+                            <ActionButtons />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>

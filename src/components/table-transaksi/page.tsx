@@ -53,11 +53,11 @@ interface User {
 }
 
 const tableData: User[] = [
-  {
-    id: 1,
-    nama: "Afgan Irwansyah",
-    role: ["Back End", "Unit Testing", "System Analyst"],
-  },
+  // {
+  //   id: 1,
+  //   nama: "Afgan Irwansyah",
+  //   role: ["Back End", "Unit Testing", "System Analyst"],
+  // },
 ];
 
 export default function TableTrancsaction() {
