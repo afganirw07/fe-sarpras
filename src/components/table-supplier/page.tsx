@@ -291,30 +291,41 @@ export default function TableSupplier() {
                   </TableHeader>
 
                   <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                    {tableData.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="light:border-gray-100 border px-6 py-4">
-                          <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-                            {user.id}
-                          </span>
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.id}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
-                          <ActionButtons />
-                        </TableCell>
+                    {tableData.length === 0 ? (
+                      <TableRow>
+                        <td
+                          colSpan={6}
+                          className="border px-6 py-6 text-center text-sm text-gray-500"
+                        >
+                          Tidak ada Kategori
+                        </td>
                       </TableRow>
-                    ))}
+                    ) : (
+                      tableData.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="light:border-gray-100 border px-6 py-4">
+                            <span className="text-sm font-medium text-gray-800 dark:text-white/90">
+                              {user.id}
+                            </span>
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.id}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
+                            {user.nama}
+                          </TableCell>
+                          <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
+                            <ActionButtons />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
