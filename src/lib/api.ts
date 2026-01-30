@@ -14,6 +14,7 @@ export async function api(path: string, options: RequestInit = {}) {
     ...options,
     headers,
   });
+  console.log("FETCH TO:===========================================", `${baseUrl}${path}`);
 
     if (!res.ok) {
     const text = await res.text();

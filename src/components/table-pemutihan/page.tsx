@@ -60,21 +60,21 @@ interface User {
 }
 
 const tableData: User[] = [
-  // {
-  //   id: 1,
-  //   nama: "Afgan Irwansyah",
-  //   role: ["Back End", "Unit Testing", "System Analyst"],
-  // },
-  // {
-  //   id: 2,
-  //   nama: "Ahsan Rohsikan",
-  //   role: ["Front End"],
-  // },
-  // {
-  //   id: 3,
-  //   nama: "Zefanya Prasetiyo",
-  //   role: ["Front End"],
-  // },
+  {
+    id: 1,
+    nama: "Afgan Irwansyah",
+    role: ["Back End", "Unit Testing", "System Analyst"],
+  },
+  {
+    id: 2,
+    nama: "Ahsan Rohsikan",
+    role: ["Front End"],
+  },
+  {
+    id: 3,
+    nama: "Zefanya Prasetiyo",
+    role: ["Front End"],
+  },
 ];
 
 export default function TablePemutihan() {
