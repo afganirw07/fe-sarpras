@@ -1,17 +1,17 @@
 "use client";
 
 import React, { ReactElement } from "react";
-import {Table,TableBody,TableCell,TableHeader,TableRow,} from "../ui/table";
-import { Button } from "../ui/button";
+import {Table,TableBody,TableCell,TableHeader,TableRow,} from "../../../ui/table";
+import { Button } from "../../../ui/button";
 import { Search, SquareArrowOutUpRight, Focus, QrCode } from "lucide-react";
 import {Dialog,DialogContent,DialogDescription,DialogHeader,DialogTitle,DialogTrigger,DialogClose,DialogFooter,} from "@/components/ui/dialog";
 import {AlertDialog,AlertDialogAction,AlertDialogCancel,AlertDialogContent,AlertDialogDescription,AlertDialogFooter,AlertDialogHeader,AlertDialogTitle,AlertDialogTrigger,} from "@/components/ui/alert-dialog";
 import {Tooltip,TooltipContent,TooltipTrigger,} from "@/components/ui/tooltip";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "../../../ui/label";
+import { Input } from "../../../ui/input";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import TextArea from "../form/input/TextArea";
+import TextArea from "../../../form/input/TextArea";
 
 interface User {
   id: number;

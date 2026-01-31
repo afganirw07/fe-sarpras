@@ -1,36 +1,25 @@
 "use client";
 
-import React, { ReactElement } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Button } from "../ui/button";
-import { Search, Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
+} from "../../../ui/table";
+import { Button } from "../../../ui/button";
+import { Search } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
   DialogClose,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+
 import {
   Select,
   SelectContent,
@@ -38,16 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "../ui/label";
-import Input from "../form/input/InputField";
+
+import { Label } from "../../../ui/label";
+import Input from "../../../form/input/InputField";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "../../../ui/textarea";
+import ActionItemsButtons from "../../tables-actionButton/itemActionButton";
 
 interface User {
   id: number;
@@ -94,140 +80,7 @@ const tableData: User[] = [
 ];
 
 export default function TableItems() {
-  function ActionButtons() {
-    return (
-      <div className="flex justify-center gap-4">
-        {/* EDIT */}
-        <Dialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DialogTrigger asChild>
-                <button type="button">
-                  <Pencil size={16} className="cursor-pointer" />
-                </button>
-              </DialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Edit</TooltipContent>
-          </Tooltip>
-
-          <DialogContent className="max-w-4xl p-6">
-            <DialogHeader>
-              <DialogTitle>Add Items</DialogTitle>
-            </DialogHeader>
-
-            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-              <div className="grid gap-2">
-                <Label>Kode Item</Label>
-                <Input placeholder="Kode Item" />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Nama Item</Label>
-                <Input placeholder="Nama Item" />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Kategori</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="a">Kategori A</SelectItem>
-                    <SelectItem value="b">Kategori B</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Merek</Label>
-                <Input placeholder="Merek Item" />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Sub Kategori</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose Sub Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="a">Sub A</SelectItem>
-                    <SelectItem value="b">Sub B</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Harga Item</Label>
-                <Input type="number" defaultValue={0} />
-              </div>
-
-              <div className="grid gap-2">
-                <Label>Satuan</Label>
-                <Input placeholder="Satuan" />
-              </div>
-
-              <div className="row-span-2 grid gap-2">
-                <Label>Spesifikasi</Label>
-                <Textarea className="h-full min-h-[180px]" />
-              </div>
-            </div>
-
-            <DialogFooter className="mt-6">
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button className="border border-gray-100 bg-blue-800 transition duration-300 hover:bg-blue-900">
-                Save
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* DELETE */}
-        <AlertDialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <AlertDialogTrigger asChild>
-                <button type="button">
-                  <Trash2 size={16} />
-                </button>
-              </AlertDialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Delete</TooltipContent>
-          </Tooltip>
-
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Yakin hapus Item ?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tindakan ini tidak bisa dibatalkan
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-600 text-white">
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button type="button">
-              <Link href={"/dashboard/items/show"}>
-                <SquareArrowOutUpRight size={16} />
-              </Link>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Show</TooltipContent>
-        </Tooltip>
-      </div>
-    );
-  }
-
+  
   const kirimAlert = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success("selamat kamu sukses");
@@ -235,7 +88,7 @@ export default function TableItems() {
 
   return (
     <div className="flex flex-col">
-      <div className="w-full max-w-sm rounded-xl border  border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="w-full max-w-sm rounded-xl border  border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/5 dark:bg-white/3">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
             Data Item
@@ -311,7 +164,7 @@ export default function TableItems() {
 
                     <div className="row-span-2 grid gap-2">
                       <Label>Spesifikasi</Label>
-                      <Textarea className="h-full min-h-[180px]" />
+                      <Textarea className="h-full min-h-45" />
                     </div>
                   </div>
 
@@ -348,64 +201,64 @@ export default function TableItems() {
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
             <div className="relative overflow-x-auto">
               <div className="inline-block min-w-full align-middle">
                 <Table className="w-full table-auto ">
-                  <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
+                  <TableHeader className="border border-gray-100 dark:border-white/5">
                     <TableRow>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] rounded-b-none rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-20 rounded-b-none rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         No
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-20 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Kode
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-20 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Nama
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[160px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-40 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Merek
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-20 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Harga
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[120px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-30 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Kategori
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[120px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-40 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Os Balance
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[140px] rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-35 rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
                       >
                         Action
                       </TableCell>
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
+                  <TableBody className="divide-gray-100 dark:divide-white/5">
                     {tableData.length === 0 ? (
                       <TableRow>
                         <td
@@ -442,7 +295,7 @@ export default function TableItems() {
                             {user.nama}
                           </TableCell>
                           <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
-                            <ActionButtons />
+                            <ActionItemsButtons />
                           </TableCell>
                         </TableRow>
                       ))

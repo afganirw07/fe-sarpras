@@ -1,4 +1,4 @@
-import TableShow from "@/components/table-show/page"
+import TableShow from "@/components/tables/tables-UI/table-show/page"
 
 export default function Show() {
     return (

@@ -1,4 +1,4 @@
-import TableTrashed from "@/components/table-trashed/page"
+import TableTrashed from "@/components/tables/tables-UI/table-trashed/page"
 
 
 export default function Trashed() {

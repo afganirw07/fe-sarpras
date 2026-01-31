@@ -1,25 +1,20 @@
 "use client";
 
-import React, { ReactElement } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Button } from "../ui/button";
+} from "../../../ui/table";
+import { Button } from "../../../ui/button";
 import {
   Search,
-  Pencil,
-  Trash2,
-  SquareArrowOutUpRight,
-  ArrowRightFromLine,
 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -27,35 +22,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "../ui/label";
-import Input from "../form/input/InputField";
+
+import { Label } from "../../../ui/label";
+import Input from "../../../form/input/InputField";
 import { toast, Toaster } from "sonner";
-import Link from "next/link";
-import { Textarea } from "../ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import DialogTransactionIn from "../dialog/dialogTransactionIn";
+import ActionKategoriButtons from "../../tables-actionButton/kategoriActionButton";
+
 
 interface User {
   id: number;
@@ -66,100 +44,7 @@ interface User {
 const tableData: User[] = [];
 
 export default function TableKategori() {
-  function ActionButtons() {
-    return (
-      <div className="flex justify-center gap-4">
-        {/* EDIT */}
-        <Dialog>
-          <form onSubmit={kirimAlert}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DialogTrigger asChild>
-                  <button type="button">
-                    <Pencil size={16} className="cursor-pointer" />
-                  </button>
-                </DialogTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Edit</TooltipContent>
-            </Tooltip>
-            <DialogContent className="max-w-xl p-6">
-              <DialogHeader>
-                <DialogTitle>Update Supplier</DialogTitle>
-              </DialogHeader>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div className="grid gap-2">
-                  <Label>Nama</Label>
-                  <Input placeholder="Nama Lengkap" />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Contact</Label>
-                  <Input placeholder="Nomor Telepon / Email" />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Address</Label>
-                  <Textarea
-                    placeholder="Alamat Lengkap"
-                    className="min-h-[120px]"
-                  />
-                </div>
-              </div>
-
-              <DialogFooter className="mt-6">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button className="bg-blue-800 hover:bg-blue-900">Save</Button>
-              </DialogFooter>
-            </DialogContent>
-          </form>
-        </Dialog>
-
-        {/* DELETE */}
-        <AlertDialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <AlertDialogTrigger asChild>
-                <button type="button">
-                  <Trash2 size={16} />
-                </button>
-              </AlertDialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Delete</TooltipContent>
-          </Tooltip>
-
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Yakin hapus supplier?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tindakan ini tidak bisa dibatalkan
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-600 text-white">
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button type="button">
-              <Link href={"/dashboard/items/show/id"}>
-                <SquareArrowOutUpRight size={16} />
-              </Link>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Show</TooltipContent>
-        </Tooltip>
-      </div>
-    );
-  }
+  
 
   const kirimAlert = (e: React.FormEvent) => {
     e.preventDefault();
@@ -305,7 +190,7 @@ export default function TableKategori() {
                                 {user.nama}
                               </TableCell>
                               <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                                <ActionButtons />
+                                <ActionKategoriButtons />
                               </TableCell>
                             </TableRow>
                           ))
@@ -414,7 +299,7 @@ export default function TableKategori() {
                             {user.nama}
                           </TableCell>
                           <TableCell className="border px-4 py-4">
-                            <ActionButtons />
+                            <ActionKategoriButtons />
                           </TableCell>
                         </TableRow>
                       ))

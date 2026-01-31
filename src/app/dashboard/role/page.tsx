@@ -1,4 +1,4 @@
-import TableRoles from "@/components/table-roles/TableRoles";
+import TableRoles from "@/components/tables/tables-UI/table-roles/TableRoles";
 
 export default function RolePage () {
     return(

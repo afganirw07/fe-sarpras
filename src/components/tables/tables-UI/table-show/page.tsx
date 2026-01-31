@@ -7,8 +7,8 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Button } from "../ui/button";
+} from "../../../ui/table";
+import { Button } from "../../../ui/button";
 import { Search, SquareArrowOutUpRight, Focus, QrCode } from "lucide-react";
 import {
   Dialog,
@@ -36,11 +36,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "../../../ui/label";
+import { Input } from "../../../ui/input";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import TextArea from "../form/input/TextArea";
+import TextArea from "../../../form/input/TextArea";
 
 interface User {
   id: number;

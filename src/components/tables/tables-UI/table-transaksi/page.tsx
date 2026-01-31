@@ -7,8 +7,8 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Button } from "../ui/button";
+} from "../../../ui/table";
+import { Button } from "../../../ui/button";
 import { Search, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
@@ -36,15 +36,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Label } from "../ui/label";
-import Input from "../form/input/InputField";
+import { Label } from "../../../ui/label";
+import Input from "../../../form/input/InputField";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import TextArea from "../form/input/TextArea";
+import TextArea from "../../../form/input/TextArea";
 import { table } from "console";
-import DialogTransactionIn from "../dialog/dialogTransactionIn";
-import DialogTransactionOut from "../dialog/dialogTransactionOut";
-import DialogTransactionReturn from "../dialog/dialog.transactionReturn";
+import DialogTransactionIn from "../../../dialog/dialogTransactionIn";
+import DialogTransactionOut from "../../../dialog/dialogTransactionOut";
+import DialogTransactionReturn from "../../../dialog/dialog.transactionReturn";
 
 interface User {
   id: number;

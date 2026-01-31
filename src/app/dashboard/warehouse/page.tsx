@@ -1,4 +1,4 @@
-import TableWarehouse from "@/components/table-warehouse/page"
+import TableWarehouse from "@/components/tables/tables-UI/table-warehouse/page"
 
 export default function Warehouse() {
     return (
