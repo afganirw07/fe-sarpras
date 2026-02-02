@@ -42,9 +42,9 @@ import { toast, Toaster } from "sonner";
 import Link from "next/link";
 import TextArea from "../../../form/input/TextArea";
 import { table } from "console";
-import DialogTransactionIn from "../../../dialog/dialogTransactionIn";
-import DialogTransactionOut from "../../../dialog/dialogTransactionOut";
-import DialogTransactionReturn from "../../../dialog/dialog.transactionReturn";
+import DialogTransactionIn from "../../../dialog/dialogTransaction/dialogTransactionIn";
+import DialogTransactionOut from "../../../dialog/dialogTransaction/dialogTransactionOut";
+import DialogTransactionReturn from "../../../dialog/dialogTransaction/dialog.transactionReturn";
 
 interface User {
   id: number;
@@ -53,11 +53,11 @@ interface User {
 }
 
 const tableData: User[] = [
-  // {
-  //   id: 1,
-  //   nama: "Afgan Irwansyah",
-  //   role: ["Back End", "Unit Testing", "System Analyst"],
-  // },
+  {
+    id: 1,
+    nama: "Afgan Irwansyah",
+    role: ["Back End", "Unit Testing", "System Analyst"],
+  },
 ];
 
 export default function TableTrancsaction() {

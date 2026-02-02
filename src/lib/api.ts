@@ -1,5 +1,4 @@
 
-
 export async function api(path: string, options: RequestInit = {}) {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL
     const token = process.env.NEXT_PUBLIC_API_KEY

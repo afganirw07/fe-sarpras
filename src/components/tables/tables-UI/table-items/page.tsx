@@ -34,6 +34,7 @@ import { toast, Toaster } from "sonner";
 import Link from "next/link";
 import { Textarea } from "../../../ui/textarea";
 import ActionItemsButtons from "../../tables-actionButton/itemActionButton";
+import ButtonTrashed from "@/components/ui/button/trashedButton";
 
 interface User {
   id: number;
@@ -179,12 +180,9 @@ export default function TableItems() {
                 </DialogContent>
               </form>
             </Dialog>
-            <Button
-              size={"lg"}
-              className="text-White bg-red-800 transition duration-300 hover:bg-red-900"
-            >
-              <Link href={"/dashboard/items/trashed"}>Trashed</Link>
-            </Button>
+            <ButtonTrashed
+            route="items"
+            />
           </div>
         </div>
         <div className="mt-12">

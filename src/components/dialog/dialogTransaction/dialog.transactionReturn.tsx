@@ -6,8 +6,8 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Button } from "../ui/button";
+} from "../../ui/table";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Label from "../form/Label";
-import { Input } from "../ui/input";
+import Label from "../../form/Label";
+import { Input } from "../../ui/input";
 
 export default function DialogTransactionIn() {
   const tableData: any[] = [];
@@ -78,8 +78,8 @@ export default function DialogTransactionIn() {
             <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
               <div className="relative overflow-x-auto">
                 <div className="inline-block min-w-full align-middle">
-                  <Table className="w-full min-w-[800px] table-auto">
-                    <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
+                  <Table className="w-full min-w-200 table-auto">
+                    <TableHeader className="border border-gray-100 dark:border-white/5">
                       <TableRow>
                         <TableCell
                           isHeader

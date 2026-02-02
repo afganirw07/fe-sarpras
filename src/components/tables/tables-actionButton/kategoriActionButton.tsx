@@ -39,7 +39,7 @@ import {toast, Toaster} from "react-hot-toast";
 
 export default function ActionKategoriButtons() {
 
-      const kirimAlert = (e: React.FormEvent) => {
+    const kirimAlert = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success("selamat kamu sukses");
   };

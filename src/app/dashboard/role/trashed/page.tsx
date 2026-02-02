@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactElement, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -8,88 +8,64 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Pencil, Trash2, Users, Shield } from "lucide-react";
+import { Search, Shield } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
-import { getEmployees } from "@/lib/roles";
-import { Employee } from "@/lib/roles";
+import { getDeletedRole } from "@/lib/roles";
 import {
-  getEmployeeRoles,
   EmployeeRole,
 } from "@/lib/roles";
-import DialogAddRoles from "@/components/dialog/dialogRoles/dialogAddRole";
 import ActionButtonsRoles from "@/components/dialog/dialogRoles/dialogActionButtonsRole";
 import { toast } from "sonner";
-import ButtonTrashed from "@/components/ui/button/trashedButton";
+import RestoreAction from "@/components/dialog/dialogRoles/restoreRole";
 
-export default function TableRoles() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+export default function RolesTrahed() {
   const [loading, setLoading] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [rows, setRows] = useState<EmployeeRole[]>([]);
   const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const data = await getEmployees();
-        setEmployees(data);
-      } catch {
-        toast.error("Gagal ambil employee");
-      }
-    };
-
-    fetchEmployees();
-  }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
 
-  const employeeMap = useMemo(() => {
-    return employees.reduce<Record<string, string>>((acc, emp) => {
-      acc[emp.id] = emp.full_name;
-      return acc;
-    }, {});
-  }, [employees]);
-
-  const filteredRows = useMemo(() => {
-    const keyword = search.toLowerCase();
-
-    return rows.filter((row) => {
-      const employeeName = employeeMap[row.employee_id] ?? "";
-      const rolesText = row.roles.join(" ");
-
-      return (
-        employeeName.toLowerCase().includes(keyword) ||
-        rolesText.toLowerCase().includes(keyword)
-      );
-    });
-  }, [rows, employeeMap, search]);
-  
-  const fetchRoles = async () => {
+  const fetchDeletedRoles = async () => {
     try {
       setLoading(true);
-      const data = await getEmployeeRoles();
+      const data = await getDeletedRole();
       setRows(data);
     } catch {
-      toast.error("Gagal ambil data role");
+      toast.error("Gagal ambil data deleted-role");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRoles();
+    fetchDeletedRoles();
   }, []);
+
+  // Filter rows based on search
+  const filteredRows = useMemo(() => {
+    if (!search.trim()) return rows;
+
+    const keyword = search.toLowerCase();
+    return rows.filter((row) => {
+      const employeeName = row.employee?.full_name?.toLowerCase() || "";
+      const rolesString = row.roles.join(" ").toLowerCase();
+      
+      return (
+        employeeName.includes(keyword) ||
+        rolesString.includes(keyword)
+      );
+    });
+  }, [rows, search]);
 
   // Role color mapping
   const getRoleColor = (role: string) => {
     const roleLower = role.toLowerCase();
     if (roleLower.includes("admin")) return "bg-purple-100 text-purple-700 border-purple-200";
     if (roleLower.includes("approver")) return "bg-emerald-100 text-emerald-700 border-emerald-200";
-    if (roleLower.includes("oprasional")) return "bg-amber-100 text-amber-700 border-amber-200";
+    if (roleLower.includes("operator")) return "bg-amber-100 text-amber-700 border-amber-200";
     return "bg-blue-100 text-blue-700 border-blue-200";
   };
 
@@ -105,57 +81,11 @@ export default function TableRoles() {
               </div>
               <div>
                 <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                  Manajemen Role
+                  Manajemen Role (Terhapus)
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Kelola hak akses pengguna
+                  Kelola role yang telah dihapus
                 </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-            <DialogAddRoles onSuccess={fetchRoles}/>
-            <ButtonTrashed
-            route="role"/>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{filteredRows.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/30">
-                <Shield className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Active Roles</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {rows.reduce((acc, row) => acc + row.roles.length, 0)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900/30">
-                <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Employees</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{employees.length}</p>
               </div>
             </div>
           </div>
@@ -184,28 +114,28 @@ export default function TableRoles() {
             <div className="overflow-x-auto">
               <Table className="w-full">
                 <TableHeader>
-                  <TableRow className="border-b border-gray-200/50 dark:border-white/5">
+                  <TableRow className="border-b border-gray-200/50 dark:border-white/5 font-quicksand">
                     <TableCell
                       isHeader
-                      className="w-20 bg-gradient-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       No
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-gradient-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Nama Pengguna
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-gradient-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Role & Akses
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="w-32 bg-gradient-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Aksi
                     </TableCell>
@@ -243,7 +173,7 @@ export default function TableRoles() {
                   )}
 
                   {!loading &&
-                    filteredRows.map((row, index) => (
+                    filteredRows.map((row: EmployeeRole, index: number) => (
                       <TableRow 
                         key={row.id}
                         className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
@@ -257,14 +187,14 @@ export default function TableRoles() {
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
-                              {(employeeMap[row.employee_id] ?? "-").charAt(0).toUpperCase()}
+                              {(row.employee?.full_name || "?").charAt(0).toUpperCase()}
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">
-                                {employeeMap[row.employee_id] ?? "-"}
+                                {row.employee?.full_name || "N/A"}
                               </p>
                               <p className="text-xs text-gray-500 dark:text-gray-400">
-                                ID: {row.employee_id.slice(0, 8)}...
+                                {row.employee?.phone_number || "-"}
                               </p>
                             </div>
                           </div>
@@ -272,7 +202,7 @@ export default function TableRoles() {
 
                         <TableCell className="px-6 py-4">
                           <div className="flex flex-wrap gap-2">
-                            {row.roles.map((role, i) => (
+                            {row.roles.map((role: string, i: number) => (
                               <span
                                 key={i}
                                 className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${getRoleColor(role)}`}
@@ -284,11 +214,10 @@ export default function TableRoles() {
                         </TableCell>
 
                         <TableCell className="px-6 py-4 text-center">
-                          <ActionButtonsRoles
-                            employeeId={row.employee_id}
-                            roleId={row.id}
-                            onSuccess={fetchRoles}
-                          />
+                            <RestoreAction
+                              roleId={row.id}  
+                            onSuccess={fetchDeletedRoles}
+                            />
                         </TableCell>
                       </TableRow>
                     ))}
