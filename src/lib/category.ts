@@ -17,6 +17,20 @@ export interface Subcategory {
   deleted_at: string | null;
 }
 
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  pagination: Pagination;
+  message: string;
+}
+
 export interface CategoryPayload {
   name: string;
   code: string;
@@ -34,14 +48,18 @@ export interface UpdateSubcategoryPayload {
   code: string;
 }
 
-export async function getCategories(): Promise<Category[]> {
-  const json = await api("/api/categories");
-  return json.data;
+export async function getCategories(
+  page: number = 1,
+  limit: number = 10
+): Promise<PaginatedResponse<Category>> {
+  return api(`/api/categories?page=${page}&limit=${limit}`);
 }
 
-export async function getSubcategories(): Promise<Subcategory[]> {
-  const json = await api("/api/subcategory");
-  return json.data;
+export async function getSubcategories(
+  page: number = 1,
+  limit: number = 10
+): Promise<PaginatedResponse<Subcategory>> {
+  return api(`/api/subcategory?page=${page}&limit=${limit}`);
 }
 
 export async function createCategory(payload: CategoryPayload) {
@@ -82,7 +100,6 @@ export async function updateSubcategory(
   });
 }
 
-
 export async function deleteCategory(categoryId: string) {
   if (!categoryId) throw new Error("Category ID is required");
 
@@ -104,8 +121,8 @@ export async function getCategoryById(
 ): Promise<Category | null> {
   if (!categoryId) return null;
 
-  const categories = await getCategories();
-  return categories.find((c) => c.id === categoryId) ?? null;
+  const json = await getCategories();
+  return json.data.find((c) => c.id === categoryId) ?? null;
 }
 
 export async function getSubcategoriesByCategoryId(
@@ -113,8 +130,6 @@ export async function getSubcategoriesByCategoryId(
 ): Promise<Subcategory[]> {
   if (!categoryId) return [];
 
-  const subcategories = await getSubcategories();
-  return subcategories.filter(
-    (sc) => sc.category_id === categoryId
-  );
+  const json = await getSubcategories(1, 1000);
+  return json.data.filter((sc) => sc.category_id === categoryId);
 }

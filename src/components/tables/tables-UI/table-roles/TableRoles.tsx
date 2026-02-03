@@ -58,7 +58,7 @@ export default function TableRoles() {
     const keyword = search.toLowerCase();
 
     return rows.filter((row) => {
-      const employeeName = employeeMap[row.employee_id] ?? "";
+      const employeeName = employeeMap[row.employeeId] ?? "";
       const rolesText = row.roles.join(" ");
 
       return (
@@ -112,7 +112,11 @@ export default function TableRoles() {
                 </p>
               </div>
             </div>
-            <DialogAddRoles onSuccess={fetchRoles} />
+            <div className="flex gap-2">
+            <DialogAddRoles onSuccess={fetchRoles}/>
+            <ButtonTrashed
+            route="role"/>
+            </div>
           </div>
         </div>
 
@@ -257,10 +261,10 @@ export default function TableRoles() {
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">
-                                {employeeMap[row.employee_id] ?? "-"}
+                                {employeeMap[row.employeeId] ?? "-"}
                               </p>
                               <p className="text-xs text-gray-500 dark:text-gray-400">
-                                ID: {row.employee_id.slice(0, 8)}...
+                                ID: {row.employeeId.slice(0, 8)}...
                               </p>
                             </div>
                           </div>
@@ -281,7 +285,7 @@ export default function TableRoles() {
 
                         <TableCell className="px-6 py-4 text-center">
                           <ActionButtonsRoles
-                            employeeId={row.employee_id}
+                            employeeId={row.employeeId}
                             roleId={row.id}
                             onSuccess={fetchRoles}
                           />

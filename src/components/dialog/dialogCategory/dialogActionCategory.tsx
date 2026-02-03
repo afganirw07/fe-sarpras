@@ -7,8 +7,8 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Button } from "../ui/button";
+} from "../../ui/table";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -25,8 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import { Trash2, Pencil, SquareArrowOutUpRight } from "lucide-react";
 import { toast } from "sonner";
 import {

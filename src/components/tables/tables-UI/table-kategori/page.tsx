@@ -20,7 +20,7 @@ import {
   Building2,
   List,
 } from "lucide-react";
-import DialogCategory from "../dialog/dialogAddCategory";
+import DialogCategory from "@/components/dialog/dialogCategory/dialogAddCategory";
 import { useEffect, useState } from "react";
 import {
   getCategories,
@@ -29,7 +29,8 @@ import {
   getSubcategories,
 } from "@/lib/category";
 import { toast } from "sonner";
-import ActionButtonsCategory from "../dialog/dialogActionCategory";
+import ActionButtonsCategory from "@/components/dialog/dialogCategory/dialogActionCategory";
+
 
 export default function TableKategori() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -40,12 +41,14 @@ export default function TableKategori() {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      const [cats, subs] = await Promise.all([
-        getCategories(),
-        getSubcategories(),
-      ]);
-      setCategories(cats);
-      setSubcategories(subs);
+      const [catsRes, subsRes] = await Promise.all([
+  getCategories(),
+  getSubcategories(),
+]);
+
+setCategories(catsRes.data);
+setSubcategories(subsRes.data);
+
     } catch {
       toast.error("Gagal ambil data");
     } finally {
@@ -88,7 +91,6 @@ export default function TableKategori() {
   return (
     <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
       <div className="w-full max-w-7xl mx-auto">
-        {/* Header Card */}
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
@@ -108,7 +110,6 @@ export default function TableKategori() {
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
             <div className="flex items-center gap-3">
@@ -153,7 +154,6 @@ export default function TableKategori() {
           </div>
         </div>
 
-        {/* Main Content Card */}
         <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
           {/* Search Bar */}
           <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
@@ -171,7 +171,6 @@ export default function TableKategori() {
             </div>
           </div>
 
-          {/* Table */}
           <div className="overflow-hidden">
             <div className="overflow-x-auto">
               <Table className="w-full">

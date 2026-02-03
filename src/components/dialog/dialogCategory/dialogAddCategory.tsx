@@ -5,8 +5,8 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Button } from "../ui/button";
+} from "../../ui/table";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import { useState } from "react";
 import { createCategory, createSubcategory } from "@/lib/category";
 import { Trash2 } from "lucide-react";
@@ -37,16 +37,12 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
   const [subcategoryName, setSubcategoryName] = useState("");
   const [subcategoryCode, setSubcategoryCode] = useState("");
   const [open, setOpen] = useState(false);
-  const [subcategoryType, setSubcategoryType] = useState<
-    "" | "Consumable" | "Loanable"
-  >("Consumable");
 
   const [loading, setLoading] = useState(false);
   interface SubcategoryTableItem {
     id: string;
     name: string;
     code: string;
-    type: "Consumable" | "Loanable";
   }
 
   const resetForm = () => {
@@ -54,15 +50,13 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
     setCategoryCode("");
     setSubcategoryName("");
     setSubcategoryCode("");
-    setSubcategoryType("");
-    setSubcategories([]);
   };
 
   const [subcategories, setSubcategories] = useState<SubcategoryTableItem[]>(
     [],
   );
   const handleAddSubcategory = () => {
-    if (!subcategoryName || !subcategoryCode || !subcategoryType) {
+    if (!subcategoryName || !subcategoryCode) {
       toast.error("Lengkapi data subkategori");
       return;
     }
@@ -73,14 +67,11 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
         id: `${prev.length + 1}`,
         name: subcategoryName,
         code: subcategoryCode,
-        type: subcategoryType,
       },
     ]);
-    console.log("SEND TYPE:", subcategoryType);
     
     setSubcategoryName("");
     setSubcategoryCode("");
-    setSubcategoryType("");
   };
 
   const handleSave = async () => {
@@ -118,7 +109,6 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
       setCategoryCode("");
       setSubcategoryName("");
       setSubcategoryCode("");
-      setSubcategoryType("");
     } catch (error: any) {
       alert(error.message || "Terjadi kesalahan");
     } finally {
@@ -263,9 +253,6 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
                         </TableCell>
                         <TableCell className="light:border-gray-100 font-quicksand border px-4 py-4 text-sm font-semibold text-gray-800 dark:text-white/90">
                           {subcategory.code}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 font-quicksand border px-4 py-4 text-sm font-semibold text-gray-800 dark:text-white/90">
-                          {subcategory.type}
                         </TableCell>
                       </TableRow>
                     ))

@@ -8,46 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import { Button } from "../../../ui/button";
+
 import { Search, Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "../../../ui/label";
-import Input from "../../../form/input/InputField";
 import { toast, Toaster } from "sonner";
-import Link from "next/link";
-import { Textarea } from "../../../ui/textarea";
+import ActionButtonsSupplier from "@/components/dialog/dialogSupplier/dialogactionSupplier";
+import DialogAddSupplier from "@/components/dialog/dialogSupplier/dialogAddSupllier";
 
 interface User {
   id: number;
@@ -74,101 +39,6 @@ const tableData: User[] = [
 ];
 
 export default function TableSupplier() {
-  function ActionButtons() {
-    return (
-      <div className="flex justify-center gap-4">
-        {/* EDIT */}
-        <Dialog>
-          <form onSubmit={kirimAlert}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DialogTrigger asChild>
-                  <button type="button">
-                    <Pencil size={16} className="cursor-pointer" />
-                  </button>
-                </DialogTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Edit</TooltipContent>
-            </Tooltip>
-            <DialogContent className="max-w-xl p-6">
-              <DialogHeader>
-                <DialogTitle>Update Supplier</DialogTitle>
-              </DialogHeader>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div className="grid gap-2">
-                  <Label>Nama</Label>
-                  <Input placeholder="Nama Lengkap" />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Contact</Label>
-                  <Input placeholder="Nomor Telepon / Email" />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>Address</Label>
-                  <Textarea
-                    placeholder="Alamat Lengkap"
-                    className="min-h-[120px]"
-                  />
-                </div>
-              </div>
-
-              <DialogFooter className="mt-6">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button className="bg-blue-800 hover:bg-blue-900">Save</Button>
-              </DialogFooter>
-            </DialogContent>
-          </form>
-        </Dialog>
-
-        {/* DELETE */}
-        <AlertDialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <AlertDialogTrigger asChild>
-                <button type="button">
-                  <Trash2 size={16} />
-                </button>
-              </AlertDialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Delete</TooltipContent>
-          </Tooltip>
-
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Yakin hapus supplier?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tindakan ini tidak bisa dibatalkan
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-600 text-white">
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button type="button">
-              <Link href={"/dashboard/items/show/id"}>
-                <SquareArrowOutUpRight size={16} />
-              </Link>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Show</TooltipContent>
-        </Tooltip>
-      </div>
-    );
-  }
-
   const kirimAlert = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success("selamat kamu sukses");
@@ -181,55 +51,7 @@ export default function TableSupplier() {
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
             Data Supplier
           </h1>
-          <div className="flex flex-col items-center justify-end gap-2 md:flex-row">
-            <Dialog>
-              <form onSubmit={kirimAlert}>
-                <DialogTrigger asChild>
-                  <Button
-                    size={"lg"}
-                    className="font-quicksand text-md bg-blue-800 text-white transition duration-300 hover:bg-blue-900"
-                  >
-                    + Add Supplier
-                  </Button>
-                </DialogTrigger>
-
-                <DialogContent className="max-w-xl p-6">
-                  <DialogHeader>
-                    <DialogTitle>Add Contact</DialogTitle>
-                  </DialogHeader>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="grid gap-2">
-                      <Label>Nama</Label>
-                      <Input placeholder="Nama Lengkap" />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Contact</Label>
-                      <Input placeholder="Nomor Telepon / Email" />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Address</Label>
-                      <Textarea
-                        placeholder="Alamat Lengkap"
-                        className="min-h-[120px]"
-                      />
-                    </div>
-                  </div>
-
-                  <DialogFooter className="mt-6">
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button className="bg-blue-800 hover:bg-blue-900">
-                      Save
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </form>
-            </Dialog>
-          </div>
+        <DialogAddSupplier/>
         </div>
         <div className="mt-20">
           <div className="flex w-full items-end justify-end gap-3 md:w-auto">
@@ -321,7 +143,7 @@ export default function TableSupplier() {
                             {user.nama}
                           </TableCell>
                           <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
-                            <ActionButtons />
+                            <ActionButtonsSupplier/>
                           </TableCell>
                         </TableRow>
                       ))
