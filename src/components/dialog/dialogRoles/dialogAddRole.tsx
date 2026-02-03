@@ -120,16 +120,9 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
       });
 
       toast.success("Role berhasil ditambahkan");
-      
+      await onSuccess?.()
       setSelectedEmployeeId("");
       setSelectedRoles([]);
-      setSearch("");
-      
-      setIsOpen(false);
-      
-      if (onSuccess) {
-        await onSuccess();
-      }
     } catch (err: any) {
       console.error("[DialogAddRoles] Failed:", err.message);
       toast.error(err.message || "Gagal menambah role");

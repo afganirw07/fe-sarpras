@@ -112,11 +112,7 @@ export default function TableRoles() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-            <DialogAddRoles onSuccess={fetchRoles}/>
-            <ButtonTrashed
-            route="role"/>
-            </div>
+            <DialogAddRoles onSuccess={fetchRoles} />
           </div>
         </div>
 
@@ -187,25 +183,25 @@ export default function TableRoles() {
                   <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                     <TableCell
                       isHeader
-                      className="w-20 bg-gradient-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       No
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-gradient-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Nama Pengguna
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-gradient-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Role & Akses
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="w-32 bg-gradient-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Aksi
                     </TableCell>
@@ -256,8 +252,8 @@ export default function TableRoles() {
 
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
-                              {(employeeMap[row.employee_id] ?? "-").charAt(0).toUpperCase()}
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
+                              {(employeeMap[row.employeeId] ?? "-").charAt(0).toUpperCase()}
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">

@@ -212,7 +212,7 @@ export default function TableWarehouse() {
 
   return (
     <div className="flex flex-col">
-      <div className="w-full max-w-sm rounded-xl border  border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="w-full max-w-sm rounded-xl border  border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/5 dark:bg-white/3">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
             Data Warehouse
@@ -233,64 +233,64 @@ export default function TableWarehouse() {
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
             <div className="relative overflow-x-auto">
               <div className="inline-block min-w-full align-middle">
                 <Table className="w-full table-auto ">
-                  <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
+                  <TableHeader className="border border-gray-100 dark:border-white/5">
                     <TableRow>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] rounded-b-none rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-20 rounded-b-none rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         No
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-20 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Kode
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-20 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Nama
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[160px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-40 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Merek
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-20 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Harga
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[120px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-30 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Kategori
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[120px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-40 border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
                       >
                         Os Balance
                       </TableCell>
                       <TableCell
                         isHeader
-                        className="light:border-gray-100 min-w-[140px] rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
+                        className="light:border-gray-100 min-w-35 rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
                       >
                         Action
                       </TableCell>
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
+                  <TableBody className="divide-gray-100 dark:divide-white/5">
                     {tableData.length == 0 ? (
                       <TableRow>
                         <td

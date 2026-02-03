@@ -36,24 +36,12 @@ interface RoleEmployee {
 
 export async function getEmployeeRoles() {
   const json = await api("/api/roles");
-  
-  console.log("Raw roles data:", json.data);
-  
-  const activeRoles = Array.isArray(json.data) 
-    ? json.data.filter((role: EmployeeRole) => {
-        console.log(`Role ${role.id}: deleted_at =`, role.deleted_at);
-        return role.deleted_at === null;
-      })
-    : [];
-  
-  console.log("Filtered active roles:", activeRoles);
-  
-  return activeRoles;
+  return json.data;
 }
 
 export async function getEmployees(): Promise<Employee[]> {
   const json = await api("/api/employees");
-  const mapped = json.data.map((item: any) => ({
+  return json.data.map((item: any) => ({
     id: item.id,
     full_name: item.full_name,
     role: Array.isArray(item.role?.roles)
@@ -70,7 +58,7 @@ export async function addEmployeeRoles(payload: {
   employeeId: string;
   role: string[];
 }) {
-  const response = await api("/api/roles", {
+  return api("/api/roles", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -84,8 +72,7 @@ export async function updateEmployeeRole(payload: {
 }) {
   if (!payload.roleId) throw new Error("Role ID is required");
 
-
-  const response = await api(`/api/roles/${payload.roleId}`, {
+  return api(`/api/roles/${payload.roleId}`, {
     method: "PUT",
     body: JSON.stringify({
       employee_id: payload.employee_id,
@@ -127,8 +114,11 @@ export async function getDeletedRole(): Promise<EmployeeRole[]> {
 
 export async function restoreDeletedRole(roleId: string): Promise<EmployeeRole> {
   if (!roleId) throw new Error("Role ID is required");
-  const response = await api(`/api/roles-restore/${roleId}`, {
-    method: "PUT",
+
+  console.log("API Call - Deleting role ID:", roleId);
+
+  return api(`/api/roles/${roleId}`, {
+    method: "DELETE",
   });
 
   return response.data;
