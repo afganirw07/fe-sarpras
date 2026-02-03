@@ -133,3 +133,48 @@ export async function getSubcategoriesByCategoryId(
   const json = await getSubcategories(1, 1000);
   return json.data.filter((sc) => sc.category_id === categoryId);
 }
+
+export async function getDeletedSubcategoriesFiltered(): Promise<Subcategory[]> {
+  const json = await api("/api/subcategory");
+
+  const deleted = Array.isArray(json.data)
+    ? json.data.filter(
+        (sc: Subcategory) => sc.deleted_at !== null
+      )
+    : [];
+
+  return deleted;
+}
+
+export async function restoreDeletedSubcategory(
+  subcategoryId: string
+): Promise<Subcategory> {
+  if (!subcategoryId) throw new Error("Subcategory ID is required");
+
+  const response = await api(`/api/categories-restore/${subcategoryId}`, {
+    method: "PUT",
+  });
+
+  return response.data;
+}
+
+export async function getDeletedCategories(
+  page: number = 1,
+  limit: number = 10
+): Promise<PaginatedResponse<Category>> {
+  return api(`/api/categories-deleted?page=${page}&limit=${limit}`);
+}
+
+export async function restoreDeletedCategory(
+  categoryId: string
+): Promise<Category> {
+  if (!categoryId) throw new Error("Category ID is required");
+
+  const response = await api(`/api/categories-restore/${categoryId}`, {
+    method: "PUT",
+  });
+
+  return response.data;
+}
+
+

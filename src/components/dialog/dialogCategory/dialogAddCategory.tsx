@@ -18,12 +18,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { useState } from "react";
@@ -207,20 +211,13 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
                       isHeader
                       className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                     >
-                      Kode
+                      Kode Subcategory
                     </TableCell>
                     <TableCell
                       isHeader
                       className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                     >
-                      Nama
-                    </TableCell>
-
-                    <TableCell
-                      isHeader
-                      className="min-w-55 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                    >
-                      Subcategory
+                      Nama Subcategory
                     </TableCell>
                     <TableCell
                       isHeader
@@ -254,6 +251,39 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
                         <TableCell className="light:border-gray-100 font-quicksand border px-4 py-4 text-sm font-semibold text-gray-800 dark:text-white/90">
                           {subcategory.code}
                         </TableCell>
+
+                                                <TableCell className="border px-4 py-4 text-center">
+                                                  <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                      <button type="button">
+                                                        <Trash2 size={16} className="text-red-600" />
+                                                      </button>
+                                                    </AlertDialogTrigger>
+                        
+                                                    <AlertDialogContent>
+                                                      <AlertDialogHeader>
+                                                        <AlertDialogTitle>
+                                                          Hapus Subkategori?
+                                                        </AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                          Data ini akan dihapus permanen.
+                                                        </AlertDialogDescription>
+                                                      </AlertDialogHeader>
+                        
+                                                      <AlertDialogFooter>
+                                                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                          className="bg-red-600 text-white"
+                                                          onClick={() =>
+                                                            handleDeleteSubcategory(subcategory.id)
+                                                          }
+                                                        >
+                                                          Hapus
+                                                        </AlertDialogAction>
+                                                      </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                  </AlertDialog>
+                                                </TableCell>
                       </TableRow>
                     ))
                   )}

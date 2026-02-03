@@ -1,6 +1,7 @@
 "use client";
 
 import React, { ReactElement, useMemo } from "react";
+import Pagination from "../../Pagination";
 import {
   Table,
   TableBody,
@@ -30,6 +31,7 @@ import {
 } from "@/lib/category";
 import { toast } from "sonner";
 import ActionButtonsCategory from "@/components/dialog/dialogCategory/dialogActionCategory";
+import ButtonTrashed from "@/components/ui/button/trashedButton";
 
 
 export default function TableKategori() {
@@ -37,6 +39,9 @@ export default function TableKategori() {
   const [loading, setLoading] = useState(false);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+const PAGE_SIZE = 5;
+
 
   const fetchAllData = async () => {
     try {
@@ -88,6 +93,17 @@ setSubcategories(subsRes.data);
     });
   }, [categories, subcategories, search]);
 
+  useEffect(() => {
+  setCurrentPage(1);
+}, [search]);
+
+const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
+
+const paginatedCategories = useMemo(() => {
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  return filteredCategories.slice(startIndex, startIndex + PAGE_SIZE);
+}, [filteredCategories, currentPage]);
+
   return (
     <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
       <div className="w-full max-w-7xl mx-auto">
@@ -106,7 +122,10 @@ setSubcategories(subsRes.data);
                 </p>
               </div>
             </div>
+            <div className="flex items-center gap-2">
             <DialogCategory onSuccess={fetchAllData} />
+            <ButtonTrashed route="kategori"/>
+            </div>
           </div>
         </div>
 
@@ -242,14 +261,14 @@ setSubcategories(subsRes.data);
                       </td>
                     </TableRow>
                   ) : (
-                    filteredCategories.map((category, index) => (
+                    paginatedCategories.map((category, index) => (
                       <TableRow 
                         key={category.id}
                         className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                       >
                         <TableCell className="px-6 py-4 border border-gray-200">
                           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
-                            {index + 1}
+                            {(currentPage - 1) * PAGE_SIZE + index + 1}
                           </span>
                         </TableCell>
 
@@ -331,6 +350,16 @@ setSubcategories(subsRes.data);
                   )}
                 </TableBody>
               </Table>
+              {totalPages > 1 && (
+  <div className="flex justify-end border-t border-gray-200/50 p-4 dark:border-white/5">
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={setCurrentPage}
+    />
+  </div>
+)}
+
             </div>
           </div>
         </div>
