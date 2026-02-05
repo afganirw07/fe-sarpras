@@ -45,12 +45,17 @@ export async function getSuppliers(
   return api(`/api/suppliers?page=${page}&limit=${limit}`);
 }
 
-export async function getSupplierById(
-  id: string
-): Promise<Supplier[]> {
+export async function getSupplierById(id: string): Promise<Supplier> {
   if (!id) throw new Error("Supplier ID is required");
+
   const json = await api(`/api/suppliers/${id}`);
-  return json.data;
+  console.log("getSupplierById response:", json);
+
+  if (!Array.isArray(json.data) || json.data.length === 0) {
+    throw new Error("Supplier not found");
+  }
+
+  return json.data[0];
 }
 
 export async function createSupplier(
@@ -80,4 +85,23 @@ export async function deleteSupplier(
   return api(`/api/suppliers/${supplierId}`, {
     method: "DELETE",
   });
+}
+
+export async function getDeletedSuppliers(
+  page: number = 1,
+  limit: number = 10
+): Promise<GetSuppliersResponse> {
+  return api(`/api/suppliers-deleted?page=${page}&limit=${limit}`);
+}
+
+export async function restoreDeletedSupplier(
+  supplierId: string
+): Promise<Supplier> {
+  if (!supplierId) throw new Error("Supplier ID is required");
+
+  const response = await api(`/api/suppliers-restore/${supplierId}`, {
+    method: "PUT",
+  });
+
+  return response.data;
 }

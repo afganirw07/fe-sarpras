@@ -91,7 +91,7 @@ export default function ActionButtonsRoles({
 
   useEffect(() => {
     if (!selectedEmployeeId) return;
-    const row = rows.find((r) => r.employee_id === selectedEmployeeId);
+    const row = rows.find((r) => r.employeeId === selectedEmployeeId);
 
     setSelectedRoles(row?.roles || []);
   }, [selectedEmployeeId, rows]);
@@ -165,7 +165,7 @@ async function handleDelete(e: React.MouseEvent) {
           <button
             onClick={() => {
               setSelectedEmployeeId(employeeId);
-              const row = rows.find((r) => r.employee_id === employeeId);
+              const row = rows.find((r) => r.employeeId === employeeId);
               console.log("ROW EDIT: ", row);
               setSelectedRoles(row?.roles || []);
             }}
