@@ -2,13 +2,14 @@
 import { api } from "./api";
 
 export interface Item {
+  id: string
   code: string;
   category: string;
   subCategory: string;
-  unit: string;
+  price: number;
+  unit: number;
   name: string;
   brand: string;
-  desc: string;
 }
 
 // CREATE - Menambah item baru

@@ -1,11 +1,9 @@
 "use client";
 
-import React, { ReactElement } from "react";
 import { Search, Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,

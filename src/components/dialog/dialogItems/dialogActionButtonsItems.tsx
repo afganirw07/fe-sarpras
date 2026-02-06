@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "../../ui/button";
-import { Search, Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
+import {  Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -42,8 +42,9 @@ import {
   EmployeeRole,
   updateEmployeeRole,
 } from "@/lib/roles";
+import Link from "next/link";
 
-export default function ActionButtonsRoles({
+export default function ActionButtonsItems({
   employeeId,
   roleId,
   onSuccess
@@ -267,10 +268,11 @@ async function handleDelete(e: React.MouseEvent) {
             <AlertDialogTrigger asChild>
               <button 
                 type="button"
-                onClick={() => setDeleteId(roleId)}
+                onClick={() => setDeleteId(roleId)} // UBAH dari employeeId jadi roleId
               >
                 <Trash2 size={16}
-                color="red" />
+                color="red"
+                />
               </button>
             </AlertDialogTrigger>
           </TooltipTrigger>
@@ -299,6 +301,16 @@ async function handleDelete(e: React.MouseEvent) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+       <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button">
+              <Link href={`/dashboard/items/show/$`}>
+                <SquareArrowOutUpRight size={16} />
+              </Link>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Show</TooltipContent>
+        </Tooltip>
     </div>
   );
 }

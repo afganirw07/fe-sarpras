@@ -23,12 +23,10 @@ import {
 import { Label } from "../../ui/label";
 import { toast, Toaster } from "sonner";
 import MultiSelect from "../../form/MultiSelect";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { getEmployees } from "@/lib/roles";
 import { Employee } from "@/lib/roles";
 import { addEmployeeRoles } from "@/lib/roles";
-import { useMemo } from "react";
 import { getEmployeeRoles, EmployeeRole } from "@/lib/roles";
 
 export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
@@ -40,26 +38,48 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const employeeWithRoleIds = new Set(rows.map((r) => r.employee_id));
+  const employeeWithRoleIds = new Set(rows.map((r) => r.employeeId));
 
   const employeesWithoutRole = employees.filter(
     (emp) => !employeeWithRoleIds.has(emp.id),
   );  
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const data = await getEmployees();
-        setEmployees(data);
-        
-          
-      } catch {
-        toast.error("Gagal ambil employee");
-      }
-    };
-
-    fetchEmployees();
+  // Fungsi untuk fetch employees
+  const fetchEmployees = useCallback(async () => {
+    try {
+      const data = await getEmployees();
+      setEmployees(data);
+    } catch {
+      toast.error("Gagal ambil employee");
+    }
   }, []);
+
+  // Fungsi untuk fetch roles
+  const fetchRoles = useCallback(async () => {
+    try {
+      const data = await getEmployeeRoles();
+      setRows(data);
+    } catch {
+      toast.error("Gagal ambil data role");
+    }
+  }, []);
+
+  // Initial fetch saat component mount
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
+  // Refresh data saat dialog dibuka
+  useEffect(() => {
+    if (isOpen) {
+      fetchEmployees();
+      fetchRoles();
+    }
+  }, [isOpen, fetchEmployees, fetchRoles]);
 
   const filteredEmployees = useMemo(() => {
     const keyword = search.toLowerCase();
@@ -68,19 +88,6 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
     );
   }, [employeesWithoutRole, search]);
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const data = await getEmployeeRoles();
-        setRows(data);
-      } catch {
-        toast.error("Gagal ambil data role");
-      }
-    };
-
-    fetchRoles();
-  }, []);
-
   const handleDialogChange = (open: boolean) => {
     setIsOpen(open);
     
@@ -88,12 +95,14 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
       setSelectedEmployeeId("");
       setSelectedRoles([]);
       setSearch("");
+      // Refresh data saat dialog dibuka
+      fetchEmployees();
+      fetchRoles();
     }
   };
 
   const kirimAlert = async (e: React.FormEvent) => {
     e.preventDefault();
-
 
     if (!selectedEmployeeId) {
       toast.error("Pilih employee dulu");
@@ -104,7 +113,6 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
       toast.error("Pilih minimal satu role");
       return;
     }
-
 
     console.log(" Payload:", {
       employeeId: selectedEmployeeId,
@@ -120,9 +128,15 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
       });
 
       toast.success("Role berhasil ditambahkan");
-      await onSuccess?.()
+      
+      // Refresh data setelah berhasil menambah role
+      await Promise.all([fetchEmployees(), fetchRoles()]);
+      
+      await onSuccess?.();
+      
       setSelectedEmployeeId("");
       setSelectedRoles([]);
+      setIsOpen(false); // Tutup dialog setelah berhasil
     } catch (err: any) {
       console.error("[DialogAddRoles] Failed:", err.message);
       toast.error(err.message || "Gagal menambah role");
@@ -201,15 +215,15 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
 
                     {filteredEmployees.map((emp) => (
                       <SelectItem 
-                      key={emp.id} 
-                      value={emp.id}
-                      disabled = {emp.isRoleDeleted}
-                      className={emp.isRoleDeleted ? "opacity-50 cursor-not-allowed" : ""}
+                        key={emp.id} 
+                        value={emp.id}
+                        disabled={emp.isRoleDeleted}
+                        className={emp.isRoleDeleted ? "opacity-50 cursor-not-allowed" : ""}
                       >                      
-                       {emp.full_name}
-                       {emp.isRoleDeleted && (
-                         <span className="ml-2 text-xs text-red-500">Role dihapus, pulihkan terlebih dahulu</span>
-                       )}
+                        {emp.full_name}
+                        {emp.isRoleDeleted && (
+                          <span className="ml-2 text-xs text-red-500">Role dihapus, pulihkan terlebih dahulu</span>
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactElement, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Pencil, Trash2, Users, Shield } from "lucide-react";
+import { Search,  Users, Shield } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { getEmployees } from "@/lib/roles";
@@ -25,8 +25,6 @@ import ButtonTrashed from "@/components/ui/button/trashedButton";
 export default function TableRoles() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [rows, setRows] = useState<EmployeeRole[]>([]);
   const [search, setSearch] = useState("");
 
@@ -87,9 +85,9 @@ export default function TableRoles() {
   // Role color mapping
   const getRoleColor = (role: string) => {
     const roleLower = role.toLowerCase();
-    if (roleLower.includes("admin")) return "bg-purple-100 text-purple-700 border-purple-200";
-    if (roleLower.includes("approver")) return "bg-emerald-100 text-emerald-700 border-emerald-200";
-    if (roleLower.includes("oprasional")) return "bg-amber-100 text-amber-700 border-amber-200";
+    if (roleLower.includes("admin")) return "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-500";
+    if (roleLower.includes("approver")) return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-500";
+    if (roleLower.includes("operator")) return "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-500";
     return "bg-blue-100 text-blue-700 border-blue-200";
   };
 
