@@ -6,6 +6,7 @@ export interface Item {
   code: string;
   category: string;
   subCategory: string;
+  stock: number
   price: number;
   unit: number;
   name: string;
@@ -14,7 +15,7 @@ export interface Item {
 
 // CREATE - Menambah item baru
 export async function createItem(data: Item) {
-  return await api('api/items', {
+  return await api('/api/items', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -22,21 +23,21 @@ export async function createItem(data: Item) {
 
 // READ - Mendapatkan semua items
 export async function getItems() {
-  return await api('api/items', {
+  return await api('/api/items', {
     method: 'GET',
   });
 }
 
 // READ - Mendapatkan item by ID
 export async function getItemById(id: string) {
-  return await api(`api/items/${id}`, {
+  return await api(`/api/items/${id}`, {
     method: 'GET',
   });
 }
 
 // UPDATE - Update item
 export async function updateItem(id: string, data: Partial<Item>) {
-  return await api(`api/items/${id}`, {
+  return await api(`/api/items/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
@@ -44,7 +45,17 @@ export async function updateItem(id: string, data: Partial<Item>) {
 
 // DELETE - Hapus item
 export async function deleteItem(id: string) {
-  return await api(`api/items/${id}`, {
+  return await api(`/api/items/${id}`, {
     method: 'DELETE',
   });
+}
+
+export async function restoreDeleteItems(id:string ):Promise<Item>{
+  return await api(`/api/items-restore/${id}`, {
+    method: 'PUT',
+  });
+}
+export async function getDeletedItems(): Promise<Item> {
+  const json = await api("/api/items-deleted");
+  return json.data;
 }

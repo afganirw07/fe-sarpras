@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { Button } from "../../ui/button";
-import {  Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
+import { Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -32,152 +32,71 @@ import {
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { toast } from "sonner";
-import MultiSelect from "../../form/MultiSelect";
-import {
-  deleteEmployeeRole,
-  getEmployees,
-  Employee,
-  addEmployeeRoles,
-  getEmployeeRoles,
-  EmployeeRole,
-  updateEmployeeRole,
-} from "@/lib/roles";
+import { deleteItem, updateItem, Item } from "@/lib/items";
 import Link from "next/link";
 
 export default function ActionButtonsItems({
-  employeeId,
-  roleId,
-  onSuccess
+  item,
+  onSuccess,
 }: {
-  employeeId: string;
-  roleId: string;
+  item: Item;
   onSuccess?: () => void;
 }) {
-  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [rows, setRows] = useState<EmployeeRole[]>([]);
-  const [deleteId, setDeleteId] = useState<string | null>(null); 
+  const [formData, setFormData] = useState<Item>(item);
 
-
-const fetchEmployees = useCallback(async () => {
-  try {
-    const data = await getEmployees();
-    setEmployees(data);
-  } catch {
-    toast.error("Gagal ambil employee");
-  }
-}, []);
-
-   useEffect(() => {
-    (async () => {
-      await fetchEmployees();
-    })();
-  }, [fetchEmployees]);
-
-
-   const fetchRoles = useCallback(async() => {
-      try {
-        const data = await getEmployeeRoles();
-        console.log(
-          "DATA ROLES: =======================================",
-          data,
-        );
-        setRows(data);
-      } catch {
-        toast.error("Gagal ambil data role");
-      }
-    }, []);
-
-  useEffect(() => {
-   (async () => {
-     fetchRoles();
-   })
-  }, [fetchRoles]);
-
-  useEffect(() => {
-    if (!selectedEmployeeId) return;
-    const row = rows.find((r) => r.employeeId === selectedEmployeeId);
-
-    setSelectedRoles(row?.roles || []);
-  }, [selectedEmployeeId, rows]);
-
-  const kirimAlert = async (e: React.FormEvent) => {
+  // Handle Update
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedEmployeeId) {
-      toast.error("Pilih employee dulu");
-      return;
-    }
-    if (selectedRoles.length === 0) {
-      toast.error("Pilih minimal satu role");
-      return;
-    }
-
     try {
-      await addEmployeeRoles({
-        employeeId: selectedEmployeeId,
-        role: selectedRoles,
-      });
-      toast.success("Role berhasil ditambahkan");
-
-      setSelectedEmployeeId("");
-      setSelectedRoles([]);
-      await onSuccess?.()
+      setLoading(true);
+      await updateItem(item.id, formData);
+      toast.success("Item berhasil diperbarui");
+      await onSuccess?.();
     } catch (err: any) {
-      toast.error(err.message || "Gagal menambah role");
+      console.error("Update error:", err);
+      toast.error(err.message || "Gagal update item");
+    } finally {
+      setLoading(false);
     }
   };
 
-async function handleDelete(e: React.MouseEvent) {
-  e.preventDefault();
-  
-  try {
-    if (!deleteId) {
-      toast.error("Role ID tidak ditemukan");
-      return;
+  // Handle Delete
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+      console.log("Deleting item ID:", item.id);
+      await deleteItem(item.id);
+      toast.success("Item berhasil dihapus");
+      await onSuccess?.();
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast.error(err.message || "Gagal hapus item");
+    } finally {
+      setLoading(false);
     }
-    
-    console.log("Deleting role ID:", deleteId);
-    await deleteEmployeeRole(deleteId);
-    setRows((prevRows) => prevRows.filter((r) => r.id !== deleteId));
-    toast.success("Role berhasil dihapus");   
-    setDeleteId(null);
+  };
 
-    await fetchEmployees();
-    await fetchRoles();
-    await onSuccess?.();
-  } catch (err: any) {
-    console.error("Delete error:", err);
-    toast.error(err.message || "Gagal hapus role");
-  }
-}
-
-  interface RoleOption {
-  text: string;
-  value: string;
-}
-
-  const options: RoleOption[] = [
-    { text: "Approver", value: "approver" },
-    { text: "Admin", value: "admin" },
-    { text: "Oprasional", value: "operator" },
-  ];
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "stock"  || name === "unit" 
+        ? Number(value) 
+        : value,
+    }));
+  };
 
   return (
     <div className="flex justify-center gap-4">
       {/* EDIT */}
       <Dialog>
         <DialogTrigger asChild>
-          <button
-            onClick={() => {
-              setSelectedEmployeeId(employeeId);
-              const row = rows.find((r) => r.employeeId === employeeId);
-              console.log("ROW EDIT: ", row);
-              setSelectedRoles(row?.roles || []);
-            }}
-          >
+          <button type="button">
             <Tooltip>
               <TooltipTrigger asChild>
                 <span>
@@ -191,63 +110,115 @@ async function handleDelete(e: React.MouseEvent) {
 
         <DialogContent className="w-full max-w-4xl p-8">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-xl">Edit Role</DialogTitle>
+            <DialogTitle className="text-xl">Edit Item</DialogTitle>
             <DialogDescription>
-              Update role untuk pengguna yang dipilih
+              Update informasi item yang dipilih
             </DialogDescription>
           </DialogHeader>
 
-          <form
-          
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (selectedRoles.length === 0) {
-                toast.error("Pilih minimal satu role");
-                return;
-              }
-              try {
-                await updateEmployeeRole({
-                  employee_id: selectedEmployeeId,
-                  roleId: roleId,
-                  role: selectedRoles,
-                });
-                toast.success("Role berhasil diperbarui");
-              } catch (err: any) {
-                toast.error(err.message || "Gagal update role");
-              }
-              await onSuccess?.()
-            }}
-          >
-            <div className="flex flex-col gap-4">
+          <form onSubmit={handleUpdate}>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Kode */}
               <div className="flex flex-col gap-2">
-                <Label>Nama Pengguna</Label>
+                <Label>Kode</Label>
                 <Input
-                  value={
-                    employees.find((emp) => emp.id === selectedEmployeeId)
-                      ?.full_name || ""
-                  }
-                  readOnly
-                  className="h-11 w-full bg-gray-100 text-gray-700 dark:text-white"
+                  name="code"
+                  value={formData.code}
+                  onChange={handleInputChange}
+                  className="h-11"
+                  required
                 />
               </div>
 
-              {/* Edit Role */}
+              {/* Nama */}
               <div className="flex flex-col gap-2">
-                <Label>Role</Label>
-                <MultiSelect
-                  options={options}
-                  defaultSelected={selectedRoles}
-                  onChange={(values: string[]) => setSelectedRoles(values)}
+                <Label>Nama</Label>
+                <Input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="h-11"
+                  required
                 />
-                <p className="text-xs text-gray-500">
-                  Bisa memilih lebih dari satu role
-                </p>
+              </div>
+
+              {/* Merek */}
+              <div className="flex flex-col gap-2">
+                <Label>Merek</Label>
+                <Input
+                  name="brand"
+                  value={formData.brand}
+                  onChange={handleInputChange}
+                  className="h-11"
+                />
+              </div>
+
+              {/* Kategori */}
+              <div className="flex flex-col gap-2">
+                <Label>Kategori</Label>
+                <Input
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="h-11"
+                  required
+                />
+              </div>
+
+              {/* Sub Kategori */}
+              <div className="flex flex-col gap-2">
+                <Label>Sub Kategori</Label>
+                <Input
+                  name="subCategory"
+                  value={formData.subCategory}
+                  onChange={handleInputChange}
+                  className="h-11"
+                  required
+                />
+              </div>
+
+              {/* Stok */}
+              <div className="flex flex-col gap-2">
+                <Label>Stok</Label>
+                <Input
+                  name="stock"
+                  type="number"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                  className="h-11"
+                  required
+                />
+              </div>
+
+              {/* Harga
+              <div className="flex flex-col gap-2">
+                <Label>Harga</Label>
+                <Input
+                  name="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  className="h-11"
+                  required
+                />
+              </div> */}
+
+              {/* Unit */}
+              <div className="flex flex-col gap-2">
+                <Label>Unit</Label>
+                <Input
+                  name="unit"
+                  value={formData.unit}
+                  onChange={handleInputChange}
+                  className="h-11"
+                  required
+                />
               </div>
             </div>
 
             <DialogFooter className="mt-10 flex justify-end gap-3">
               <DialogClose asChild>
-                <Button type="button" variant="outline">
+                <Button type="button" variant="outline" disabled={loading}>
                   Cancel
                 </Button>
               </DialogClose>
@@ -255,24 +226,22 @@ async function handleDelete(e: React.MouseEvent) {
               <Button
                 type="submit"
                 className="bg-blue-800 px-6 text-white hover:bg-blue-900"
+                disabled={loading}
               >
-                Save
+                {loading ? "Menyimpan..." : "Save"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* DELETE */}
       <AlertDialog>
         <Tooltip>
           <TooltipTrigger asChild>
             <AlertDialogTrigger asChild>
-              <button 
-                type="button"
-                onClick={() => setDeleteId(roleId)} // UBAH dari employeeId jadi roleId
-              >
-                <Trash2 size={16}
-                color="red"
-                />
+              <button type="button">
+                <Trash2 size={16} color="red" />
               </button>
             </AlertDialogTrigger>
           </TooltipTrigger>
@@ -281,36 +250,40 @@ async function handleDelete(e: React.MouseEvent) {
 
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Yakin hapus role?</AlertDialogTitle>
+            <AlertDialogTitle>Yakin hapus item?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tindakan ini tidak bisa dibatalkan
+              Item <strong>{item.name}</strong> akan dihapus secara permanen.
+              Tindakan ini tidak bisa dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 
             <AlertDialogAction asChild>
               <button
-                className="rounded bg-red-600 px-4 hover:bg-red-700 py-2 text-white"
+                className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
                 onClick={handleDelete}
+                disabled={loading}
               >
-                Delete  
+                {loading ? "Menghapus..." : "Delete"}
               </button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-       <Tooltip>
-          <TooltipTrigger asChild>
-            <button type="button">
-              <Link href={`/dashboard/items/show/$`}>
-                <SquareArrowOutUpRight size={16} />
-              </Link>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Show</TooltipContent>
-        </Tooltip>
+
+      {/* SHOW */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button type="button">
+            <Link href={`/dashboard/items/show/${item.id}`}>
+              <SquareArrowOutUpRight size={16} />
+            </Link>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>Show</TooltipContent>
+      </Tooltip>
     </div>
   );
 }

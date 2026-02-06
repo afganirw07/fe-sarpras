@@ -91,7 +91,7 @@ export default function TableShow() {
 
   return (
     <div className="flex flex-col">
-      <div className="w-full max-w-sm rounded-xl border p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div className="w-full max-w-sm rounded-xl border p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/5 dark:bg-white/3">
         <div className="flex flex-col gap-6">
           <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
             Detail Master Item
@@ -147,70 +147,70 @@ export default function TableShow() {
                   className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
                 />
               </div>
-              <p className="font-figtree text-base text-xs font-semibold lg:text-lg">
+              <p className="font-figtree text-xs font-semibold lg:text-lg">
                 Total Item : 0 item
               </p>
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
             <div className="relative overflow-x-auto">
               <div className="inline-block min-w-full align-middle">
                 <Table className="w-full table-fixed">
-                  <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
+                  <TableHeader className="border border-gray-100 dark:border-white/5">
                     <TableRow>
                       <TableCell
                         isHeader
-                        className="w-[60px] rounded-l-md border border-r-0 bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
+                        className="w-15 rounded-l-md border border-r-0 bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
                         No
                       </TableCell>
 
                       <TableCell
                         isHeader
-                        className="w-[360px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
+                        className="w-90 border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
                         SN Number
                       </TableCell>
 
                       <TableCell
                         isHeader
-                        className="w-[160px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
+                        className="w-40 border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
                         Warehouse
                       </TableCell>
 
                       <TableCell
                         isHeader
-                        className="w-[120px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
+                        className="w-30 border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
                         PO Number
                       </TableCell>
 
                       <TableCell
                         isHeader
-                        className="w-[120px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
+                        className="w-30 border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
                         Kondisi
                       </TableCell>
 
                       <TableCell
                         isHeader
-                        className="w-[130px] border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
+                        className="w-32.5 border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200"
                       >
                         Status
                       </TableCell>
 
                       <TableCell
                         isHeader
-                        className="w-[100px] rounded-r-md border bg-blue-800 px-4 py-3 text-center text-xs font-medium text-gray-200"
+                        className="w-25 rounded-r-md border bg-blue-800 px-4 py-3 text-center text-xs font-medium text-gray-200"
                       >
                         Action
                       </TableCell>
                     </TableRow>
                   </TableHeader>
 
-                  <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                  <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
                     {tableData.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="border px-4 py-4 text-sm">

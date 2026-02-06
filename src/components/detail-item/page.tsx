@@ -5,7 +5,7 @@ import { Link } from "lucide-react"
 
 export default function DetailItem() {
     return (
-        <div className="w-full max-w-6xl rounded-xl border p-6 dark:border-white/[0.05] dark:bg-white/[0.03]">
+        <div className="w-full max-w-6xl rounded-xl border p-6 dark:border-white/5 dark:bg-white/3">
   <div className="flex flex-col gap-8">
     <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
       Detail Item

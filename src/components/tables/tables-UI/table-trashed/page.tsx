@@ -1,226 +1,266 @@
 "use client";
 
-import React, { ReactElement } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../../ui/table";
-import { Button } from "../../../ui/button";
-import { Search, ArchiveRestore } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "../../../ui/label";
-import Input from "../../../form/input/InputField";
-import { toast, Toaster } from "sonner";
-import Link from "next/link";
-import TextArea from "../../../form/input/TextArea";
+} from "@/components/ui/table";
+import { Search, Package } from "lucide-react";
+import { toast } from "sonner";
+import { getDeletedItems, Item } from "@/lib/items";
+import { restoreDeleteItems } from "@/lib/items";
+import RestoreActionItems from "@/components/dialog/dialogItems/restoreItems";
+import ButtonBack from "@/components/ui/button/backButton";
 
-interface User {
-  id: number;
-  nama: string;
-  role: string[];
-}
+export default function TableTrashedItems() {
+  const [loading, setLoading] = useState(false);
+  const [items, setItems] = useState<Item[]>([]);
+  const [search, setSearch] = useState("");
 
-const tableData: User[] = [
-  {
-    id: 1,
-    nama: "Afgan Irwansyah",
-    role: ["Back End", "Unit Testing", "System Analyst"],
-  },
-  {
-    id: 2,
-    nama: "Ahsan Rohsikan",
-    role: ["Front End"],
-  },
-  {
-    id: 3,
-    nama: "Zefanya Prasetiyo",
-    role: ["Front End"],
-  },
-];
-
-export default function TableTrashed() {
-  function ActionButtons() {
-    return (
-      <div className="flex justify-center gap-4">
-        {/* DELETE */}
-        <AlertDialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <AlertDialogTrigger asChild>
-                <button type="button">
-                  <ArchiveRestore size={16} className="text-red-600" />
-                </button>
-              </AlertDialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Restore</TooltipContent>
-          </Tooltip>
-
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Yakin ?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tindakan ini tidak bisa dibatalkan
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-600 text-white">
-                Restore
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    );
-  }
-
-  const kirimAlert = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("selamat kamu sukses");
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
   };
 
+  const fetchDeletedItems = async () => {
+    try {
+      setLoading(true);
+      const response = await getDeletedItems();
+      // Extract data dari response
+      if (response?.data && Array.isArray(response.data)) {
+        setItems(response.data);
+      } else if (Array.isArray(response)) {
+        setItems(response);
+      } else {
+        console.warn('Invalid response format:', response);
+        setItems([]);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Gagal ambil data items terhapus");
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDeletedItems();
+  }, []);
+
+  // Filter items based on search
+  const filteredItems = useMemo(() => {
+    if (!search.trim()) return items;
+
+    const keyword = search.toLowerCase();
+    return items.filter((item) => {
+      return (
+        item.name.toLowerCase().includes(keyword) ||
+        item.code.toLowerCase().includes(keyword) ||
+        (item.brand && item.brand.toLowerCase().includes(keyword)) ||
+        item.category.toLowerCase().includes(keyword) ||
+        item.subCategory.toLowerCase().includes(keyword)
+      );
+    });
+  }, [items, search]);
+
   return (
-    <div className="flex flex-col">
-      <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
-            Data Items
-          </h1>
+    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
+      <div className="w-full max-w-7xl mx-auto">
+        {/* Header Card */}
+        <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
+                <Package className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
+                  Data Item (Terhapus)
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Kelola item yang telah dihapus
+                </p>
+              </div>
+            </div>
+            <ButtonBack 
+            route="/items"
+            />
+          </div>
         </div>
-        <div className="mt-12">
-          <div className="flex w-full items-end justify-end gap-3 md:w-auto">
-            <div className="relative w-full md:w-72">
+
+        {/* Main Content Card */}
+        <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
+          {/* Search Bar */}
+          <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
+            <div className="relative w-full md:w-80">
               <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                size={20}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
               />
               <input
-                placeholder="Search item"
-                className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
+                placeholder="Cari berdasarkan nama, kode, atau merek..."
+                value={search}
+                onChange={handleSearch}
+                className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
               />
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <div className="relative overflow-x-auto">
-              <div className="inline-block min-w-full align-middle">
-                <Table className="w-full table-auto ">
-                  <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
-                    <TableRow>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[80px] rounded-b-none rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        No
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Kode
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Nama
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[160px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Merek
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Harga
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[120px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Kategori
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[120px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Os Balance
-                      </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[140px] rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-center text-xs font-medium text-gray-200"
-                      >
-                        Action
-                      </TableCell>
-                    </TableRow>
-                  </TableHeader>
+          {/* Table */}
+          <div className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow className="border-b border-gray-200/50 dark:border-white/5">
+                    <TableCell
+                      isHeader
+                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      No
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Kode
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Nama
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Merek
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Kategori
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Sub Kategori
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Stok
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Aksi
+                    </TableCell>
+                  </TableRow>
+                </TableHeader>
 
-                  <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                    {tableData.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="light:border-gray-100 border px-6 py-4">
-                          <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-                            {user.id}
+                <TableBody>
+                  {loading && (
+                    <TableRow>
+                      <td colSpan={8} className="py-16">
+                        <div className="flex flex-col items-center justify-center gap-3">
+                          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 dark:border-gray-700 dark:border-t-blue-400"></div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Memuat data...
+                          </p>
+                        </div>
+                      </td>
+                    </TableRow>
+                  )}
+
+                  {!loading && filteredItems.length === 0 && (
+                    <TableRow>
+                      <td colSpan={8} className="py-16">
+                        <div className="flex flex-col items-center justify-center gap-3">
+                          <div className="rounded-full bg-gray-100 p-4 dark:bg-white/5">
+                            <Search className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            Data tidak ditemukan
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Coba kata kunci pencarian lain
+                          </p>
+                        </div>
+                      </td>
+                    </TableRow>
+                  )}
+
+                  {!loading &&
+                    filteredItems.map((item, index) => (
+                      <TableRow
+                        key={item.id}
+                        className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
+                      >
+                        <TableCell className="px-6 py-4">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
+                            {index + 1}
                           </span>
                         </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.id}
+
+                        <TableCell className="px-6 py-4">
+                          <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                            {item.code}
+                          </span>
                         </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
+
+                        <TableCell className="px-6 py-4">
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {item.name}
+                          </p>
                         </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
+
+                        <TableCell className="px-6 py-4">
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {item.brand || "-"}
+                          </p>
                         </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
+
+                        <TableCell className="px-6 py-4">
+                          <span className="rounded-lg border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            {item.category}
+                          </span>
                         </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
+
+                        <TableCell className="px-6 py-4">
+                          <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                            {item.subCategory}
+                          </span>
                         </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
+
+                        <TableCell className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {item.stock}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {item.unit}
+                            </span>
+                          </div>
                         </TableCell>
-                        <TableCell className="light:border-gray-100 border px-5  py-4 text-center">
-                          <ActionButtons />
+
+                        <TableCell className="px-6 py-4 text-center">
+                          <RestoreActionItems
+                            itemId={item.id}
+                            onSuccess={fetchDeletedItems}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
-              </div>
+                </TableBody>
+              </Table>
             </div>
           </div>
         </div>
