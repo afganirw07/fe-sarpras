@@ -1,132 +1,97 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../../ui/table";
-import { Button } from "../../../ui/button";
-import { 
-  Search, 
-  Pencil, 
-  Trash2, 
-  SquareArrowOutUpRight, 
-  Warehouse, 
-  Building2, 
-  Tag, 
-  QrCode,
-  Archive
+} from "@/components/ui/table";
+import {
+  Search,
+  RotateCcw,
+  Archive,
+  Trash2,
+  Building2,
+  Warehouse,
+  Tag,
 } from "lucide-react";
-import { toast, Toaster } from "sonner";
-import Link from "next/link";
-import { Textarea } from "../../../ui/textarea";
-import DialogAddWarehouse from "../../../dialog/dialogWarehouse/dialogaddWarehouse";
-import ActionButtonsWarehouse from "@/components/dialog/dialogWarehouse/dialogActionWarehouse";
-import { getRooms, Room } from "@/lib/warehouse";
-import ButtonQrWarehouse from "@/components/button-qr/buttonQrWarehouse";
-import { QRCodeCanvas } from "qrcode.react";
-import ButtonTrashed from "@/components/ui/button/trashedButton";
+import { toast } from "sonner";
+import { getDeletedRooms, Room } from "@/lib/warehouse";
+import RestoreActionWarehouse from "@/components/dialog/dialogWarehouse/restoreWarehouse";
 
-export default function TableWarehouse() {
-  const [warehouses, setWarehouses] = useState<Room[]>([]);
+export default function WarehouseTrashed() {
   const [loading, setLoading] = useState(false);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [search, setSearch] = useState("");
 
-  const fetchWarehouses = async () => {
+  const fetchDeleted = async () => {
     try {
       setLoading(true);
-      const res = await getRooms();
-      setWarehouses(res.data);
-    } catch (error: any) {
-      toast.error(error?.message || "Gagal mengambil data warehouse");
-      console.log("==============================================", error);
+      const res = await getDeletedRooms(1, 50);
+      setRooms(res.data);
+    } catch {
+      toast.error("Gagal mengambil warehouse terhapus");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchWarehouses();
+    fetchDeleted();
   }, []);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-  };
+  const filteredRooms = useMemo(() => {
+    if (!search.trim()) return rooms;
 
-  const filteredWarehouses = useMemo(() => {
     const keyword = search.toLowerCase();
-    
-    return warehouses.filter((warehouse) => {
-      return (
-        warehouse.code.toLowerCase().includes(keyword) ||
-        warehouse.type.toLowerCase().includes(keyword) ||
-        warehouse.name.toLowerCase().includes(keyword)
-      );
-    });
-  }, [warehouses, search]);
+    return rooms.filter(
+      (r) =>
+        r.name.toLowerCase().includes(keyword) ||
+        r.code.toLowerCase().includes(keyword) ||
+        r.type.toLowerCase().includes(keyword),
+    );
+  }, [rooms, search]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="w-full max-w-7xl mx-auto">
+    <div className="flex min-h-screen flex-col bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
+      <div className="mx-auto w-full max-w-7xl">
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
-                <Warehouse className="h-6 w-6 text-white" />
+                <Archive className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                  Manajemen Warehouse
+                  Warehouse Terhapus
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Kelola data warehouse dan ruangan
+                  Kelola dan pulihkan warehouse yang dihapus
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {warehouses.map((w) => (
-                <QRCodeCanvas
-                  key={w.id}
-                  id={`qr-${w.id}`}
-                  value={`${window.location.origin}/warehouse/${w.id}`}
-                  size={150}
-                  className="hidden"
-                />
-              ))}
-              <ButtonTrashed route="/warehouse" />
-              <ButtonQrWarehouse warehouses={warehouses} />
-              <DialogAddWarehouse onSuccess={fetchWarehouses} />
+            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 dark:border-blue-900/50 dark:bg-blue-900/20">
+              <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                {filteredRooms.length} Warehouse Terhapus
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-                <Warehouse className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <Trash2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Warehouse</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {warehouses.length}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Total Terhapus
                 </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-violet-100 p-2 dark:bg-blue-900/30">
-                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Aktif</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {warehouses.length}
+                  {rooms.length}
                 </p>
               </div>
             </div>
@@ -134,13 +99,15 @@ export default function TableWarehouse() {
 
           <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-cyan-100 p-2 dark:bg-cyan-900/30">
-                <Tag className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+              <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/30">
+                <RotateCcw className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Kategori</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Dapat Dipulihkan
+                </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {new Set(warehouses.map(w => w.type)).size}
+                  {filteredRooms.length}
                 </p>
               </div>
             </div>
@@ -148,13 +115,15 @@ export default function TableWarehouse() {
 
           <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-cyan-100 p-2 dark:bg-cyan-900/30">
-                <Search className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+              <div className="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/30">
+                <Archive className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Hasil Pencarian</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {filteredWarehouses.length}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Status
+                </p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">
+                  Arsip Aktif
                 </p>
               </div>
             </div>
@@ -169,9 +138,9 @@ export default function TableWarehouse() {
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
               />
               <input
-                placeholder="Cari warehouse, kategori, atau instansi..."
+                placeholder="Cari warehouse yang terhapus..."
                 value={search}
-                onChange={handleSearch}
+                onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
               />
             </div>
@@ -198,13 +167,7 @@ export default function TableWarehouse() {
                       isHeader
                       className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
-                      Kategori
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                    >
-                      Instansi
+                      Tipe
                     </TableCell>
                     <TableCell
                       isHeader
@@ -216,35 +179,39 @@ export default function TableWarehouse() {
                 </TableHeader>
 
                 <TableBody>
-                  {loading ? (
+                  {loading && (
                     <TableRow>
-                      <td colSpan={5} className="py-16">
+                      <td colSpan={4} className="py-16">
                         <div className="flex flex-col items-center justify-center gap-3">
                           <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 dark:border-gray-700 dark:border-t-blue-400"></div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Memuat data...</p>
                         </div>
                       </td>
                     </TableRow>
-                  ) : filteredWarehouses.length === 0 ? (
+                  )}
+
+                  {!loading && filteredRooms.length === 0 && (
                     <TableRow>
-                      <td colSpan={5} className="py-16">
+                      <td colSpan={4} className="py-16">
                         <div className="flex flex-col items-center justify-center gap-3">
                           <div className="rounded-full bg-gray-100 p-4 dark:bg-white/5">
                             <Warehouse className="h-8 w-8 text-gray-400" />
                           </div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {search ? "Data tidak ditemukan" : "Tidak ada warehouse"}
+                            {search ? "Data tidak ditemukan" : "Tidak ada warehouse terhapus"}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {search ? "Coba kata kunci pencarian lain" : "Tambahkan warehouse baru untuk memulai"}
+                            {search ? "Coba kata kunci pencarian lain" : "Semua warehouse Anda masih aktif"}
                           </p>
                         </div>
                       </td>
                     </TableRow>
-                  ) : (
-                    filteredWarehouses.map((item, index) => (
+                  )}
+
+                  {!loading &&
+                    filteredRooms.map((r, index) => (
                       <TableRow 
-                        key={item.id}
+                        key={r.id}
                         className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                       >
                         <TableCell className="px-6 py-4">
@@ -256,14 +223,14 @@ export default function TableWarehouse() {
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
-                              {item.code.charAt(0).toUpperCase()}
+                              {r.code.charAt(0).toUpperCase()}
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">
-                                {item.code}
+                                {r.name}
                               </p>
                               <p className="text-xs text-gray-500 dark:text-gray-400">
-                                ID: {item.id.slice(0, 8)}...
+                                {r.code}
                               </p>
                             </div>
                           </div>
@@ -272,30 +239,20 @@ export default function TableWarehouse() {
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Tag className="h-4 w-4 text-blue-500" />
-                            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                              {item.type}
-                            </span>
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
-                              {item.name}
+                            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-sm font-semibold capitalize text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                              {r.type}
                             </span>
                           </div>
                         </TableCell>
 
                         <TableCell className="px-6 py-4 text-center">
-                          <ActionButtonsWarehouse
-                            room={item}
-                            onSuccess={fetchWarehouses}
+                          <RestoreActionWarehouse
+                            roomId={r.id}
+                            onSuccess={fetchDeleted}
                           />
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
+                    ))}
                 </TableBody>
               </Table>
             </div>
