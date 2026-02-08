@@ -108,7 +108,7 @@ export default function ActionButtonsItems({
           </button>
         </DialogTrigger>
 
-        <DialogContent className="w-full max-w-4xl p-8">
+        <DialogContent className="w-full max-w-4xl p-8 dark:bg-black">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl">Edit Item</DialogTitle>
             <DialogDescription>

@@ -61,84 +61,8 @@ export default function TableSupplier() {
   }, [suppliers, search]);
 
   return (
-      <div className="w-full lg:max-w-7xl md:max-w-4xl max-w-md mx-auto">
-        <div className="mb-4 sm:mb-6 rounded-xl sm:rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="rounded-lg sm:rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-2 sm:p-3 shadow-lg shadow-blue-500/20">
-                <Truck className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="font-figtree text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  Manajemen Supplier
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  Kelola data supplier dan kontak
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-col sm:flex-row">
-              <DialogAddSupplier onSuccess={fetchSuppliers} />
-              <ButtonTrashed route="supplier"/>
-            </div>
-          </div>
-        </div>
-        <div className="mb-4 sm:mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="rounded-lg sm:rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-3 sm:p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-                <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Supplier</p>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  {suppliers.length}
-                </p>
-              </div>
-            </div>
-          </div>
-         
-          <div className="rounded-lg sm:rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-3 sm:p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="rounded-lg bg-sky-100 p-2 dark:bg-sky-900/30">
-                <Search className="h-4 w-4 sm:h-5 sm:w-5 text-sky-600 dark:text-sky-400" />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">Pencarian</p>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  {filteredSuppliers.length}
-                </p>
-              </div>
-            </div>
-          </div>
-           <div className="rounded-lg sm:rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-3 sm:p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="rounded-lg bg-cyan-100 p-2 dark:bg-cyan-900/30">
-                <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-600 dark:text-cyan-400" />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Aktif</p>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  {suppliers.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg sm:rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-3 sm:p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/30">
-                <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">Kontak</p>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  {suppliers.filter(s => s.phone_number).length}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+       //  responsive container
+        <div className="w-full lg:max-w-7xl md:max-w-4xl max-w-xs">
         <div className="rounded-xl sm:rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="border-b border-gray-200/50 p-4 sm:p-6 dark:border-white/5">
             <div className="relative w-full">
@@ -176,43 +100,44 @@ export default function TableSupplier() {
                 </div>
               </div>
             ) : (
-              
-         <div className="relative w-full overflow-x-auto lg:overflow-x-visible">
-              <Table className="min-w-225 lg:min-w-full table-auto">
+               <div className="overflow-hidden">
+         <div className="overflow-x-auto">
+              <Table className="w-full">
                 <TableHeader>
-                  <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                    <TableCell
-                      isHeader
-                      className="min-w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                    >
-                      No
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-65 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                    >
-                      Supplier
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-65  bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                    >
-                      Kontak
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-80  bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                    >
-                      Alamat
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="min-w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                    >
-                      Aksi
-                    </TableCell>
-                  </TableRow>
-                </TableHeader>
+                                  <TableRow className="border-b border-gray-200/50 dark:border-white/5">
+                                    <TableCell
+                                      isHeader
+                                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                                    >
+                                      No
+                                    </TableCell>
+                                    <TableCell
+                                      isHeader
+                                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                                    >
+                                      Nama Pengguna
+                                    </TableCell>
+                                    <TableCell
+                                      isHeader
+                                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                                    >
+                                      Role & Akses
+                                    </TableCell>
+                                    <TableCell
+                                      isHeader
+                                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                                    >
+                                      Alamat
+                                    </TableCell>
+                                    <TableCell
+                                      isHeader
+                                      className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                                    >
+                                      Aksi
+                                    </TableCell>
+                                  </TableRow>
+                                </TableHeader>
+                
 
                 <TableBody>
                   {loading ? (
@@ -272,13 +197,13 @@ export default function TableSupplier() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <Mail className="h-4 w-4 text-blue-500" />
-                              <span className="text-sm text-gray-700 dark:text-gray-300">
+                              <span className="text-sm md:text-xs text-gray-700 dark:text-gray-300">
                                 {supplier.email}
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Phone className="h-4 w-4 text-emerald-500" />
-                              <span className="text-sm text-gray-700 dark:text-gray-300">
+                              <span className="text-sm md:text-xs text-gray-700 dark:text-gray-300">
                                 {supplier.phone_number}
                               </span>
                             </div>
@@ -288,7 +213,7 @@ export default function TableSupplier() {
                         <TableCell className="px-6 py-4">
                           <div className="flex items-start gap-2">
                             <MapPin className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
-                            <span className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                            <span className="text-sm md:text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
                               {supplier.address}
                             </span>
                           </div>
@@ -305,6 +230,7 @@ export default function TableSupplier() {
                   )}
                 </TableBody>
               </Table>
+            </div>
             </div>
             )}
         </div>

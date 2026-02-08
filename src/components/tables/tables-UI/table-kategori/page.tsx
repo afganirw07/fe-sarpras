@@ -33,27 +33,24 @@ import { toast } from "sonner";
 import ActionButtonsCategory from "@/components/dialog/dialogCategory/dialogActionCategory";
 import ButtonTrashed from "@/components/ui/button/trashedButton";
 
-
 export default function TableKategori() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-const PAGE_SIZE = 5;
-
+  const PAGE_SIZE = 5;
 
   const fetchAllData = async () => {
     try {
       setLoading(true);
       const [catsRes, subsRes] = await Promise.all([
-  getCategories(),
-  getSubcategories(),
-]);
+        getCategories(),
+        getSubcategories(),
+      ]);
 
-setCategories(catsRes.data);
-setSubcategories(subsRes.data);
-
+      setCategories(catsRes.data);
+      setSubcategories(subsRes.data);
     } catch {
       toast.error("Gagal ambil data");
     } finally {
@@ -75,105 +72,41 @@ setSubcategories(subsRes.data);
 
   const filteredCategories = useMemo(() => {
     const keyword = search.toLowerCase();
-    
+
     return categories.filter((category) => {
-      const matchesCategory = 
+      const matchesCategory =
         category.name.toLowerCase().includes(keyword) ||
         category.code.toLowerCase().includes(keyword) ||
         (category.instansi?.toLowerCase().includes(keyword) ?? false);
-      
+
       const matchesSubcategory = subcategories
         .filter((sub) => sub.category_id === category.id)
-        .some((sub) => 
-          sub.name.toLowerCase().includes(keyword) ||
-          sub.code.toLowerCase().includes(keyword)
+        .some(
+          (sub) =>
+            sub.name.toLowerCase().includes(keyword) ||
+            sub.code.toLowerCase().includes(keyword),
         );
-      
+
       return matchesCategory || matchesSubcategory;
     });
   }, [categories, subcategories, search]);
 
   useEffect(() => {
-  setCurrentPage(1);
-}, [search]);
+    setCurrentPage(1);
+  }, [search]);
 
-const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
+  const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
 
-const paginatedCategories = useMemo(() => {
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-  return filteredCategories.slice(startIndex, startIndex + PAGE_SIZE);
-}, [filteredCategories, currentPage]);
+  const paginatedCategories = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredCategories.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredCategories, currentPage]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="w-full max-w-7xl mx-auto">
-        <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
-                <FolderOpen className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                  Manajemen Kategori
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Kelola kategori dan subkategori
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-            <DialogCategory onSuccess={fetchAllData} />
-            <ButtonTrashed route="kategori"/>
-            </div>
-          </div>
-        </div>
+    
 
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-                <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Kategori</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {categories.length}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-                <List className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Subkategori</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {subcategories.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-sky-100 p-2 dark:bg-sky-900/30">
-                <Tag className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Hasil Pencarian</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {filteredCategories.length}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
+      <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
+        <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
           {/* Search Bar */}
           <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
             <div className="relative w-full md:w-80">
@@ -197,37 +130,37 @@ const paginatedCategories = useMemo(() => {
                   <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                     <TableCell
                       isHeader
-                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br w-20 from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       No
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Kode
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Nama Kategori
                     </TableCell>
-                    <TableCell
+                    {/* <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Instansi
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Subkategori
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br w-32 from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-center text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Aksi
                     </TableCell>
@@ -240,7 +173,9 @@ const paginatedCategories = useMemo(() => {
                       <td colSpan={6} className="py-16">
                         <div className="flex flex-col items-center justify-center gap-3">
                           <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 dark:border-gray-700 dark:border-t-blue-400"></div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Memuat data...</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Memuat data...
+                          </p>
                         </div>
                       </td>
                     </TableRow>
@@ -252,61 +187,70 @@ const paginatedCategories = useMemo(() => {
                             <Search className="h-8 w-8 text-gray-400" />
                           </div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {search ? "Data tidak ditemukan" : "Tidak ada kategori"}
+                            {search
+                              ? "Data tidak ditemukan"
+                              : "Tidak ada kategori"}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {search ? "Coba kata kunci pencarian lain" : "Tambahkan kategori baru untuk memulai"}
+                            {search
+                              ? "Coba kata kunci pencarian lain"
+                              : "Tambahkan kategori baru untuk memulai"}
                           </p>
                         </div>
                       </td>
                     </TableRow>
                   ) : (
                     paginatedCategories.map((category, index) => (
-                      <TableRow 
+                      <TableRow
                         key={category.id}
                         className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                       >
-                        <TableCell className="px-6 py-4 border border-gray-200">
+                        <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
                           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                             {(currentPage - 1) * PAGE_SIZE + index + 1}
                           </span>
                         </TableCell>
 
-                        <TableCell className="px-6 py-4 border border-gray-200">
+                        <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
                           <div className="flex items-center gap-2">
-                            <Tag className="h-4 w-4 text-blue-500" />
-                            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                            <Tag className="h-[clamp(12px,1vw,16px)] w-[clamp(12px,1vw,16px)] text-blue-500" />
+                            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-[clamp(9px,0.65rem,11px)] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                               {category.code}
                             </span>
                           </div>
                         </TableCell>
 
-                        <TableCell className="px-6 py-4 border border-gray-200">
+                        <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
+                            <div className="bg-linear-to-br flex h-10 w-10 items-center justify-center rounded-lg from-blue-500 to-blue-600 text-[clamp(11px,0.85rem,14px)] font-semibold text-white shadow-lg shadow-blue-500/20">
                               {category.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 dark:text-white">
+                              <p
+                                className="max-w-40 truncate whitespace-nowrap text-[clamp(10px,0.7rem,10px)]"
+                              >
                                 {category.name}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
+
+                             <p
+                                className="max-w-40 truncate whitespace-nowrap text-[clamp(10px,0.7rem,10px)]"
+                              >
                                 ID: {category.id.slice(0, 8)}...
                               </p>
                             </div>
                           </div>
                         </TableCell>
 
-                        <TableCell className="px-6 py-4 border border-gray-200">
+                        {/* <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
                           <div className="flex items-center gap-2">
                             <Building2 className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                            <span className="max-w-40 truncate whitespace-nowrap text-[clamp(10px,0.7rem,10px)]] text-gray-700 dark:text-gray-300">
                               {category.instansi || "TB-002"}
                             </span>
                           </div>
-                        </TableCell>
+                        </TableCell> */}
 
-                        <TableCell className="px-6 py-4 border border-gray-200">
+                        <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
                           {(() => {
                             const subs = subcategories.filter(
                               (sub) => sub.category_id === category.id,
@@ -315,15 +259,15 @@ const paginatedCategories = useMemo(() => {
                             return subs.length ? (
                               <div className="space-y-1.5">
                                 {subs.map((sub) => (
-                                  <div 
+                                  <div
                                     key={sub.id}
-                                    className="flex items-center gap-2 rounded-lg bg-linear-to-r from-blue-50 to-purple-50 px-3 py-2 dark:from-blue-900/20 dark:to-purple-900/20"
+                                    className="bg-linear-to-r flex items-center gap-2 rounded-lg from-blue-50 to-purple-50 px-3 py-2 dark:from-blue-900/20 dark:to-purple-900/20"
                                   >
-                                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
-                                    <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                                    {/* <div className="h-1.5 w-1.5 rounded-full bg-blue-500 sm:hidden"></div> */}
+                                    <span className="text-[clamp(9px,0.65rem,11px)] font-medium text-blue-900 dark:text-blue-300">
                                       {sub.name}
                                     </span>
-                                    <span className="ml-auto rounded bg-blue-200/50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-800/30 dark:text-blue-400">
+                                    <span className="ml-auto rounded bg-blue-200/50 px-2 py-0.5 text-[clamp(9px,0.65rem,11px)] font-semibold text-blue-700 dark:bg-blue-800/30 dark:text-blue-400">
                                       {sub.code}
                                     </span>
                                   </div>
@@ -331,7 +275,7 @@ const paginatedCategories = useMemo(() => {
                               </div>
                             ) : (
                               <div className="flex items-center justify-center rounded-lg bg-gray-50 px-3 py-2 dark:bg-white/5">
-                                <span className="text-sm text-gray-400">
+                                <span className="text-[clamp(11px,0.85rem,14px)] text-gray-400">
                                   Belum ada subkategori
                                 </span>
                               </div>
@@ -339,9 +283,9 @@ const paginatedCategories = useMemo(() => {
                           })()}
                         </TableCell>
 
-                        <TableCell className="px-6 py-4 text-center border border-gray-200">
-                          <ActionButtonsCategory 
-                            categoryId={category.id} 
+                        <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-center dark:border-gray-800">
+                          <ActionButtonsCategory
+                            categoryId={category.id}
                             onSuccess={fetchAllData}
                           />
                         </TableCell>
@@ -351,19 +295,17 @@ const paginatedCategories = useMemo(() => {
                 </TableBody>
               </Table>
               {totalPages > 1 && (
-  <div className="flex justify-end border-t border-gray-200/50 p-4 dark:border-white/5">
-    <Pagination
-      currentPage={currentPage}
-      totalPages={totalPages}
-      onPageChange={setCurrentPage}
-    />
-  </div>
-)}
-
+                <div className="flex justify-end border-t border-gray-200/50 p-4 dark:border-white/5">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 }

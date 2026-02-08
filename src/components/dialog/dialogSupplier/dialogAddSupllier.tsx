@@ -69,7 +69,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="max-w-xl p-6">
+        <DialogContent className="max-w-xl p-6 dark:bg-black">
           <DialogHeader>
             <DialogTitle>Add Supplier</DialogTitle>
           </DialogHeader>

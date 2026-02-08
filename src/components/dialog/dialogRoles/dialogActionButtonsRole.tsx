@@ -180,7 +180,7 @@ async function handleDelete(e: React.MouseEvent) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <span>
-                  <Pencil size={16} />
+                  <Pencil size={15} />
                 </span>
               </TooltipTrigger>
               <TooltipContent>Edit</TooltipContent>
@@ -188,7 +188,7 @@ async function handleDelete(e: React.MouseEvent) {
           </button>
         </DialogTrigger>
 
-        <DialogContent className="w-full max-w-4xl p-8">
+        <DialogContent className="w-full max-w-4xl p-8 dark:bg-black">
           <DialogHeader className="mb-6">
             <DialogTitle className="text-xl">Edit Role</DialogTitle>
             <DialogDescription>
@@ -269,7 +269,7 @@ async function handleDelete(e: React.MouseEvent) {
                 type="button"
                 onClick={() => setDeleteId(roleId)}
               >
-                <Trash2 size={16}
+                <Trash2 size={15}
                 color="red" />
               </button>
             </AlertDialogTrigger>

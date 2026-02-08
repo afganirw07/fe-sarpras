@@ -91,14 +91,14 @@ export default function ActionButtonsSupplier({
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
               <button type="button">
-                <Pencil size={16} />
+                <Pencil size={15} />
               </button>
             </DialogTrigger>
           </TooltipTrigger>
           <TooltipContent>Edit</TooltipContent>
         </Tooltip>
 
-        <DialogContent className="max-w-xl p-6">
+        <DialogContent className="max-w-xl p-6 dark:bg-black">
           <DialogHeader>
             <DialogTitle>Update Supplier</DialogTitle>
           </DialogHeader>
@@ -165,7 +165,7 @@ export default function ActionButtonsSupplier({
           <TooltipTrigger asChild>
             <AlertDialogTrigger asChild>
               <button type="button">
-                <Trash2 size={16} />
+                <Trash2 size={15} />
               </button>
             </AlertDialogTrigger>
           </TooltipTrigger>
@@ -194,7 +194,7 @@ export default function ActionButtonsSupplier({
       <Tooltip>
         <TooltipTrigger asChild>
           <Link href={`/dashboard/supplier/show/${supplier.id}`}>
-            <SquareArrowOutUpRight size={16} />
+            <SquareArrowOutUpRight size={15} />
           </Link>
         </TooltipTrigger>
         <TooltipContent>Show</TooltipContent>

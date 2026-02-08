@@ -163,7 +163,7 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="w-full max-w-4xl p-8">
+        <DialogContent className="w-full max-w-4xl p-8 dark:bg-black">
           <form onSubmit={kirimAlert}>
             <DialogHeader className="mb-6">
               <DialogTitle className="text-xl">Tambah Role</DialogTitle>

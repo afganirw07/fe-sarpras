@@ -92,74 +92,8 @@ export default function TableRoles() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="w-full max-w-7xl mx-auto">
-        {/* Header Card */}
-        <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                  Manajemen Role
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Kelola hak akses pengguna
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-            <DialogAddRoles onSuccess={fetchRoles}/>
-            <ButtonTrashed
-            route="role"/>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{filteredRows.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/30">
-                <Shield className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Active Roles</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {rows.reduce((acc, row) => acc + row.roles.length, 0)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900/30">
-                <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Employees</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{employees.length}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Card */}
+    //  responsive container
+        <div className="w-full lg:max-w-7xl md:max-w-4xl max-w-xs">
         <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
           {/* Search Bar */}
           <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
@@ -269,7 +203,7 @@ export default function TableRoles() {
                         </TableCell>
 
                         <TableCell className="px-6 py-4">
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-row gap-2">
                             {row.roles.map((role, i) => (
                               <span
                                 key={i}
@@ -296,6 +230,5 @@ export default function TableRoles() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

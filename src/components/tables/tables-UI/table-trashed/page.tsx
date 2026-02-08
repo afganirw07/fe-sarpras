@@ -34,11 +34,11 @@ export default function TableTrashedItems() {
       } else if (Array.isArray(response)) {
         setItems(response);
       } else {
-        console.warn('Invalid response format:', response);
+        console.warn("Invalid response format:", response);
         setItems([]);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
       toast.error("Gagal ambil data items terhapus");
       setItems([]);
     } finally {
@@ -67,32 +67,30 @@ export default function TableTrashedItems() {
   }, [items, search]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="w-full max-w-7xl mx-auto">
-        {/* Header Card */}
-        <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
-                <Package className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                  Data Item (Terhapus)
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Kelola item yang telah dihapus
-                </p>
-              </div>
+    <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
+      {/* Header Card */}
+      <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-linear-to-br rounded-xl from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
+              <Package className="h-6 w-6 text-white" />
             </div>
-            <ButtonBack 
-            route="/items"
-            />
+            <div>
+              <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
+                Data Item (Terhapus)
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Kelola item yang telah dihapus
+              </p>
+            </div>
           </div>
+          <ButtonBack route="/items" />
         </div>
+      </div>
 
-        {/* Main Content Card */}
-        <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
+      {/* Main Content Card */}
+      <div className="mx-auto w-full max-w-xs md:max-w-2xl lg:max-w-7xl">
+        <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
           {/* Search Bar */}
           <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
             <div className="relative w-full md:w-80">
@@ -117,51 +115,51 @@ export default function TableTrashedItems() {
                   <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                     <TableCell
                       isHeader
-                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br w-20 from-gray-50 to-gray-100/50 px-8 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 lg:px-4 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       No
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 lg:px-4 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Kode
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 lg:px-4 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Nama
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 lg:px-4 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Merek
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                    >
-                      Kategori
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                    >
-                      Sub Kategori
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 lg:px-4 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Stok
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 lg:px-4 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
-                      Aksi
+                      Kategori
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 lg:px-4 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Sub Kategori
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br text-lexft w-32 from-gray-50 to-gray-100/50 px-8 py-4 text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 lg:px-4 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      Action
                     </TableCell>
                   </TableRow>
                 </TableHeader>
@@ -211,7 +209,7 @@ export default function TableTrashedItems() {
                         </TableCell>
 
                         <TableCell className="px-6 py-4">
-                          <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                          <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-[clamp(2px,0.85rem,12px)] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                             {item.code}
                           </span>
                         </TableCell>
@@ -229,13 +227,13 @@ export default function TableTrashedItems() {
                         </TableCell>
 
                         <TableCell className="px-6 py-4">
-                          <span className="rounded-lg border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                          <span className="rounded-lg border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-[clamp(2px,0.85rem,12px)] font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                             {item.category}
                           </span>
                         </TableCell>
 
                         <TableCell className="px-6 py-4">
-                          <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                          <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-[clamp(2px,0.85rem,12px)] font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
                             {item.subCategory}
                           </span>
                         </TableCell>
@@ -245,7 +243,7 @@ export default function TableTrashedItems() {
                             <span className="text-sm font-semibold text-gray-900 dark:text-white">
                               {item.stock}
                             </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="text-[clamp(2px,0.85rem,12px)] text-gray-500 dark:text-gray-400">
                               {item.unit}
                             </span>
                           </div>

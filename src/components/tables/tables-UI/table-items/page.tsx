@@ -78,8 +78,8 @@ const fetchItems = async () => {
 
   return (
     <>
-      {/* Main Content Card */}
-      <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
+        {/* responsive table */}
+          <div className="w-full lg:max-w-7xl md:max-w-2xl max-w-xs mx-auto">
         {/* Search Bar */}
         <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
           <div className="relative w-full md:w-80">
@@ -96,63 +96,62 @@ const fetchItems = async () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="relative overflow-x-auto">
-          <div className="inline-block min-w-full align-middle">
-            <Table className="w-full table-auto">
+        <div className="overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <Table className="w-full">
               <TableHeader>
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                   <TableCell
                     isHeader
-                    className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     No
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Kode
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Nama
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Merek
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Stok
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Kategori
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Sub Kategori
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Unit
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-lexft text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Action
                   </TableCell>
@@ -204,7 +203,7 @@ const fetchItems = async () => {
                       </TableCell>
 
                       <TableCell className="px-6 py-4">
-                        <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-[clamp(2px,0.85rem,12px)] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                           {item.code}
                         </span>
                       </TableCell>
@@ -234,7 +233,7 @@ const fetchItems = async () => {
                       </TableCell>
 
                       <TableCell className="px-6 py-4">
-                        <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                        <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-[clamp(2px,0.85rem,12px)] font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
                           {item.subCategory}
                         </span>
                       </TableCell>
@@ -257,8 +256,8 @@ const fetchItems = async () => {
               </TableBody>
             </Table>
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
     </>
   );
 }

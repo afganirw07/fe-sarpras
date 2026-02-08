@@ -36,7 +36,7 @@ export default function DialogAddItems(){
                   </Button>
                 </DialogTrigger>
 
-                <DialogContent className="max-w-2xl p-6">
+                <DialogContent className="max-w-2xl p-6 dark:bg-black">
                   <form >
                     <DialogHeader>
                       <DialogTitle>Tambah Item Baru</DialogTitle>

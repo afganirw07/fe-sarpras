@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { getDeletedSuppliers, Supplier } from "@/lib/supplier";
 import RestoreActionSupplier from "@/components/dialog/dialogSupplier/restoreSupplier";
+import ButtonBack from "@/components/ui/button/backButton";
 
 export default function SupplierTrashed() {
   const [loading, setLoading] = useState(false);
@@ -58,10 +59,9 @@ export default function SupplierTrashed() {
   }, [suppliers, search]);
 
   return (
-    <div className="bg-linear-to-br flex min-h-screen flex-col from-slate-50 via-blue-50/30 to-slate-50 p-4 sm:p-6 lg:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="mx-auto w-full lg:max-w-7xl md:max-w-4xl max-w-md">
+      <div className="mx-auto w-full lg:max-w-7xl md:max-w-4xl max-w-xs">
         <div className="mb-4 rounded-xl border border-gray-200/50 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:mb-6 sm:rounded-2xl sm:p-6 dark:border-white/5 dark:bg-white/5">
-          <div className="flex flex-col gap-4 sm:gap-3">
+          <div className="flex lg:flex-row flex-col justify-between gap-4 sm:gap-3">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="bg-linear-to-br rounded-lg from-blue-500 to-blue-600 p-2 shadow-lg shadow-blue-500/20 sm:rounded-xl sm:p-3">
                 <Archive className="h-5 w-5 text-white sm:h-6 sm:w-6" />
@@ -75,10 +75,13 @@ export default function SupplierTrashed() {
                 </p>
               </div>
             </div>
+            <div className="flex flex-row gap-2">
             <div className="self-start rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 sm:rounded-xl sm:px-4 dark:border-blue-900/50 dark:bg-blue-900/20">
               <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                 {filteredSuppliers.length} Supplier Terhapus
               </p>
+            </div>
+              <ButtonBack route="supplier"/>
             </div>
           </div>
         </div>
@@ -133,6 +136,7 @@ export default function SupplierTrashed() {
           </div>
         </div>
 
+       <div className="mx-auto w-full lg:max-w-7xl md:max-w-4xl max-w-xs">
         <div className="rounded-xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm sm:rounded-2xl dark:border-white/5 dark:bg-white/5">
           <div className="border-b border-gray-200/50 p-4 sm:p-6 dark:border-white/5">
             <div className="relative w-full">
@@ -320,6 +324,6 @@ export default function SupplierTrashed() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
   );
 }

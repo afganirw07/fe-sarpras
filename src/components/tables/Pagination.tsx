@@ -33,7 +33,7 @@ const Pagination: React.FC<PaginationProps> = ({
     <div className="flex items-center">
       {/* Previous */}
       <button
-        onClick={() => onPageChange(currentPage - 1)}
+     onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
         className="mr-2.5 flex h-10 items-center justify-center rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
       >
@@ -51,7 +51,7 @@ const Pagination: React.FC<PaginationProps> = ({
             className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium ${
               page === currentPage
                 ? "bg-brand-500 text-white"
-                : "text-gray-700 hover:bg-blue-500/[0.08] dark:text-gray-400"
+                : "text-gray-700 hover:bg-blue-500/8 dark:text-gray-400"
             }`}
           >
             {page}
@@ -63,7 +63,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
       {/* Next */}
       <button
-        onClick={() => onPageChange(currentPage + 1)}
+    onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
         className="ml-2.5 flex h-10 items-center justify-center rounded-lg border border-gray-300 bg-white px-3.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
       >
