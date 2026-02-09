@@ -48,8 +48,7 @@ export default function ItemPage() {
   const totalCategories = new Set(items.map((item) => item.category)).size;
 
   return (
-    <>
-      <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
+      <div className="w-full max-w-7xl mx-auto">
         {/* Header Card */}
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -73,7 +72,7 @@ export default function ItemPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="w-full mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
@@ -117,9 +116,8 @@ export default function ItemPage() {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Main Content Card - Table */}
         <TableItems/>
       </div>
-    </>
   );
 }

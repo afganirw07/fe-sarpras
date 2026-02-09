@@ -55,26 +55,31 @@ const fetchItems = async () => {
     }).format(amount);
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
 
   const filteredRows = useMemo(() => {
     if (!Array.isArray(items)) {
-    console.warn('Items is not an array:', items);
-    return [];
-  }
+      console.warn('Items is not an array:', items);
+      return [];
+    }
     const keyword = search.toLowerCase();
     return items.filter((item) => {
+      const categoryName = item.category?.name || '';
+      const subcategoryName = item.subcategory?.name || '';
+      
       return (
         item.name.toLowerCase().includes(keyword) ||
         item.code.toLowerCase().includes(keyword) ||
         (item.brand && item.brand.toLowerCase().includes(keyword)) ||
-        item.category.toLowerCase().includes(keyword) ||
-        item.subCategory.toLowerCase().includes(keyword)
+        categoryName.toLowerCase().includes(keyword) ||
+        subcategoryName.toLowerCase().includes(keyword)
       );
     });
-  }, [search, items]); // Tambahkan items sebagai dependency
+  }, [search, items]);
+
+
 
   return (
     <>
@@ -203,7 +208,7 @@ const fetchItems = async () => {
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-2 py-4">
                         <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                           {item.code}
                         </span>
@@ -229,15 +234,17 @@ const fetchItems = async () => {
                         </p>
                       </TableCell>
 
-                      <TableCell className="px-6 py-4">
-                          {item.category}
-                      </TableCell>
+                        <TableCell className="px-4 py-4">
+                      <p className="text-sm text-gray-900 dark:text-white truncate max-w-30">
+                        {item.category?.name || "-"}
+                      </p>
+                    </TableCell>
 
-                      <TableCell className="px-6 py-4">
-                        <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                          {item.subCategory}
-                        </span>
-                      </TableCell>
+                    <TableCell className="px-4 py-4">
+                      <span className="inline-block rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400 truncate max-w-35">
+                        {item.subcategory?.name || "-"}
+                      </span>
+                    </TableCell>
 
                       <TableCell className="px-6 py-4">
                         <div className="flex items-center gap-2">

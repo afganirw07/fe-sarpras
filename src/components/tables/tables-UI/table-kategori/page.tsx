@@ -105,8 +105,8 @@ const paginatedCategories = useMemo(() => {
 }, [filteredCategories, currentPage]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="w-full max-w-7xl mx-auto">
+
+      <div className="w-full lg:max-w-7xl md:max-w-4xl max-w-lg mx-auto">
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
@@ -190,9 +190,8 @@ const paginatedCategories = useMemo(() => {
             </div>
           </div>
 
-          <div className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <Table className="w-full">
+         <div className="relative w-full overflow-x-auto lg:overflow-x-visible">
+              <Table className="min-w-225 lg:min-w-full table-auto">
                 <TableHeader>
                   <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                     <TableCell
@@ -363,7 +362,5 @@ const paginatedCategories = useMemo(() => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
   );
 }

@@ -2,15 +2,27 @@
 import { api } from "./api";
 
 export interface Item {
-  id: string
+  id: string;
+  category_id: string;
+  subcategory_id: string;
   code: string;
-  category: string;
-  subCategory: string;
-  stock: number
-  price: number;
-  unit: number;
   name: string;
-  brand: string;
+  brand: string | null;
+  unit: string;
+  stock: number;
+  type: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  category: {
+    name: string;
+  };
+  subcategory: {
+    name: string;
+  };
+  categoryName?: string;
+  subCategory?: string;
 }
 
 // CREATE - Menambah item baru
