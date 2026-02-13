@@ -29,28 +29,37 @@ import { getRooms, Room } from "@/lib/warehouse";
 import ButtonQrWarehouse from "@/components/button-qr/buttonQrWarehouse";
 import { QRCodeCanvas } from "qrcode.react";
 import ButtonTrashed from "@/components/ui/button/trashedButton";
+import Pagination from "../../Pagination";
 
 export default function TableWarehouse() {
   const [warehouses, setWarehouses] = useState<Room[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0);;
+  const perPage = 3;
 
-  const fetchWarehouses = async () => {
-    try {
-      setLoading(true);
-      const res = await getRooms();
-      setWarehouses(res.data);
-    } catch (error: any) {
-      toast.error(error?.message || "Gagal mengambil data warehouse");
-      console.log("==============================================", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchWarehouses = async (page = currentPage) => {
+  try {
+    setLoading(true);
 
-  useEffect(() => {
-    fetchWarehouses();
-  }, []);
+    const res = await getRooms(page, perPage);
+
+    setWarehouses(res.data);
+    setTotalPages(res.pagination.totalPages);
+    setTotalItems(res.pagination.total);
+  } catch (error: any) {
+    toast.error(error?.message || "Gagal mengambil data warehouse");
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchWarehouses(currentPage);
+}, [currentPage]);
+
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -158,7 +167,7 @@ export default function TableWarehouse() {
                       >
                         <TableCell className="px-6 py-4">
                           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 lg:text-xs font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
-                            {index + 1}
+                           {(currentPage - 1) * perPage + index + 1}
                           </span>
                         </TableCell>
 
@@ -208,8 +217,31 @@ export default function TableWarehouse() {
                 </TableBody>
               </Table>
             </div>
+            {totalPages > 1 && (
+            <div className="flex justify-between p-4">
+             <div className="flex items-center gap-4 text-sm text-muted-foreground">
+<span>
+  Showing{" "}
+  {(currentPage - 1) * perPage + 1} –{" "}
+  {Math.min(currentPage * perPage, totalItems)}{" "}
+  of {totalItems}
+</span>
+
+  <span className="text-gray-400">|</span>
+
+  <span>{perPage} rows per page</span>
+</div>
+
+  <Pagination
+    currentPage={currentPage}
+    totalPages={totalPages}
+    onPageChange={(page) => setCurrentPage(page)}
+  />
+</div>
+
+)}
+          </div>
           </div>
         </div>
-      </div>
   );
 }

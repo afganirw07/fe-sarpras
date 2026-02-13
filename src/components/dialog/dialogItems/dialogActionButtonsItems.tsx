@@ -92,7 +92,7 @@ export default function ActionButtonsItems({
   };
 
   return (
-    <div className="flex justify-center gap-4">
+    <div className="flex items-center gap-2">
       {/* EDIT */}
       <Dialog>
         <DialogTrigger asChild>
@@ -100,7 +100,7 @@ export default function ActionButtonsItems({
             <Tooltip>
               <TooltipTrigger asChild>
                 <span>
-                  <Pencil size={16} />
+                  <Pencil size={14} />
                 </span>
               </TooltipTrigger>
               <TooltipContent>Edit</TooltipContent>
@@ -170,7 +170,7 @@ export default function ActionButtonsItems({
                 <Label>Sub Kategori</Label>
                 <Input
                   name="subCategory"
-                  value={formData.subCategory}
+                  value={formData.subcategory}
                   onChange={handleInputChange}
                   className="h-11"
                   required
@@ -241,7 +241,7 @@ export default function ActionButtonsItems({
           <TooltipTrigger asChild>
             <AlertDialogTrigger asChild>
               <button type="button">
-                <Trash2 size={16} color="red" />
+                <Trash2 size={14} color="red" />
               </button>
             </AlertDialogTrigger>
           </TooltipTrigger>
@@ -278,7 +278,7 @@ export default function ActionButtonsItems({
         <TooltipTrigger asChild>
           <button type="button">
             <Link href={`/dashboard/items/show/${item.id}`}>
-              <SquareArrowOutUpRight size={16} />
+              <SquareArrowOutUpRight size={14} />
             </Link>
           </button>
         </TooltipTrigger>

@@ -21,16 +21,23 @@ import { toast } from "sonner";
 import { getDeletedRooms, Room } from "@/lib/warehouse";
 import RestoreActionWarehouse from "@/components/dialog/dialogWarehouse/restoreWarehouse";
 import ButtonBack from "@/components/ui/button/backButton";
+import Pagination from "@/components/tables/Pagination";
 
 export default function WarehouseTrashed() {
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [search, setSearch] = useState("");
+   const [currentPage, setCurrentPage] = useState(1);
+   const [totalPages, setTotalPages] = useState(1)
+    const [totalItems, setTotalItems] = useState(0);;
+    const perPage = 3;
 
-  const fetchDeleted = async () => {
+  const fetchDeleted = async (page = currentPage) => {
     try {
       setLoading(true);
-      const res = await getDeletedRooms(1, 50);
+      const res = await getDeletedRooms(page, perPage);
+       setTotalPages(res.pagination.totalPages);
+    setTotalItems(res.pagination.total);
       setRooms(res.data);
     } catch {
       toast.error("Gagal mengambil warehouse terhapus");
@@ -40,8 +47,8 @@ export default function WarehouseTrashed() {
   };
 
   useEffect(() => {
-    fetchDeleted();
-  }, []);
+    fetchDeleted(currentPage);
+  }, [currentPage]);
 
   const filteredRooms = useMemo(() => {
     if (!search.trim()) return rooms;
@@ -220,7 +227,7 @@ export default function WarehouseTrashed() {
                       >
                         <TableCell className="px-6 py-4">
                           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
-                            {index + 1}
+                     {(currentPage - 1) * perPage + index + 1}
                           </span>
                         </TableCell>
 
@@ -260,9 +267,32 @@ export default function WarehouseTrashed() {
                 </TableBody>
               </Table>
             </div>
+          {totalPages > 1 && (
+            <div className="flex justify-between p-4">
+             <div className="flex items-center gap-4 text-sm text-muted-foreground">
+<span>
+  Showing{" "}
+  {(currentPage - 1) * perPage + 1} –{" "}
+  {Math.min(currentPage * perPage, totalItems)}{" "}
+  of {totalItems}
+</span>
+
+  <span className="text-gray-400">|</span>
+
+  <span>{perPage} rows per page</span>
+</div>
+
+  <Pagination
+    currentPage={currentPage}
+    totalPages={totalPages}
+    onPageChange={(page) => setCurrentPage(page)}
+  />
+</div>
+
+)}
+          </div>
           </div>
         </div>
-      </div>
       </div>
   );
 }

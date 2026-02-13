@@ -23,16 +23,24 @@ import { toast } from "sonner";
 import { getDeletedSuppliers, Supplier } from "@/lib/supplier";
 import RestoreActionSupplier from "@/components/dialog/dialogSupplier/restoreSupplier";
 import ButtonBack from "@/components/ui/button/backButton";
+import Pagination from "@/components/tables/Pagination";
 
 export default function SupplierTrashed() {
   const [loading, setLoading] = useState(false);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+     const [totalPages, setTotalPages] = useState(1)
+        const [totalItems, setTotalItems] = useState(0);;
+        const perPage = 3;
+  
 
-  const fetchDeleted = async () => {
+  const fetchDeleted = async (page = currentPage) => {
     try {
       setLoading(true);
-      const res = await getDeletedSuppliers(1, 50);
+      const res = await getDeletedSuppliers(page,perPage);
+          setTotalPages(res.pagination.totalPages);
+    setTotalItems(res.pagination.total);
       setSuppliers(res.data);
     } catch {
       toast.error("Gagal mengambil supplier terhapus");
@@ -42,8 +50,8 @@ export default function SupplierTrashed() {
   };
 
   useEffect(() => {
-    fetchDeleted();
-  }, []);
+    fetchDeleted(currentPage);
+  }, [currentPage]);
 
   const filteredSuppliers = useMemo(() => {
     if (!search.trim()) return suppliers;
@@ -322,6 +330,29 @@ export default function SupplierTrashed() {
               </TableBody>
             </Table>
           </div>
+           {totalPages > 1 && (
+                        <div className="flex justify-between p-4">
+                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>
+              Showing{" "}
+              {(currentPage - 1) * perPage + 1} –{" "}
+              {Math.min(currentPage * perPage, totalItems)}{" "}
+              of {totalItems}
+            </span>
+            
+              <span className="text-gray-400">|</span>
+            
+              <span>{perPage} rows per page</span>
+            </div>
+            
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+              />
+            </div>
+            
+            )}
         </div>
       </div>
       </div>

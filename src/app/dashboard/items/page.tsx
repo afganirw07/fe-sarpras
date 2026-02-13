@@ -10,6 +10,7 @@ import { toast } from "sonner";
 export default function ItemPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
+  
 
   const fetchItems = async () => {
     try {
