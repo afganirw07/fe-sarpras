@@ -18,34 +18,33 @@ export default function TableItems() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
-const fetchItems = async () => {
-  try {
-    setLoading(true);
-    const response = await getItems();
-    console.log('Response:', response); 
-    
-    if (response?.data && Array.isArray(response.data)) {
-      setItems(response.data);
-    } else if (Array.isArray(response)) {
-      setItems(response);
-    } else {
-      console.warn('Invalid response format:', response);
+  const fetchItems = async () => {
+    try {
+      setLoading(true);
+      const response = await getItems();
+      console.log('Response:', response); 
+      
+      if (response?.data && Array.isArray(response.data)) {
+        setItems(response.data);
+      } else if (Array.isArray(response)) {
+        setItems(response);
+      } else {
+        console.warn('Invalid response format:', response);
+        setItems([]);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error("Gagal ambil data items");
       setItems([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error:', error);
-    toast.error("Gagal ambil data items");
-    setItems([]);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     fetchItems();
   }, []);
 
-  // Fungsi untuk format Rupiah
   const formatRupiah = (amount: number): string => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -83,8 +82,9 @@ const fetchItems = async () => {
 
   return (
     <>
-      {/* Main Content Card */}
-      <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
+        {/* responsive table */}
+          <div className="w-full lg:max-w-7xl md:max-w-2xl max-w-md mx-auto">
+           <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         {/* Search Bar */}
         <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
           <div className="relative w-full md:w-80">
@@ -101,63 +101,62 @@ const fetchItems = async () => {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="relative overflow-x-auto">
-          <div className="inline-block min-w-full align-middle">
-            <Table className="w-full table-auto">
+        <div className="overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <Table className="w-full">
               <TableHeader>
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                   <TableCell
                     isHeader
-                    className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     No
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Kode
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Nama
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Merek
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Stok
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Kategori
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Sub Kategori
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Unit
                   </TableCell>
                   <TableCell
                     isHeader
-                    className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-lexft text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     Action
                   </TableCell>
@@ -208,8 +207,8 @@ const fetchItems = async () => {
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-2 py-4">
-                        <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                      <TableCell className="px-4 py-4">
+                        <span className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                           {item.code}
                         </span>
                       </TableCell>
@@ -235,7 +234,7 @@ const fetchItems = async () => {
                       </TableCell>
 
                         <TableCell className="px-4 py-4">
-                      <p className="text-sm text-gray-900 dark:text-white truncate max-w-30">
+                      <p className="inline-block rounded-lg border border-green-200 bg-lime-50 px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400 truncate max-w-35">
                         {item.category?.name || "-"}
                       </p>
                     </TableCell>
@@ -264,8 +263,9 @@ const fetchItems = async () => {
               </TableBody>
             </Table>
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
+          </div>
     </>
   );
 }

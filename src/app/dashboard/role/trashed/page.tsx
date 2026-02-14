@@ -18,6 +18,7 @@ import {
 import ActionButtonsRoles from "@/components/dialog/dialogRoles/dialogActionButtonsRole";
 import { toast } from "sonner";
 import RestoreAction from "@/components/dialog/dialogRoles/restoreRole";
+import ButtonBack from "@/components/ui/button/backButton";
 
 export default function RolesTrahed() {
   const [loading, setLoading] = useState(false);
@@ -70,8 +71,7 @@ export default function RolesTrahed() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="w-full max-w-7xl mx-auto">
+      <div className="w-full lg:max-w-7xl md:max-w-3xl max-w-xs mx-auto">
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
@@ -87,9 +87,12 @@ export default function RolesTrahed() {
                 </p>
               </div>
             </div>
+                <ButtonBack 
+                          route="/role"
+                          />
           </div>
         </div>
-
+            <div className="w-full lg:max-w-7xl md:max-w-3xl max-w-xl mx-auto">
         <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
             <div className="relative w-full md:w-80">
@@ -182,7 +185,7 @@ export default function RolesTrahed() {
 
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
                               {(row.employee?.full_name || "?").charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -197,7 +200,7 @@ export default function RolesTrahed() {
                         </TableCell>
 
                         <TableCell className="px-6 py-4">
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-row gap-2">
                             {row.roles.map((role: string, i: number) => (
                               <span
                                 key={i}
@@ -223,6 +226,6 @@ export default function RolesTrahed() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
   );
 }

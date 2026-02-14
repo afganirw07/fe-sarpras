@@ -12,34 +12,45 @@ import { Search, FolderOpen, Tag, Building2, RotateCcw, Archive, Trash2 } from "
 import { toast } from "sonner";
 import { getDeletedCategories, restoreDeletedCategory, Category } from "@/lib/category";
 import RestoreActionCategory from "@/components/dialog/dialogCategory/restoreCategory";
+import ButtonBack from "@/components/ui/button/backButton";
 import { Button } from "@/components/ui/button";
+import Pagination from "@/components/tables/Pagination";
 
 export default function CategoryTrashed() {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const perPage = 10;
 
-  const fetchDeleted = async () => {
-    try {
-      setLoading(true);
-      const res = await getDeletedCategories(1, 50);
-      setCategories(res.data);
-    } catch {
-      toast.error("Gagal mengambil kategori terhapus");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchDeleted = async (page = 1) => {
+  try {
+    setLoading(true);
+
+    const res = await getDeletedCategories(page, perPage);
+
+    setCategories(res.data);
+    setTotalPages(res.pagination.totalPages);
+
+  } catch {
+    toast.error("Gagal mengambil kategori terhapus");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   useEffect(() => {
-    fetchDeleted();
-  }, []);
+    fetchDeleted(currentPage);
+  }, [currentPage]);
 
   const handleRestore = async (id: string) => {
     try {
       await restoreDeletedCategory(id);
       toast.success("Kategori berhasil direstore");
-      fetchDeleted();
+      fetchDeleted(currentPage);
     } catch {
       toast.error("Gagal restore kategori");
     }
@@ -57,11 +68,12 @@ export default function CategoryTrashed() {
     );
   }, [categories, search]);
 
+  
+
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="w-full max-w-7xl mx-auto">
+      <div className="w-full lg:max-w-7xl md:max-w-3xl max-w-xs mx-auto">
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex lg:flex-row flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
                 <Archive className="h-6 w-6 text-white" />
@@ -75,10 +87,13 @@ export default function CategoryTrashed() {
                 </p>
               </div>
             </div>
+            <div className="flex flex-row items-center gap-4">
             <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 dark:border-blue-900/50 dark:bg-blue-900/20">
               <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                 {filteredCategories.length} Kategori Terhapus
               </p>
+            </div>
+            <ButtonBack route="/kategori"/>
             </div>
           </div>
         </div>
@@ -127,6 +142,7 @@ export default function CategoryTrashed() {
           </div>
         </div>
 
+      <div className="w-full lg:max-w-7xl md:max-w-3xl max-w-xs mx-auto">
         <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
             <div className="relative w-full md:w-80">
@@ -150,31 +166,31 @@ export default function CategoryTrashed() {
                   <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                     <TableCell
                       isHeader
-                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       No
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Kode
                     </TableCell>
                     <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Nama Kategori
                     </TableCell>
-                    <TableCell
+                    {/* <TableCell
                       isHeader
-                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Instansi
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell
                       isHeader
-                      className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="w-32 bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-center text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       Aksi
                     </TableCell>
@@ -226,7 +242,7 @@ export default function CategoryTrashed() {
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Tag className="h-4 w-4 text-blue-500" />
-                            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-[clamp(2px,0.85rem,12px)] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                               {cat.code}
                             </span>
                           </div>
@@ -234,28 +250,28 @@ export default function CategoryTrashed() {
 
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-600 text-[clamp(2px,0.85rem,12px)] font-semibold text-white shadow-lg shadow-blue-500/20">
                               {cat.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900 dark:text-white">
+                              <p className="text-[clamp(2px,0.85rem,12px)] font-medium text-gray-900 dark:text-white">
                                 {cat.name}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                              <p className="text-[clamp(2px,0.85rem,12px)] text-gray-500 dark:text-gray-400">
                                 ID: {cat.id.slice(0, 8)}...
                               </p>
                             </div>
                           </div>
                         </TableCell>
-
+{/* 
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Building2 className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                            <span className=text-[clamp(2px,0.85rem,12px)] text-gray-700 dark:text-gray-300">
                               {cat.instansi || "-"}
                             </span>
                           </div>
-                        </TableCell>
+                        </TableCell> */}
 
                         <TableCell className="px-6 py-4 text-center">
                             <RestoreActionCategory categoryId={cat.id} onSuccess={fetchDeleted}/>
@@ -265,9 +281,17 @@ export default function CategoryTrashed() {
                 </TableBody>
               </Table>
             </div>
+            <div className="flex justify-end p-4">
+  <Pagination
+    currentPage={currentPage}
+    totalPages={totalPages}
+    onPageChange={(page) => setCurrentPage(page)}
+  />
+</div>
+
           </div>
         </div>
       </div>
-    </div>
+      </div>
   );
 }

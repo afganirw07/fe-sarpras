@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "../../ui/button";
 import { Pencil, Trash2, SquareArrowOutUpRight } from "lucide-react";
 import {
@@ -25,15 +25,40 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
+import Input from "@/components/form/input/InputField";
+import TextArea from "@/components/form/input/TextArea";
 import { toast } from "sonner";
 import { deleteItem, updateItem, Item } from "@/lib/items";
+import { getCategories, Category, Subcategory } from "@/lib/category";
 import Link from "next/link";
+
+interface CategoryWithSubcategories extends Category {
+  subcategories: Subcategory[];
+}
+
+interface ItemFormData {
+  code: string;
+  name: string;
+  category_id: string;
+  subcategory_id: string;
+  brand: string;
+  unit: string;
+  // description: string;
+  stock: number;
+  type: string;
+}
 
 export default function ActionButtonsItems({
   item,
@@ -43,7 +68,94 @@ export default function ActionButtonsItems({
   onSuccess?: () => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<Item>(item);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  const [selectedCategorySubcategories, setSelectedCategorySubcategories] = useState<Subcategory[]>([]);
+  
+  const [formData, setFormData] = useState<ItemFormData>({
+    code: item.code || "",
+    name: item.name || "",
+    category_id: item.category_id || "",
+    subcategory_id: item.subcategory_id || "",
+    brand: item.brand || "",
+    unit: item.unit || "",
+    // description: item.description || "",
+    stock: item.stock || 0,
+    type: item.type || "Loanable",
+  });
+
+  // Fetch categories
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await getCategories(1, 100);
+      const categoriesData = response.data as CategoryWithSubcategories[];
+      setCategories(categoriesData);
+
+      // Set subcategories jika category_id sudah ada
+      if (formData.category_id) {
+        const selectedCategory = categoriesData.find(
+          (cat) => cat.id === formData.category_id
+        );
+        if (selectedCategory && selectedCategory.subcategories) {
+          setSelectedCategorySubcategories(selectedCategory.subcategories);
+        }
+      }
+    } catch (error) {
+      toast.error("Gagal mengambil data kategori");
+      console.error(error);
+    }
+  }, [formData.category_id]);
+
+  // Load categories saat dialog dibuka
+  useEffect(() => {
+    if (isEditOpen) {
+      fetchCategories();
+    }
+  }, [isEditOpen, fetchCategories]);
+
+  // Handle dialog open/close
+  const handleDialogChange = (open: boolean) => {
+    setIsEditOpen(open);
+    
+    if (open) {
+      // Reset form dengan data item saat dialog dibuka
+      setFormData({
+        code: item.code || "",
+        name: item.name || "",
+        category_id: item.category_id || "",
+        subcategory_id: item.subcategory_id || "",
+        brand: item.brand || "",
+        unit: item.unit || "",
+        // description: item.description || "",
+        stock: item.stock || 0,
+        type: item.type || "Loanable",
+      });
+    }
+  };
+
+  // Handle input change
+  const handleInputChange = (field: keyof ItemFormData, value: string | number) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Handle category change
+  const handleCategoryChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      category_id: value,
+      subcategory_id: "", 
+    }));
+
+    const selectedCategory = categories.find((cat) => cat.id === value);
+    if (selectedCategory && selectedCategory.subcategories) {
+      setSelectedCategorySubcategories(selectedCategory.subcategories);
+    } else {
+      setSelectedCategorySubcategories([]);
+    }
+  };
 
   // Handle Update
   const handleUpdate = async (e: React.FormEvent) => {
@@ -51,8 +163,34 @@ export default function ActionButtonsItems({
 
     try {
       setLoading(true);
-      await updateItem(item.id, formData);
+
+      // Validasi
+      if (!formData.code || !formData.name || !formData.category_id) {
+        toast.error("Mohon lengkapi data wajib: Kode, Nama, dan Kategori");
+        return;
+      }
+
+      if (!formData.unit) {
+        toast.error("Satuan wajib diisi");
+        return;
+      }
+
+      const updateData = {
+        code: formData.code.trim(),
+        name: formData.name.trim(),
+        category_id: formData.category_id,
+        subcategory_id: formData.subcategory_id || null,
+        brand: formData.brand?.trim() || null,
+        unit: formData.unit.trim(),
+        // description: formData.description?.trim() || null,
+        stock: formData.stock,
+        type: formData.type,
+      };
+
+      await updateItem(item.id, updateData as Item);
       toast.success("Item berhasil diperbarui");
+      
+      setIsEditOpen(false);
       await onSuccess?.();
     } catch (err: any) {
       console.error("Update error:", err);
@@ -80,21 +218,10 @@ export default function ActionButtonsItems({
     }
   };
 
-  // Handle input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "stock"  || name === "unit" 
-        ? Number(value) 
-        : value,
-    }));
-  };
-
   return (
     <div className="flex justify-center gap-4">
       {/* EDIT */}
-      <Dialog>
+      <Dialog open={isEditOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
           <button type="button">
             <Tooltip>
@@ -108,115 +235,141 @@ export default function ActionButtonsItems({
           </button>
         </DialogTrigger>
 
-        <DialogContent className="w-full max-w-4xl p-8">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-xl">Edit Item</DialogTitle>
-            <DialogDescription>
-              Update informasi item yang dipilih
-            </DialogDescription>
-          </DialogHeader>
-
+        <DialogContent className="max-w-2xl p-6 dark:bg-black">
           <form onSubmit={handleUpdate}>
-            <div className="grid grid-cols-2 gap-4">
-              {/* Kode */}
-              <div className="flex flex-col gap-2">
-                <Label>Kode</Label>
+            <DialogHeader>
+              <DialogTitle>Edit Item</DialogTitle>
+              <DialogDescription>
+                Update informasi item yang dipilih
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4 mt-4">
+              {/* Kode Item */}
+              <div className="grid gap-2">
+                <Label>Kode Item *</Label>
                 <Input
-                  name="code"
-                  value={formData.code}
-                  onChange={handleInputChange}
-                  className="h-11"
-                  required
+                  placeholder="Kode Item"
+                  defaultValue={formData.code}
+                  onChange={(e) => handleInputChange("code", e.target.value)}
                 />
               </div>
 
-              {/* Nama */}
-              <div className="flex flex-col gap-2">
-                <Label>Nama</Label>
+              {/* Nama Item */}
+              <div className="grid gap-2">
+                <Label>Nama Item *</Label>
                 <Input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="h-11"
-                  required
-                />
-              </div>
-
-              {/* Merek */}
-              <div className="flex flex-col gap-2">
-                <Label>Merek</Label>
-                <Input
-                  name="brand"
-                  value={formData.brand}
-                  onChange={handleInputChange}
-                  className="h-11"
+                  placeholder="Nama Item"
+                  defaultValue={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
                 />
               </div>
 
               {/* Kategori */}
-              <div className="flex flex-col gap-2">
-                <Label>Kategori</Label>
+              <div className="grid gap-2">
+                <Label>Kategori *</Label>
+                <Select
+                  value={formData.category_id}
+                  onValueChange={handleCategoryChange}
+                  disabled={loading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Kategori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.length > 0 ? (
+                      categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-sm text-gray-500 text-center">
+                        Kategori tidak ditemukan
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Merek */}
+              <div className="grid gap-2">
+                <Label>Merek</Label>
                 <Input
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="h-11"
-                  required
+                  placeholder="Merek Item"
+                  defaultValue={formData.brand}
+                  onChange={(e) => handleInputChange("brand", e.target.value)}
                 />
               </div>
 
               {/* Sub Kategori */}
-              <div className="flex flex-col gap-2">
+              <div className="grid gap-2">
                 <Label>Sub Kategori</Label>
+                <Select
+                  value={formData.subcategory_id}
+                  onValueChange={(value) =>
+                    handleInputChange("subcategory_id", value)
+                  }
+                  disabled={
+                    !formData.category_id ||
+                    selectedCategorySubcategories.length === 0
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        !formData.category_id
+                          ? "Pilih kategori terlebih dahulu"
+                          : selectedCategorySubcategories.length === 0
+                          ? "Tidak ada sub kategori"
+                          : "Pilih Sub Kategori"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedCategorySubcategories.map((subcategory) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Deskripsi - Row Span 3 */}
+              {/* <div className="row-span-3 grid gap-2">
+                <Label>Deskripsi</Label>
+                <TextArea
+                  value={formData.description}
+                  className="h-full min-h-45"
+                  placeholder="Masukkan deskripsi item..."
+                  onChange={(value) => handleInputChange("description", value)}
+                />
+              </div> */}
+
+              {/* Satuan */}
+              <div className="grid gap-2">
+                <Label>Satuan *</Label>
                 <Input
-                  name="subCategory"
-                  value={formData.subCategory}
-                  onChange={handleInputChange}
-                  className="h-11"
-                  required
+                  placeholder="Satuan (pcs, kg, unit, dll)"
+                  defaultValue={formData.unit}
+                  onChange={(e) => handleInputChange("unit", e.target.value)}
                 />
               </div>
 
               {/* Stok */}
-              <div className="flex flex-col gap-2">
+              <div className="grid gap-2">
                 <Label>Stok</Label>
                 <Input
-                  name="stock"
                   type="number"
-                  value={formData.stock}
-                  onChange={handleInputChange}
-                  className="h-11"
-                  required
-                />
-              </div>
-
-              {/* Harga
-              <div className="flex flex-col gap-2">
-                <Label>Harga</Label>
-                <Input
-                  name="price"
-                  type="number"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  className="h-11"
-                  required
-                />
-              </div> */}
-
-              {/* Unit */}
-              <div className="flex flex-col gap-2">
-                <Label>Unit</Label>
-                <Input
-                  name="unit"
-                  value={formData.unit}
-                  onChange={handleInputChange}
-                  className="h-11"
-                  required
+                  placeholder="0"
+                  defaultValue={formData.stock}
+                  onChange={(e) => handleInputChange("stock", Number(e.target.value))}
                 />
               </div>
             </div>
 
-            <DialogFooter className="mt-10 flex justify-end gap-3">
+            <DialogFooter className="mt-6">
               <DialogClose asChild>
                 <Button type="button" variant="outline" disabled={loading}>
                   Cancel
@@ -225,7 +378,7 @@ export default function ActionButtonsItems({
 
               <Button
                 type="submit"
-                className="bg-blue-800 px-6 text-white hover:bg-blue-900"
+                className="border border-gray-100 bg-blue-600 hover:bg-blue-700"
                 disabled={loading}
               >
                 {loading ? "Menyimpan..." : "Save"}

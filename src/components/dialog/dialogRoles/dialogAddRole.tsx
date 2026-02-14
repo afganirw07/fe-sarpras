@@ -64,14 +64,14 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
     }
   }, []);
 
-  // Initial fetch saat component mount
-  useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+  // // Initial fetch saat component mount
+  // useEffect(() => {
+  //   fetchEmployees();
+  // }, [fetchEmployees]);
 
-  useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+  // useEffect(() => {
+  //   fetchRoles();
+  // }, [fetchRoles]);
 
   // Refresh data saat dialog dibuka
   useEffect(() => {
@@ -129,7 +129,6 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
 
       toast.success("Role berhasil ditambahkan");
       
-      // Refresh data setelah berhasil menambah role
       await Promise.all([fetchEmployees(), fetchRoles()]);
       
       await onSuccess?.();
@@ -163,7 +162,7 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="w-full max-w-4xl p-8">
+        <DialogContent className="w-full max-w-4xl p-8 dark:bg-black">
           <form onSubmit={kirimAlert}>
             <DialogHeader className="mb-6">
               <DialogTitle className="text-xl">Tambah Role</DialogTitle>

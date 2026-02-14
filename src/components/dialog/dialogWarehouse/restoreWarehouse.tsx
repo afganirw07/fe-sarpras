@@ -72,7 +72,7 @@ export default function RestoreActionWarehouse({
           </TooltipContent>
         </Tooltip>
 
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-black">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-figtree">
               Pulihkan Warehouse?

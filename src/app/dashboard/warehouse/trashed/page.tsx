@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { getDeletedRooms, Room } from "@/lib/warehouse";
 import RestoreActionWarehouse from "@/components/dialog/dialogWarehouse/restoreWarehouse";
+import ButtonBack from "@/components/ui/button/backButton";
 
 export default function WarehouseTrashed() {
   const [loading, setLoading] = useState(false);
@@ -55,10 +56,9 @@ export default function WarehouseTrashed() {
   }, [rooms, search]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto w-full lg:max-w-7xl md:max-w-3xl max-w-xs">
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex lg:flex-row flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
                 <Archive className="h-6 w-6 text-white" />
@@ -72,10 +72,13 @@ export default function WarehouseTrashed() {
                 </p>
               </div>
             </div>
+            <div className="flex flex-row items-center gap-4">
             <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 dark:border-blue-900/50 dark:bg-blue-900/20">
               <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                 {filteredRooms.length} Warehouse Terhapus
               </p>
+            </div>
+            <ButtonBack route="/warehouse"/>
             </div>
           </div>
         </div>
@@ -130,6 +133,7 @@ export default function WarehouseTrashed() {
           </div>
         </div>
 
+      <div className="mx-auto w-full lg:max-w-7xl md:max-w-3xl max-w-xs">
         <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
             <div className="relative w-full md:w-80">
@@ -259,6 +263,6 @@ export default function WarehouseTrashed() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
   );
 }

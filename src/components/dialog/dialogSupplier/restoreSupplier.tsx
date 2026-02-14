@@ -73,7 +73,7 @@ export default function RestoreActionSupplier({
           </TooltipContent>
         </Tooltip>
 
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-black">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-figtree">
               Pulihkan Supplier?

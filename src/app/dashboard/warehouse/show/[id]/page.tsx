@@ -131,7 +131,7 @@ export default function TableDetailWarehouse() {
   }
 
   return (
-      <div className="w-full max-w-7xl mx-auto">
+      <div className="mx-auto w-full lg:max-w-7xl md:max-w-3xl max-w-xs">
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex items-center gap-3">
             <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
@@ -221,7 +221,8 @@ export default function TableDetailWarehouse() {
               </div>
             </div>
 
-            <div className="mt-4 relative w-full md:w-80">
+          <div className="mx-auto w-full lg:max-w-7xl md:max-w-3xl max-w-xs">
+            <div className="py-4 relative w-full md:w-80">
               <Search
                 size={20}
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -356,6 +357,7 @@ export default function TableDetailWarehouse() {
             </div>
           </div>
         </div>
+      </div>
       </div>
   );
 }

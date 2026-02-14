@@ -11,37 +11,55 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from 'react-hot-toast';
+import { userSchema } from "@/schema/user.schema";
+import { z } from "zod";
 
 export default function LoginForm() {
-
   const { data: session } = useSession();
-
   const [show, setShow] = useState(false);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const [errors, setErrors] = useState<{
+    userName?: string;
+    password?: string;
+  }>({});
 
   useEffect(() => {
-    if ( session?.user?.accessToken) {
+    if (session?.user?.accessToken) {
       router.push("/dashboard");
     }
-  }, [session, router]); 
-
-  
-
+  }, [session, router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    console.log("=== FORM SUBMIT ===");
-    console.log("Username:", userName);
-    console.log("Password:", password ? "***" : "empty");
-    
-    if (!userName || !password) {
-      toast.error('Username dan password harus diisi');
-      return;
+    setErrors({});
+
+    try {
+      userSchema.parse({
+        userName,
+        password,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: { userName?: string; password?: string } = {};
+        
+        error.issues.forEach((err) => { 
+          if (err.path[0] === 'userName') {
+            formattedErrors.userName = err.message;
+          } else if (err.path[0] === 'password') {
+            formattedErrors.password = err.message;
+          }
+        });
+        
+        setErrors(formattedErrors);
+        
+        const firstError = error.issues[0];
+        toast.error(firstError.message);
+        return;
+      }
     }
 
     setLoading(true);
@@ -164,39 +182,61 @@ export default function LoginForm() {
             </div>
 
             {/* Username Input */}
-            <div className="flex h-14 w-full items-center gap-3 rounded-full border border-gray-300 px-5 focus-within:border-blue-600">
-              <Mail size={16} className="text-gray-500" />
-              <input
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                type="text"
-                placeholder="Username"
-                className="w-full bg-transparent text-base text-gray-900 placeholder-gray-400 outline-none"
-                disabled={loading}
-                required
-              />
+            <div className="mb-1">
+              <div className={`flex h-14 w-full items-center gap-3 rounded-full border px-5 focus-within:border-blue-600 ${
+                errors.userName ? 'border-red-500' : 'border-gray-300'
+              }`}>
+                <Mail size={16} className="text-gray-500" />
+                <input
+                  value={userName}
+                  onChange={(e) => {
+                    setUserName(e.target.value);
+                    if (errors.userName) {
+                      setErrors(prev => ({ ...prev, userName: undefined }));
+                    }
+                  }}
+                  type="text"
+                  placeholder="Username"
+                  className="w-full bg-transparent text-base text-gray-900 placeholder-gray-400 outline-none"
+                  disabled={loading}
+                />
+              </div>
+              {errors.userName && (
+                <p className="mt-1 ml-5 text-xs text-red-500">{errors.userName}</p>
+              )}
             </div>
 
             {/* Password Input */}
-            <div className="mt-5 flex h-14 w-full items-center gap-3 rounded-full border border-gray-300 px-5 focus-within:border-blue-600">
-              <Lock size={16} className="text-gray-500" />
-              <input
-                type={show ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="w-full bg-transparent text-base text-gray-900 placeholder-gray-400 outline-none"
-                disabled={loading}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShow(!show)}
-                className="text-gray-500 hover:text-gray-700"
-                disabled={loading}
-              >
-                {show ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            <div className="mt-5 mb-1">
+              <div className={`flex h-14 w-full items-center gap-3 rounded-full border px-5 focus-within:border-blue-600 ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              }`}>
+                <Lock size={16} className="text-gray-500" />
+                <input
+                  type={show ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) {
+                      setErrors(prev => ({ ...prev, password: undefined }));
+                    }
+                  }}
+                  placeholder="Password"
+                  className="w-full bg-transparent text-base text-gray-900 placeholder-gray-400 outline-none"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShow(!show)}
+                  className="text-gray-500 hover:text-gray-700"
+                  disabled={loading}
+                >
+                  {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 ml-5 text-xs text-red-500">{errors.password}</p>
+              )}
             </div>
 
             {/* Submit Button */}

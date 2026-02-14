@@ -69,98 +69,7 @@ export default function TableWarehouse() {
   }, [warehouses, search]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 p-4 md:p-8 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950">
-      <div className="w-full max-w-7xl mx-auto">
-        <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
-                <Warehouse className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                  Manajemen Warehouse
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Kelola data warehouse dan ruangan
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {warehouses.map((w) => (
-                <QRCodeCanvas
-                  key={w.id}
-                  id={`qr-${w.id}`}
-                  value={`${window.location.origin}/warehouse/${w.id}`}
-                  size={150}
-                  className="hidden"
-                />
-              ))}
-              <ButtonTrashed route="/warehouse" />
-              <ButtonQrWarehouse warehouses={warehouses} />
-              <DialogAddWarehouse onSuccess={fetchWarehouses} />
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-                <Warehouse className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Warehouse</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {warehouses.length}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-violet-100 p-2 dark:bg-blue-900/30">
-                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Aktif</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {warehouses.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-cyan-100 p-2 dark:bg-cyan-900/30">
-                <Tag className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Kategori</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {new Set(warehouses.map(w => w.type)).size}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:border-white/5 dark:bg-white/5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-cyan-100 p-2 dark:bg-cyan-900/30">
-                <Search className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Hasil Pencarian</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {filteredWarehouses.length}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <div className="w-full lg:max-w-7xl md:max-w-2xl max-w-xs">
         <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
             <div className="relative w-full md:w-80">
@@ -248,14 +157,14 @@ export default function TableWarehouse() {
                         className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                       >
                         <TableCell className="px-6 py-4">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 lg:text-xs font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                             {index + 1}
                           </span>
                         </TableCell>
 
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-600 text-sm font-semibold text-white shadow-lg shadow-blue-500/20">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-600 lg:text-xs font-semibold text-white shadow-lg shadow-blue-500/20">
                               {item.code.charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -272,7 +181,7 @@ export default function TableWarehouse() {
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Tag className="h-4 w-4 text-blue-500" />
-                            <span className="rounded-md bg-blue-50 px-2.5 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                            <span className="rounded-md bg-blue-50 px-2.5 py-1 lg:text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                               {item.type}
                             </span>
                           </div>
@@ -281,7 +190,7 @@ export default function TableWarehouse() {
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Building2 className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                            <span className="lg:text-xs text-gray-700 dark:text-gray-300">
                               {item.name}
                             </span>
                           </div>
@@ -302,6 +211,5 @@ export default function TableWarehouse() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

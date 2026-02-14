@@ -75,7 +75,7 @@ export default function RestoreActionCategory({
           </TooltipContent>
         </Tooltip>
 
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-black">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-figtree">
               Pulihkan Kategori?

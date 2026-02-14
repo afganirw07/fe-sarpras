@@ -121,7 +121,7 @@ export default function ActionButtonsWarehouse({
             <Tooltip>
               <TooltipTrigger asChild>
                 <span>
-                  <Pencil size={16} />
+                  <Pencil size={15} />
                 </span>
               </TooltipTrigger>
               <TooltipContent>Edit</TooltipContent>
@@ -202,7 +202,7 @@ export default function ActionButtonsWarehouse({
           <TooltipTrigger asChild>
             <AlertDialogTrigger asChild>
               <button type="button">
-                <Trash2 size={16} />
+                <Trash2 size={15} />
               </button>
             </AlertDialogTrigger>
           </TooltipTrigger>
@@ -234,7 +234,7 @@ export default function ActionButtonsWarehouse({
         <TooltipTrigger asChild>
           <button type="button">
             <Link href={`/dashboard/warehouse/show/${room.id}`}>
-              <SquareArrowOutUpRight size={16} />
+              <SquareArrowOutUpRight size={15} />
             </Link>
           </button>
         </TooltipTrigger>

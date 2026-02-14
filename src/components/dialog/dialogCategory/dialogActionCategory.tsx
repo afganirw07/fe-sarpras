@@ -194,7 +194,7 @@ export default function ActionButtonsCategory({
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
               <button type="button">
-                <Pencil size={16} className="cursor-pointer" />
+                <Pencil size={15} className="cursor-pointer" />
               </button>
             </DialogTrigger>
           </TooltipTrigger>
@@ -326,7 +326,7 @@ export default function ActionButtonsCategory({
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <button type="button">
-                                <Trash2 size={16} className="text-red-600" />
+                                <Trash2 size={15} className="text-red-600" />
                               </button>
                             </AlertDialogTrigger>
 
@@ -380,7 +380,7 @@ export default function ActionButtonsCategory({
           <TooltipTrigger asChild>
             <AlertDialogTrigger asChild>
               <button type="button">
-                <Trash2 size={16} className="text-red-600" />
+                <Trash2 size={15} className="text-red-600" />
               </button>
             </AlertDialogTrigger>
           </TooltipTrigger>
