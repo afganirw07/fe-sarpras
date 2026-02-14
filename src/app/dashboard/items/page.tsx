@@ -10,6 +10,7 @@ export default function ItemPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  
 
   const fetchStats = async () => {
     try {

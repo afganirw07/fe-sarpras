@@ -19,17 +19,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Supplier } from "@/lib/supplier";
 import ButtonTrashed from "@/components/ui/button/trashedButton";
+import Pagination from "../../Pagination";
 
-export default function TableSupplier() {
+export default function TableSupplier({onSuccess}:{onSuccess: () => void;}) {
   const router = useRouter();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+     const [totalPages, setTotalPages] = useState(1)
+      const [totalItems, setTotalItems] = useState(0);;
+      const perPage = 3;
 
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = async (page = currentPage) => {
     try {
       setLoading(true);
-      const res = await getSuppliers();
+      const res = await getSuppliers(page,perPage);
+       setTotalPages(res.pagination.totalPages);
+    setTotalItems(res.pagination.total);
       setSuppliers(res.data);
     } catch (error) {
       console.error("Gagal fetch supplier", error);
@@ -40,8 +47,8 @@ export default function TableSupplier() {
   };
 
   useEffect(() => {
-    fetchSuppliers();
-  }, []);
+    fetchSuppliers(currentPage);
+  }, [currentPage]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -231,6 +238,29 @@ export default function TableSupplier() {
                 </TableBody>
               </Table>
             </div>
+             {totalPages > 1 && (
+                        <div className="flex justify-between p-4">
+                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>
+              Showing{" "}
+              {(currentPage - 1) * perPage + 1} –{" "}
+              {Math.min(currentPage * perPage, totalItems)}{" "}
+              of {totalItems}
+            </span>
+            
+              <span className="text-gray-400">|</span>
+            
+              <span>{perPage} rows per page</span>
+            </div>
+            
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+              />
+            </div>
+            
+            )}
             </div>
             )}
         </div>

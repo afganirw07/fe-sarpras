@@ -13,17 +13,22 @@ import { toast } from "sonner";
 import { getDeletedItems, Item } from "@/lib/items";
 import RestoreActionItems from "@/components/dialog/dialogItems/restoreItems";
 import ButtonBack from "@/components/ui/button/backButton";
+import Pagination from "../../Pagination";
 
 export default function TableTrashedItems() {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
+   const [currentPage, setCurrentPage] = useState(1);
+          const [totalPages, setTotalPages] = useState(1)
+            const [totalItems, setTotalItems] = useState(0);;
+            const perPage = 3;
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
 
-  const fetchDeletedItems = async () => {
+  const fetchDeletedItems = async (page = currentPage) => {
     try {
       setLoading(true);
       const response = await getDeletedItems();
@@ -46,8 +51,8 @@ export default function TableTrashedItems() {
   };
 
   useEffect(() => {
-    fetchDeletedItems();
-  }, []);
+    fetchDeletedItems(currentPage);
+  }, [currentPage]);
 
   // Filter items based on search
   const filteredItems = useMemo(() => {
@@ -274,6 +279,29 @@ export default function TableTrashedItems() {
                 </TableBody>
               </Table>
             </div>
+              {totalPages > 1 && (
+                                    <div className="flex justify-between p-4">
+                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span>
+                          Showing{" "}
+                          {(currentPage - 1) * perPage + 1} –{" "}
+                          {Math.min(currentPage * perPage, totalItems)}{" "}
+                          of {totalItems}
+                        </span>
+                        
+                          <span className="text-gray-400">|</span>
+                        
+                          <span>{perPage} rows per page</span>
+                        </div>
+                        
+                          <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(page) => setCurrentPage(page)}
+                          />
+                        </div>
+                        
+                        )}
           </div>
         </div>
       </div>

@@ -21,8 +21,9 @@ export default function CategoryTrashed() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const perPage = 10;
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0);;
+  const perPage = 5;
 
 const fetchDeleted = async (page = 1) => {
   try {
@@ -32,6 +33,7 @@ const fetchDeleted = async (page = 1) => {
 
     setCategories(res.data);
     setTotalPages(res.pagination.totalPages);
+    setTotalItems(res.pagination.total);
 
   } catch {
     toast.error("Gagal mengambil kategori terhapus");
@@ -39,6 +41,7 @@ const fetchDeleted = async (page = 1) => {
     setLoading(false);
   }
 };
+
 
 
 
@@ -281,7 +284,20 @@ const fetchDeleted = async (page = 1) => {
                 </TableBody>
               </Table>
             </div>
-            <div className="flex justify-end p-4">
+            <div className="flex justify-between p-4">
+             <div className="flex items-center gap-4 text-sm text-muted-foreground">
+  <span>
+    Showing{" "}
+    {(currentPage - 1) * perPage + 1} –{" "}
+    {Math.min(currentPage * perPage, totalItems)}{" "}
+    of {totalItems}
+  </span>
+
+  <span className="text-gray-400">|</span>
+
+  <span>{perPage} rows per page</span>
+</div>
+
   <Pagination
     currentPage={currentPage}
     totalPages={totalPages}

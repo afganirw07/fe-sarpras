@@ -112,69 +112,69 @@ export default function DialogTransactionOut() {
               </Button>
             </div>
 
-            <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+            <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
               <div className="relative overflow-x-auto">
                 <div className="inline-block min-w-full align-middle">
-                  <Table className="w-full min-w-[800px] table-auto">
-                    <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
+                  <Table className="w-full min-w-200 table-auto">
+                    <TableHeader className="border border-gray-100 dark:border-white/5">
                       <TableRow>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-xs font-medium text-gray-200"
                         >
                           No
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                           Item ID
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                           Item Name
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                           Item Price
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[220px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-55 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                           QTY Request
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                            QTY Receive
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                            Item condition
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                             Tahun Pengadaan
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                            Item condition
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-[30px] rounded-r-md border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                          className="min-w-7.5 rounded-r-md border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
                            Action
                         </TableCell>
