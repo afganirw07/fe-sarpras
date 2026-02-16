@@ -27,7 +27,7 @@ import {
 import Label from "../../form/Label";
 import { Input } from "../../ui/input";
 
-export default function DialogTransactionIn() {
+export default function DialogTransactionReturn() {
   const tableData: any[] = [];
 
   return (

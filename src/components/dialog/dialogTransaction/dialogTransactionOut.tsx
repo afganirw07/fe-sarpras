@@ -26,8 +26,9 @@ import {
 } from "@/components/ui/select";
 import Label from "../../form/Label";
 import { Input } from "../../ui/input";
+import { getCategoryById } from "@/lib/category";
 
-export default function DialogTransactionIn() {
+export default function DialogTransactionOut() {
   const tableData: any[] = [];
 
   return (

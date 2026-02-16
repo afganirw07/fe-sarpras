@@ -31,8 +31,13 @@ export default function TableItems() {
 
       if (response?.data && Array.isArray(response.data)) {
         setItems(response.data);
-        setTotalPages(response.pagination.totalPages);
-        setTotalItems(response.pagination.total);
+        if (response.pagination) {
+          setTotalPages(response.pagination.totalPages || 1);
+          setTotalItems(response.pagination.total || 0);
+        } else {
+          setTotalPages(1);
+          setTotalItems(response.data.length);
+        }
       } else if (Array.isArray(response)) {
         setItems(response);
       } else {

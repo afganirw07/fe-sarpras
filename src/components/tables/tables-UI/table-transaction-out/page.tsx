@@ -60,7 +60,7 @@ const tableData: User[] = [
   },
 ];
 
-export default function TableTrancsaction() {
+export default function TableTrancsactionOut() {
   function ActionButtons() {
     return (
       <div className="flex justify-center gap-4">
