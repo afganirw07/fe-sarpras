@@ -33,7 +33,8 @@ import { Textarea } from "@/components/ui/textarea";
 import Button from "@/components/ui/button/Button";
 import Link from "next/link";
 import { toast } from "sonner";
-
+import { z } from "zod";
+import { supplierSchema } from "@/schema/suplier.schema";
 import {
   Supplier,
   updateSupplier,
@@ -45,23 +46,101 @@ interface Props {
   onSuccess?: () => void;
 }
 
+interface SupplierError {
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+}
+
 export default function ActionButtonsSupplier({
   supplier,
   onSuccess,
 }: Props) {
   const [loading, setLoading] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [form, setForm] = useState({
     name: supplier.name,
     email: supplier.email,
     phone_number: supplier.phone_number,
     address: supplier.address,
   });
+  const [errors, setErrors] = useState<SupplierError>({});
 
-  const handleUpdate = async () => {
+  // Handle dialog open/close
+  const handleDialogChange = (open: boolean) => {
+    setIsEditOpen(open);
+    
+    if (open) {
+      // Reset form dengan data supplier saat dialog dibuka
+      setForm({
+        name: supplier.name,
+        email: supplier.email,
+        phone_number: supplier.phone_number,
+        address: supplier.address,
+      });
+      // Reset errors
+      setErrors({});
+    }
+  };
+
+  // Handle input change dengan clear error
+  const handleInputChange = (field: keyof typeof form, value: string) => {
+    setForm({ ...form, [field]: value });
+    
+    // Clear error untuk field yang sedang diubah
+    const errorField = field === 'phone_number' ? 'phoneNumber' : field;
+    setErrors(prev => ({ ...prev, [errorField]: undefined }));
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Reset errors
+    setErrors({});
+
+    // Prepare validation data
+    const validationData = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phoneNumber: form.phone_number.trim(),
+      address: form.address.trim(),
+    };
+
+    console.log("Validation data:", validationData);
+
+    // Validate with Zod
     try {
-      setLoading(true);
+      supplierSchema.parse(validationData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: SupplierError = {};
+        
+        error.issues.forEach((err) => {
+          const field = err.path[0] as keyof SupplierError;
+          formattedErrors[field] = err.message;
+        });
+        
+        console.log("Validation errors:", formattedErrors);
+        setErrors(formattedErrors);
+        
+        // Show first error in toast
+        const firstError = Object.values(formattedErrors)[0];
+        if (firstError) {
+          toast.error(firstError);
+        }
+        
+        return;
+      }
+    }
+
+    setLoading(true);
+
+    try {
       await updateSupplier(supplier.id, form);
       toast.success("Supplier berhasil diupdate");
+      setIsEditOpen(false);
+      setErrors({});
       onSuccess?.();
     } catch (err: any) {
       toast.error(err.message || "Gagal update supplier");
@@ -86,7 +165,7 @@ export default function ActionButtonsSupplier({
   return (
     <div className="flex justify-center gap-4">
       {/* EDIT */}
-      <Dialog>
+      <Dialog open={isEditOpen} onOpenChange={handleDialogChange}>
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
@@ -99,63 +178,100 @@ export default function ActionButtonsSupplier({
         </Tooltip>
 
         <DialogContent className="max-w-xl p-6 dark:bg-black">
-          <DialogHeader>
-            <DialogTitle>Update Supplier</DialogTitle>
-          </DialogHeader>
+          <form onSubmit={handleUpdate}>
+            <DialogHeader>
+              <DialogTitle>Update Supplier</DialogTitle>
+            </DialogHeader>
 
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label>Nama</Label>
-              <Input
-                value={form.name}
-                onChange={(e) =>
-                  setForm({ ...form, name: e.target.value })
-                }
-              />
+            <div className="grid gap-4 mt-4">
+              {/* Nama */}
+              <div className="grid gap-2">
+                <div className="flex gap-2 items-center">
+                  <Label>Nama *</Label>
+                  {errors.name && (
+                    <p className="text-xs text-red-500">{errors.name}</p>
+                  )}
+                </div>
+                <div className={`${errors.name ? 'border-red-500' : ''}`}>
+                  <Input
+                    value={form.name}
+                    placeholder="Nama Lengkap"
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="grid gap-2">
+                <div className="flex gap-2 items-center">
+                  <Label>Email *</Label>
+                  {errors.email && (
+                    <p className="text-xs text-red-500">{errors.email}</p>
+                  )}
+                </div>
+                <div className={`${errors.email ? 'border-red-500' : ''}`}>
+                  <Input
+                    value={form.email}
+                    placeholder="Email"
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+              
+              {/* Phone */}
+              <div className="grid gap-2">
+                <div className="flex gap-2 items-center">
+                  <Label>Phone *</Label>
+                  {errors.phoneNumber && (
+                    <p className="text-xs text-red-500">{errors.phoneNumber}</p>
+                  )}
+                </div>
+                <div className={`${errors.phoneNumber ? 'border-red-500' : ''}`}>
+                  <Input
+                    value={form.phone_number}
+                    placeholder="Nomor Telepon"
+                    onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              {/* Address */}
+              <div className="grid gap-2">
+                <div className="flex gap-2 items-center">
+                  <Label>Address *</Label>
+                  {errors.address && (
+                    <p className="text-xs text-red-500">{errors.address}</p>
+                  )}
+                </div>
+                <div className={`${errors.address ? 'border-red-500' : ''}`}>
+                  <Textarea
+                    value={form.address}
+                    placeholder="Alamat Lengkap"
+                    className="min-h-30"
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="grid gap-2">
-              <Label>Email / Phone</Label>
-              <Input
-                value={form.email}
-                onChange={(e) =>
-                  setForm({ ...form, email: e.target.value })
-                }
-              />
-            </div>
-            
-            <div className="grid gap-2">
-                  <Label>Phone</Label>
-              <Input
-                value={form.phone_number}
-                onChange={(e) =>
-                  setForm({ ...form, phone_number: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Address</Label>
-              <Textarea
-                value={form.address}
-                onChange={(e) =>
-                  setForm({ ...form, address: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="mt-6">
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button
-              onClick={handleUpdate}
-              disabled={loading}
-              className="bg-blue-800 hover:bg-blue-900"
-            >
-              Save
-            </Button>
-          </DialogFooter>
+            <DialogFooter className="mt-6">
+              <DialogClose asChild>
+                <Button variant="outline"  disabled={loading}>
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                disabled={loading}
+                className="bg-blue-800 hover:bg-blue-900"
+              >
+                {loading ? "Menyimpan..." : "Save"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -176,21 +292,25 @@ export default function ActionButtonsSupplier({
           <AlertDialogHeader>
             <AlertDialogTitle>Yakin hapus supplier?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tindakan ini tidak bisa dibatalkan
+              Supplier <strong>{supplier.name}</strong> akan dihapus.
+              Tindakan ini tidak bisa dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-600 text-white"
+              disabled={loading}
+              className="bg-red-600 text-white hover:bg-red-700"
             >
-              Delete
+              {loading ? "Menghapus..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* SHOW */}
       <Tooltip>
         <TooltipTrigger asChild>
           <Link href={`/dashboard/supplier/show/${supplier.id}`}>

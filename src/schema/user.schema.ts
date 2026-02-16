@@ -5,7 +5,7 @@ export const userSchema = z.object({
     .string()
     .min(1, "Username tidak boleh kosong")
     .min(6, "Username minimal 6 karakter")
-    .regex(/^[a-zA-Z0-9]+$/, "nama tidak boleh mengandung simbol"),
+     .regex(/^[a-zA-Z0-9\s]+$/, "nama tidak boleh mengandung simbol"),
   password: z
     .string()
     .min(1, "Password tidak boleh kosong")
