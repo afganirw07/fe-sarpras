@@ -91,7 +91,6 @@ export default function ActionButtonsItems({
       const categoriesData = response.data as CategoryWithSubcategories[];
       setCategories(categoriesData);
 
-      // Set subcategories jika category_id sudah ada
       if (formData.category_id) {
         const selectedCategory = categoriesData.find(
           (cat) => cat.id === formData.category_id
@@ -106,7 +105,6 @@ export default function ActionButtonsItems({
     }
   }, [formData.category_id]);
 
-  // Load categories saat dialog dibuka
   useEffect(() => {
     if (isEditOpen) {
       fetchCategories();
