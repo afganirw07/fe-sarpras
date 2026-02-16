@@ -38,11 +38,12 @@ import {
 } from "@/components/ui/tooltip";
 import { Label } from "../../ui/label";
 import Input from "@/components/form/input/InputField";
-import TextArea from "@/components/form/input/TextArea";
 import { toast } from "sonner";
 import { deleteItem, updateItem, Item } from "@/lib/items";
 import { getCategories, Category, Subcategory } from "@/lib/category";
 import Link from "next/link";
+import { z } from "zod";
+import { itemSchema } from "@/schema/items.schema";
 
 interface CategoryWithSubcategories extends Category {
   subcategories: Subcategory[];
@@ -55,9 +56,18 @@ interface ItemFormData {
   subcategory_id: string;
   brand: string;
   unit: string;
-  // description: string;
   stock: number;
   type: string;
+}
+
+interface FormErrors {
+  code?: string;
+  name?: string;
+  category?: string;
+  subCategory?: string;
+  brand?: string;
+  unit?: string;
+  stock?: string;
 }
 
 export default function ActionButtonsItems({
@@ -71,6 +81,7 @@ export default function ActionButtonsItems({
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   const [selectedCategorySubcategories, setSelectedCategorySubcategories] = useState<Subcategory[]>([]);
+  const [errors, setErrors] = useState<FormErrors>({});
   
   const [formData, setFormData] = useState<ItemFormData>({
     code: item.code || "",
@@ -79,7 +90,6 @@ export default function ActionButtonsItems({
     subcategory_id: item.subcategory_id || "",
     brand: item.brand || "",
     unit: item.unit || "",
-    // description: item.description || "",
     stock: item.stock || 0,
     type: item.type || "Loanable",
   });
@@ -124,10 +134,11 @@ export default function ActionButtonsItems({
         subcategory_id: item.subcategory_id || "",
         brand: item.brand || "",
         unit: item.unit || "",
-        // description: item.description || "",
         stock: item.stock || 0,
         type: item.type || "Loanable",
       });
+      // Reset errors
+      setErrors({});
     }
   };
 
@@ -137,6 +148,15 @@ export default function ActionButtonsItems({
       ...prev,
       [field]: value,
     }));
+
+    // Clear error saat user mulai mengetik
+    if (field === 'category_id') {
+      setErrors(prev => ({ ...prev, category: undefined }));
+    } else if (field === 'subcategory_id') {
+      setErrors(prev => ({ ...prev, subCategory: undefined }));
+    } else {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
   };
 
   // Handle category change
@@ -146,6 +166,9 @@ export default function ActionButtonsItems({
       category_id: value,
       subcategory_id: "", 
     }));
+
+    // Clear category & subcategory errors
+    setErrors(prev => ({ ...prev, category: undefined, subCategory: undefined }));
 
     const selectedCategory = categories.find((cat) => cat.id === value);
     if (selectedCategory && selectedCategory.subcategories) {
@@ -159,20 +182,50 @@ export default function ActionButtonsItems({
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Reset errors
+    setErrors({});
+
+    // Prepare validation data
+    const validationData = {
+      name: formData.name.trim(),
+      code: formData.code.trim(),
+      category: formData.category_id,
+      subCategory: formData.subcategory_id,
+      unit: formData.unit.trim(),
+      stock: formData.stock,
+      brand: formData.brand.trim(),
+    };
+
+    console.log("Validation data:", validationData);
+
+    // Validate with Zod
     try {
-      setLoading(true);
-
-      // Validasi
-      if (!formData.code || !formData.name || !formData.category_id) {
-        toast.error("Mohon lengkapi data wajib: Kode, Nama, dan Kategori");
+      itemSchema.parse(validationData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: FormErrors = {};
+        
+        error.issues.forEach((err) => {
+          const field = err.path[0] as keyof FormErrors;
+          formattedErrors[field] = err.message;
+        });
+        
+        console.log("Validation errors:", formattedErrors);
+        setErrors(formattedErrors);
+        
+        // Show first error in toast
+        const firstError = Object.values(formattedErrors)[0];
+        if (firstError) {
+          toast.error(firstError);
+        }
+        
         return;
       }
+    }
 
-      if (!formData.unit) {
-        toast.error("Satuan wajib diisi");
-        return;
-      }
+    setLoading(true);
 
+    try {
       const updateData = {
         code: formData.code.trim(),
         name: formData.name.trim(),
@@ -180,15 +233,17 @@ export default function ActionButtonsItems({
         subcategory_id: formData.subcategory_id || null,
         brand: formData.brand?.trim() || null,
         unit: formData.unit.trim(),
-        // description: formData.description?.trim() || null,
         stock: formData.stock,
         type: formData.type,
       };
+
+      console.log("Submitting update data:", updateData);
 
       await updateItem(item.id, updateData as Item);
       toast.success("Item berhasil diperbarui");
       
       setIsEditOpen(false);
+      setErrors({});
       await onSuccess?.();
     } catch (err: any) {
       console.error("Update error:", err);
@@ -245,33 +300,54 @@ export default function ActionButtonsItems({
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 mt-4">
               {/* Kode Item */}
               <div className="grid gap-2">
-                <Label>Kode Item *</Label>
-                <Input
-                  placeholder="Kode Item"
-                  defaultValue={formData.code}
-                  onChange={(e) => handleInputChange("code", e.target.value)}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Kode Item *</Label>
+                  {errors.code && (
+                    <p className="text-xs text-red-500">{errors.code}</p>
+                  )}
+                </div>
+                <div className={`${errors.code ? 'border-red-500' : ''}`}>
+                  <Input
+                    placeholder="Kode Item (HURUF BESAR)"
+                    defaultValue={formData.code}
+                    onChange={(e) => handleInputChange("code", e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               {/* Nama Item */}
               <div className="grid gap-2">
-                <Label>Nama Item *</Label>
-                <Input
-                  placeholder="Nama Item"
-                  defaultValue={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Nama Item *</Label>
+                  {errors.name && (
+                    <p className="text-xs text-red-500">{errors.name}</p>
+                  )}
+                </div>
+                <div className={`${errors.name ? 'border-red-500' : ''}`}>
+                  <Input
+                    placeholder="Nama Item"
+                    defaultValue={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               {/* Kategori */}
               <div className="grid gap-2">
-                <Label>Kategori *</Label>
+                <div className="flex gap-2 items-center">
+                  <Label>Kategori *</Label>
+                  {errors.category && (
+                    <p className="text-xs text-red-500">{errors.category}</p>
+                  )}
+                </div>
                 <Select
                   value={formData.category_id}
                   onValueChange={handleCategoryChange}
                   disabled={loading}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Pilih Kategori" />
                   </SelectTrigger>
                   <SelectContent>
@@ -292,28 +368,42 @@ export default function ActionButtonsItems({
 
               {/* Merek */}
               <div className="grid gap-2">
-                <Label>Merek</Label>
-                <Input
-                  placeholder="Merek Item"
-                  defaultValue={formData.brand}
-                  onChange={(e) => handleInputChange("brand", e.target.value)}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Merek *</Label>
+                  {errors.brand && (
+                    <p className="text-xs text-red-500">{errors.brand}</p>
+                  )}
+                </div>
+                <div className={`${errors.brand ? 'border-red-500' : ''}`}>
+                  <Input
+                    placeholder="Merek Item"
+                    defaultValue={formData.brand}
+                    onChange={(e) => handleInputChange("brand", e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               {/* Sub Kategori */}
               <div className="grid gap-2">
-                <Label>Sub Kategori</Label>
+                <div className="flex gap-2 items-center">
+                  <Label>Sub Kategori *</Label>
+                  {errors.subCategory && (
+                    <p className="text-xs text-red-500">{errors.subCategory}</p>
+                  )}
+                </div>
                 <Select
                   value={formData.subcategory_id}
                   onValueChange={(value) =>
                     handleInputChange("subcategory_id", value)
                   }
                   disabled={
+                    loading ||
                     !formData.category_id ||
                     selectedCategorySubcategories.length === 0
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.subCategory ? 'border-red-500' : ''}>
                     <SelectValue
                       placeholder={
                         !formData.category_id
@@ -334,36 +424,42 @@ export default function ActionButtonsItems({
                 </Select>
               </div>
 
-              {/* Deskripsi - Row Span 3 */}
-              {/* <div className="row-span-3 grid gap-2">
-                <Label>Deskripsi</Label>
-                <TextArea
-                  value={formData.description}
-                  className="h-full min-h-45"
-                  placeholder="Masukkan deskripsi item..."
-                  onChange={(value) => handleInputChange("description", value)}
-                />
-              </div> */}
-
               {/* Satuan */}
               <div className="grid gap-2">
-                <Label>Satuan *</Label>
-                <Input
-                  placeholder="Satuan (pcs, kg, unit, dll)"
-                  defaultValue={formData.unit}
-                  onChange={(e) => handleInputChange("unit", e.target.value)}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Satuan *</Label>
+                  {errors.unit && (
+                    <p className="text-xs text-red-500">{errors.unit}</p>
+                  )}
+                </div>
+                <div className={`${errors.unit ? 'border-red-500' : ''}`}>
+                  <Input
+                    placeholder="Satuan (pcs, kg, unit, dll)"
+                    defaultValue={formData.unit}
+                    onChange={(e) => handleInputChange("unit", e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               {/* Stok */}
               <div className="grid gap-2">
-                <Label>Stok</Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  defaultValue={formData.stock}
-                  onChange={(e) => handleInputChange("stock", Number(e.target.value))}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Stok *</Label>
+                  {errors.stock && (
+                    <p className="text-xs text-red-500">{errors.stock}</p>
+                  )}
+                </div>
+                <div className={`${errors.stock ? 'border-red-500' : ''}`}>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    defaultValue={formData.stock}
+                    onChange={(e) => handleInputChange("stock", Number(e.target.value))}
+                    min="0"
+                    disabled={loading}
+                  />
+                </div>
               </div>
             </div>
 

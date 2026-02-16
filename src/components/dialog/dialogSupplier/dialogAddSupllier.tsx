@@ -17,13 +17,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { createSupplier } from "@/lib/supplier";
 import { toast } from "sonner";
 import { supplierSchema } from "@/schema/suplier.schema";
-import z from "zod";
+import { z } from "zod";
 
 interface Props {
   onSuccess?: () => void;
 }
 
-interface supplierError {
+interface SupplierError {
   name?: string;
   email?: string;
   phoneNumber?: string;
@@ -32,17 +32,43 @@ interface supplierError {
 
 export default function DialogAddSupplier({ onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone_number: "",
     address: "",
   });
-  const [errors, setErrors] = useState<supplierError>({});
+  const [errors, setErrors] = useState<SupplierError>({});
+
+  // Handle dialog open/close
+  const handleDialogChange = (open: boolean) => {
+    setIsOpen(open);
+    
+    if (open) {
+      setForm({
+        name: "",
+        email: "",
+        phone_number: "",
+        address: "",
+      });
+      // Reset errors
+      setErrors({});
+    }
+  };
+
+  // Handle input change dengan clear error
+  const handleInputChange = (field: keyof typeof form, value: string) => {
+    setForm({ ...form, [field]: value });
+    
+    const errorField = field === 'phone_number' ? 'phoneNumber' : field;
+    setErrors(prev => ({ ...prev, [errorField]: undefined }));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Reset errors
     setErrors({});
 
     const validationData = {
@@ -52,23 +78,27 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
       address: form.address.trim(),
     };
 
+    console.log("Validation data:", validationData);
+
     try {
       supplierSchema.parse(validationData);
-    } catch (e) {
-      if (e instanceof z.ZodError) {
-        const formattedErrors: supplierError = {};
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: SupplierError = {};
 
-        e.issues.forEach((err) => {
-          const field = err.path[0] as keyof supplierError;
+        error.issues.forEach((err) => {
+          const field = err.path[0] as keyof SupplierError;
           formattedErrors[field] = err.message;
         });
 
         console.log("Validation errors:", formattedErrors);
         setErrors(formattedErrors);
 
-        // Show first error in toast
-        setLoading(false);
-        console.log("erorr", e);
+        const firstError = Object.values(formattedErrors)[0];
+        if (firstError) {
+          toast.error(firstError);
+        }
+        
         return;
       }
     }
@@ -79,13 +109,17 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
       await createSupplier(form);
       toast.success("Supplier berhasil ditambahkan");
 
-      // reset form
+      // Reset form
       setForm({
         name: "",
         email: "",
         phone_number: "",
         address: "",
       });
+      setErrors({});
+
+      // Close dialog
+      setIsOpen(false);
 
       onSuccess?.();
     } catch (err: any) {
@@ -97,7 +131,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
 
   return (
     <div className="flex flex-col items-center justify-end gap-2 md:flex-row">
-      <Dialog>
+      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
           <Button
             size="lg"
@@ -114,87 +148,77 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
             </DialogHeader>
 
             <div className="grid gap-4 mt-4">
+              {/* Nama */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                <Label>Nama</Label>
-                {errors.name && (
-                  <p className="text-xs text-red-500 ">{errors.name}</p>
-                )}  
+                  <Label>Nama *</Label>
+                  {errors.name && (
+                    <p className="text-xs text-red-500">{errors.name}</p>
+                  )}  
                 </div>
                 <div className={`${errors.name ? "border-red-500" : ""}`}>
                   <Input
                     defaultValue={form.name}
                     placeholder="Nama Lengkap"
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
                     disabled={loading}
                   />
                 </div>
-                
               </div>
 
+              {/* Email */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                  <div className="flex gap-2 items-center">
-                <Label>Email</Label>
+                  <Label>Email *</Label>
                   {errors.email && (
-                  <p className="text-xs text-red-500 ">{errors.email}</p>
-                )}
-                  </div>
+                    <p className="text-xs text-red-500">{errors.email}</p>
+                  )}
                 </div>
                 <div className={`${errors.email ? "border-red-500" : ""}`}>
                   <Input
                     defaultValue={form.email}
                     placeholder="Email"
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     disabled={loading}
                   />
                 </div>
-              
               </div>
 
+              {/* Phone */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                <Label>Phone</Label>
-                        {errors.phoneNumber && (
-                  <p className="text-xs text-red-500 ">
-                    {errors.phoneNumber}
-                  </p>
-                )}
+                  <Label>Phone *</Label>
+                  {errors.phoneNumber && (
+                    <p className="text-xs text-red-500">{errors.phoneNumber}</p>
+                  )}
                 </div>
                 <div className={`${errors.phoneNumber ? "border-red-500" : ""}`}>
                   <Input
                     defaultValue={form.phone_number}
                     placeholder="Nomor Telepon"
-                    onChange={(e) =>
-                      setForm({ ...form, phone_number: e.target.value })
-                    }
+                    onChange={(e) => handleInputChange('phone_number', e.target.value)}
                     disabled={loading}
                   />
                 </div>
-        
               </div>
 
+              {/* Address */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                <Label>Address</Label>
-                {errors.address && (
-                  <p className="text-xs text-red-500 ">{errors.address}</p>
-                )}
+                  <Label>Address *</Label>
+                  {errors.address && (
+                    <p className="text-xs text-red-500">{errors.address}</p>
+                  )}
                 </div>
                 <div className={`${errors.address ? "border-red-500" : ""}`}>
                   <Textarea
                     value={form.address}
                     placeholder="Alamat Lengkap"
                     className="min-h-30"
-                    onChange={(e) =>
-                      setForm({ ...form, address: e.target.value })
-                    }
+                    onChange={(e) => handleInputChange('address', e.target.value)}
                     disabled={loading}
                   />
                 </div>
-                
               </div>
             </div>
 

@@ -18,16 +18,9 @@ import {
   DialogClose,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
-import { Trash2, Pencil, SquareArrowOutUpRight } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -54,14 +47,21 @@ import {
   deleteSubcategory,
   deleteCategory,
 } from "@/lib/category";
-
-import Link from "next/link";
+import { z } from "zod";
+import { categorySchema } from "@/schema/category.schema";
 
 type Subcategory = {
   id: string;
   name: string;
   code: string;
 };
+
+interface CategoryError {
+  categoryName?: string;
+  categoryCode?: string;
+  SubcategoryName?: string;
+  SubCategoryCode?: string;
+}
 
 export default function ActionButtonsCategory({
   categoryId,
@@ -77,25 +77,7 @@ export default function ActionButtonsCategory({
   const [subcategoryName, setSubcategoryName] = useState("");
   const [subcategoryCode, setSubcategoryCode] = useState("");
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-
-  const handleAddSubcategory = () => {
-    if (!subcategoryName || !subcategoryCode) {
-      toast.error("Subkategori belum lengkap");
-      return;
-    }
-
-    setSubcategories((prev) => [
-      ...prev,
-      {
-        id: `temp-${crypto.randomUUID()}`,
-        name: subcategoryName,
-        code: subcategoryCode,
-      },
-    ]);
-
-    setSubcategoryName("");
-    setSubcategoryCode("");
-  };
+  const [errors, setErrors] = useState<CategoryError>({});
 
   useEffect(() => {
     if (!open) return;
@@ -125,12 +107,134 @@ export default function ActionButtonsCategory({
     fetchData();
   }, [open, categoryId]);
 
+  // Handle dialog open/close
+  const handleDialogChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    
+    if (isOpen) {
+      // Reset errors when dialog opens
+      setErrors({});
+    } else {
+      // Reset subcategory inputs when dialog closes
+      setSubcategoryName("");
+      setSubcategoryCode("");
+      setErrors({});
+    }
+  };
+
+  // Handle input change dengan clear error
+  const handleInputChange = (field: keyof CategoryError, value: string) => {
+    if (field === 'categoryName') setCategoryName(value);
+    else if (field === 'categoryCode') setCategoryCode(value);
+    else if (field === 'SubcategoryName') setSubcategoryName(value);
+    else if (field === 'SubCategoryCode') setSubcategoryCode(value);
+    
+    // Clear error untuk field yang sedang diubah
+    setErrors(prev => ({ ...prev, [field]: undefined }));
+  };
+
+  const handleAddSubcategory = () => {
+    // Reset errors untuk subcategory
+    setErrors(prev => ({ 
+      ...prev, 
+      SubcategoryName: undefined, 
+      SubCategoryCode: undefined 
+    }));
+
+    // Validate subcategory data
+    const validationData = {
+      categoryName: categoryName.trim(),
+      categoryCode: categoryCode.trim(),
+      SubcategoryName: subcategoryName.trim(),
+      SubCategoryCode: subcategoryCode.trim(),
+    };
+
+    console.log("Validation data:", validationData);
+
+    try {
+      categorySchema.parse(validationData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: CategoryError = {};
+        
+        error.issues.forEach((err) => {
+          const field = err.path[0] as keyof CategoryError;
+          // Only show subcategory errors
+          if (field === 'SubcategoryName' || field === 'SubCategoryCode') {
+            formattedErrors[field] = err.message;
+          }
+        });
+        
+        if (Object.keys(formattedErrors).length > 0) {
+          setErrors(prev => ({ ...prev, ...formattedErrors }));
+          const firstError = Object.values(formattedErrors)[0];
+          if (firstError) {
+            toast.error(firstError);
+          }
+          return;
+        }
+      }
+    }
+
+    setSubcategories((prev) => [
+      ...prev,
+      {
+        id: `temp-${crypto.randomUUID()}`,
+        name: subcategoryName,
+        code: subcategoryCode,
+      },
+    ]);
+
+    setSubcategoryName("");
+    setSubcategoryCode("");
+  };
+
   const handleSave = async () => {
+    // Reset errors
+    setErrors({});
+
+    // Validate category data
+    const validationData = {
+      categoryName: categoryName.trim(),
+      categoryCode: categoryCode.trim(),
+      SubcategoryName: subcategoryName.trim() || "dummy",
+      SubCategoryCode: subcategoryCode.trim() || "dummy",
+    };
+
+    console.log("Validation data:", validationData);
+
+    // Validate with Zod (only category fields)
+    try {
+      categorySchema.parse(validationData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formattedErrors: CategoryError = {};
+        
+        error.issues.forEach((err) => {
+          const field = err.path[0] as keyof CategoryError;
+          // Only show category errors
+          if (field === 'categoryName' || field === 'categoryCode') {
+            formattedErrors[field] = err.message;
+          }
+        });
+        
+        if (Object.keys(formattedErrors).length > 0) {
+          setErrors(formattedErrors);
+          const firstError = Object.values(formattedErrors)[0];
+          if (firstError) {
+            toast.error(firstError);
+          }
+          return;
+        }
+      }
+    }
+
     setLoading(true);
+    
     try {
       await updateCategory(categoryId, {
-        name: categoryName,
-        code: categoryCode,
+        name: categoryName.trim(),
+        code: categoryCode.trim(),
       });
 
       const newSubs = subcategories.filter((s) => s.id.startsWith("temp"));
@@ -160,10 +264,11 @@ export default function ActionButtonsCategory({
       );
 
       toast.success("Kategori berhasil disimpan");
-      await onSuccess?.()
+      await onSuccess?.();
       setOpen(false);
-    } catch {
-      toast.error("Gagal menyimpan kategori");
+      setErrors({});
+    } catch (error: any) {
+      toast.error(error?.message || "Gagal menyimpan kategori");
     } finally {
       setLoading(false);
     }
@@ -172,24 +277,37 @@ export default function ActionButtonsCategory({
   const handleDeleteSubcategory = async (id: string) => {
     if (id.startsWith("temp")) {
       setSubcategories((prev) => prev.filter((s) => s.id !== id));
+      toast.success("Subkategori dihapus");
       return;
     }
 
     try {
       await deleteSubcategory(id);
-
       setSubcategories((prev) => prev.filter((s) => s.id !== id));
-
       toast.success("Subkategori berhasil dihapus");
-      await onSuccess?.()
+      await onSuccess?.();
     } catch (error) {
       toast.error("Gagal menghapus subkategori");
     }
   };
 
+  const handleDeleteCategory = async () => {
+    try {
+      setLoading(true);
+      await deleteCategory(categoryId);
+      toast.success("Kategori berhasil dihapus");
+      await onSuccess?.();
+    } catch (error: any) {
+      toast.error(error?.message || "Gagal menghapus kategori");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex justify-center gap-4">
-      <Dialog open={open} onOpenChange={setOpen}>
+      {/* EDIT */}
+      <Dialog open={open} onOpenChange={handleDialogChange}>
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
@@ -215,35 +333,76 @@ export default function ActionButtonsCategory({
             }}
           >
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Nama Kategori */}
               <div className="grid w-full max-w-md gap-2">
-                <Label>Nama Kategori</Label>
-                <Input
-                  value={categoryName}
-                  onChange={(e) => setCategoryName(e.target.value)}
-                  readOnly={true}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Nama Kategori *</Label>
+                  {errors.categoryName && (
+                    <p className="text-xs text-red-500">{errors.categoryName}</p>
+                  )}
+                </div>
+                <div className={`${errors.categoryName ? 'border-red-500' : ''}`}>
+                  <Input
+                    value={categoryName}
+                    onChange={(e) => handleInputChange('categoryName', e.target.value)}
+                    readOnly={true}
+                    disabled={loading}
+                  />
+                </div>
               </div>
+
+              {/* Kode Kategori */}
               <div className="grid w-full max-w-md gap-2">
-                <Label>Kode Kategori</Label>
-                <Input
-                  value={categoryCode}
-                  onChange={(e) => setCategoryCode(e.target.value)}
-                  readOnly={true}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Kode Kategori *</Label>
+                  {errors.categoryCode && (
+                    <p className="text-xs text-red-500">{errors.categoryCode}</p>
+                  )}
+                </div>
+                <div className={`${errors.categoryCode ? 'border-red-500' : ''}`}>
+                  <Input
+                    value={categoryCode}
+                    onChange={(e) => handleInputChange('categoryCode', e.target.value)}
+                    readOnly={true}
+                    disabled={loading}
+                  />
+                </div>
               </div>
+
+              {/* Nama Subkategori */}
               <div className="grid w-full max-w-md gap-2">
-                <Label>Nama Subkategori</Label>
-                <Input
-                  value={subcategoryName}
-                  onChange={(e) => setSubcategoryName(e.target.value)}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Nama Subkategori</Label>
+                  {errors.SubcategoryName && (
+                    <p className="text-xs text-red-500">{errors.SubcategoryName}</p>
+                  )}
+                </div>
+                <div className={`${errors.SubcategoryName ? 'border-red-500' : ''}`}>
+                  <Input
+                    value={subcategoryName}
+                    onChange={(e) => handleInputChange('SubcategoryName', e.target.value)}
+                    placeholder="Nama subkategori (tanpa simbol)"
+                    disabled={loading}
+                  />
+                </div>
               </div>
+
+              {/* Kode Subkategori */}
               <div className="grid w-full max-w-md gap-2">
-                <Label>Kode Subkategori</Label>
-                <Input
-                  value={subcategoryCode}
-                  onChange={(e) => setSubcategoryCode(e.target.value)}
-                />
+                <div className="flex gap-2 items-center">
+                  <Label>Kode Subkategori</Label>
+                  {errors.SubCategoryCode && (
+                    <p className="text-xs text-red-500">{errors.SubCategoryCode}</p>
+                  )}
+                </div>
+                <div className={`${errors.SubCategoryCode ? 'border-red-500' : ''}`}>
+                  <Input
+                    value={subcategoryCode}
+                    onChange={(e) => handleInputChange('SubCategoryCode', e.target.value)}
+                    placeholder="Kode subkategori"
+                    disabled={loading}
+                  />
+                </div>
               </div>
             </div>
 
@@ -252,6 +411,7 @@ export default function ActionButtonsCategory({
                 type="button"
                 className="mt-4 max-w-fit bg-blue-800 text-white hover:bg-blue-900"
                 onClick={handleAddSubcategory}
+                disabled={loading}
               >
                 Add Subkategori
               </Button>
@@ -291,10 +451,10 @@ export default function ActionButtonsCategory({
                   {subcategories.length === 0 ? (
                     <TableRow>
                       <td
-                        colSpan={6}
+                        colSpan={4}
                         className="border px-6 py-6 text-center text-sm text-gray-500 dark:text-white/90"
                       >
-                        Tidak ada Kategori
+                        Tidak ada Subkategori
                       </td>
                     </TableRow>
                   ) : (
@@ -317,6 +477,7 @@ export default function ActionButtonsCategory({
                                 ),
                               )
                             }
+                            disabled={loading}
                           />
                         </TableCell>
                         <TableCell className="light:border-gray-100 font-quicksand border px-4 py-4 text-sm font-semibold text-gray-800 dark:text-white/90">
@@ -325,7 +486,7 @@ export default function ActionButtonsCategory({
                         <TableCell className="border px-4 py-4 text-center">
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <button type="button">
+                              <button type="button" disabled={loading}>
                                 <Trash2 size={15} className="text-red-600" />
                               </button>
                             </AlertDialogTrigger>
@@ -360,21 +521,26 @@ export default function ActionButtonsCategory({
                 </TableBody>
               </Table>
             </div>
+            
             <DialogFooter className="mt-8">
               <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline" type="button" disabled={loading}>
+                  Cancel
+                </Button>
               </DialogClose>
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-blue-800 text-white"
+                className="bg-blue-800 text-white hover:bg-blue-900"
               >
-                Save
+                {loading ? "Menyimpan..." : "Save"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* DELETE */}
       <AlertDialog>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -391,25 +557,18 @@ export default function ActionButtonsCategory({
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Kategori?</AlertDialogTitle>
             <AlertDialogDescription>
-              Semua subkategori akan ikut terhapus
+              Semua subkategori akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={loading}>Batal</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 text-white"
-              onClick={async () => {
-                try {
-                  await deleteCategory(categoryId);
-                  toast.success("Kategori berhasil dihapus");
-                  await onSuccess?.()
-                } catch {
-                  toast.error("Gagal menghapus kategori");
-                }
-              }}
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={handleDeleteCategory}
+              disabled={loading}
             >
-              Hapus
+              {loading ? "Menghapus..." : "Hapus"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
