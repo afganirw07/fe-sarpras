@@ -42,8 +42,8 @@ import { toast, Toaster } from "sonner";
 import Link from "next/link";
 import TextArea from "../../../form/input/TextArea";
 import { table } from "console";
-import DialogTransactionIn from "../../../dialog/dialogTransaction/dialogTransactionIn";
-import DialogTransactionOut from "../../../dialog/dialogTransaction/dialogTransactionOut";
+import DialogTransactionIn from "../../../dialog/dialogTransaction/transactionIn/dialogTransactionIn";
+import DialogTransactionOut from "../../../dialog/dialogTransaction/transaction-out/dialogTransactionOut";
 import DialogTransactionReturn from "../../../dialog/dialogTransaction/dialog.transactionReturn";
 
 interface User {

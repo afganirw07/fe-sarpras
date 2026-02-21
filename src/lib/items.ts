@@ -5,6 +5,7 @@ export interface Item {
   category_id: string;
   subcategory_id: string;
   type: string;
+  price: number,
   description: string | null;
   created_at: string;
   updated_at: string;

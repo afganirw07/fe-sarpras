@@ -1,4 +1,4 @@
-import { api } from "./api"
+import { api } from "./api";
 
 export enum TransactionStatus {
   DRAFT = "draft",
@@ -12,117 +12,135 @@ export enum TransactionType {
 }
 
 export enum InType {
-  PURCHASE = "Buy",
-  GRANT = "Donation",
+  BUY = "Buy",
+  DONATION = "Donation",
 }
 
 export enum ItemConditions {
   GOOD = "Good",
-  DAMAGED = "Poor",
-  SAFE = "Fair",
+  FAIR = "Fair",
+  POOR = "Poor",
 }
 
 export enum ItemStatus {
   AVAILABLE = "available",
   USED = "borrowed",
-  DAMAGED = "damaged"
+  DAMAGED = "damaged",
 }
 
-
 export interface TransactionDetail {
-  id: string
-  transaction_id: string
-  item_id: string
-  room_id: string
-  quantity: number
-  price: number
-  condition: ItemConditions
-  procurement_month: number
-  procurement_year: number
-  created_at: Date
-  updated_at: Date
-  deleted_at?: Date | null
+  id: string;
+  transaction_id: string;
+  item_id: string;
+  room_id: string;
+  quantity: number;
+  price: number | null;
+  condition: ItemConditions;
+  procurement_month: number;
+  procurement_year: number;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at?: Date | null;
 }
 
 export interface DetailItem {
-  id: string
-  item_id: string
-  transaction_id: string
-  room_id: string
-  migration_id?: string | null
-  serial_number: string
-  condition: ItemConditions
-  status: ItemStatus
-  created_by: string
-  created_at: Date
-  updated_at: Date
-  deleted_at?: Date | null
+  id: string;
+  item_id: string;
+  transaction_id: string;
+  room_id: string;
+  migration_id?: string | null;
+  serial_number: string;
+  condition: ItemConditions;
+  status: ItemStatus;
+  created_by: string;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at?: Date | null;
 }
 
 export interface Transaction {
-  id: string
-  user_id: string
-  supplier_id: string
-  type: TransactionType
-  in_type?: InType
-  po_number: string
-  transaction_date: Date
-  status: TransactionStatus
-  created_at: Date
-  updated_at: Date
-  deleted_at?: Date | null
+  id: string;
+  user_id: string;
+  supplier_id: string;
+  type: TransactionType;
+  in_type?: InType;
+  po_number: string;
+  transaction_date: Date;
+  status: TransactionStatus;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at?: Date | null;
 
-  transaction_details: TransactionDetail[]
-  detail_items: DetailItem[]
+  transaction_details: TransactionDetail[];
+  detail_items: DetailItem[];
 }
 
-interface BaseTransactionPayload {
-  user_id: string
-  supplier_id: string
-  po_number: string
-  transaction_date: Date
-  status: TransactionStatus
+export interface TransactionPaginationResponse {
+  data: Transaction[];
+  pagination: {
+    total: number;
+    totalPages: number;
+    page: number;
+    limit: number;
+  };
+}
 
-  transaction_details: {
-    item_id: string
-    room_id: string
-    quantity: number
-    price: number
-    condition: ItemConditions
-    procurement_month: number
-    procurement_year: number
-  }[]
+export interface BaseTransactionPayload {
+  user_id: string;
+  supplier_id: string;
+  po_number: string;
+  transaction_date: Date;
+  status: TransactionStatus;
+}
 
-  detail_items: {
-    item_id: string
-    room_id: string
-    serial_number: string
-    condition: ItemConditions
-    status: ItemStatus
-  }[]
+export interface TransactionDetailPayload {
+  item_id: string;
+  room_id: string;
+  quantity: number;
+  price: number | null;
+  condition: ItemConditions;
+  procurement_month: number;
+  procurement_year: number;
+}
+
+export interface DetailItemPayload {
+  item_id: string;
+  room_id: string;
+  serial_number: string;
+  condition: ItemConditions;
+  status: ItemStatus;
+  created_by: string;
 }
 
 export interface TransactionInPayload extends BaseTransactionPayload {
-  in_type: InType
+  in_type: InType;
+  transaction_details: TransactionDetailPayload[];
+  detail_items: DetailItemPayload[];
 }
 
-export interface TransactionOutPayload extends BaseTransactionPayload {}
+export interface TransactionOutPayload extends BaseTransactionPayload {
+  transaction_details: TransactionDetailPayload[];
+}
 
-// CREATE IN
 export async function createTransactionIn(
-  data: TransactionInPayload
+  payload: TransactionInPayload
 ): Promise<Transaction> {
   return api("/api/transactions", {
     method: "POST",
     body: JSON.stringify({
-      ...data,
+      ...payload,
       type: TransactionType.IN,
+      transaction_details: payload.transaction_details.map((d) => ({
+        ...d,
+        price:
+          payload.in_type === InType.DONATION || d.price === 0
+            ? null
+            : d.price,
+      })),
     }),
-  })
+  });
 }
 
-
-// CREATE OUT
 export async function createTransactionOut(
   payload: TransactionOutPayload
 ): Promise<Transaction> {
@@ -132,37 +150,44 @@ export async function createTransactionOut(
       ...payload,
       type: TransactionType.OUT,
     }),
-  })
+  });
 }
 
-// READ ALL (tanpa pagination)
-export async function getTransactions(): Promise<Transaction[]> {
-  return api("/api/transactions")
+export async function getTransactions(
+  page = 1,
+  limit = 10,
+  search?: string
+): Promise<TransactionPaginationResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (search) params.append("search", search);
+
+  return api(`/api/transactions?${params.toString()}`);
 }
 
-// READ BY ID
 export async function getTransactionById(
   id: string
 ): Promise<Transaction> {
-  return api(`/api/transactions/${id}`)
+  return api(`/api/transactions/${id}`);
 }
 
-// UPDATE
 export async function updateTransaction(
   id: string,
-  data: Partial<BaseTransactionPayload>
+  payload: Partial<BaseTransactionPayload>
 ): Promise<Transaction> {
   return api(`/api/transactions/${id}`, {
     method: "PUT",
-    body: JSON.stringify(data),
-  })
+    body: JSON.stringify(payload),
+  });
 }
 
-// DELETE (soft delete)
 export async function deleteTransaction(
   id: string
 ): Promise<void> {
   await api(`/api/transactions/${id}`, {
     method: "DELETE",
-  })
+  });
 }

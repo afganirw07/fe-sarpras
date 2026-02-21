@@ -153,7 +153,7 @@ export default function TableItems() {
                     <TableCell
                       key={index}
                       isHeader
-                      className={`bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300 ${
+                      className={`bg-linear-to-br from-gray-50 to-gray-100/50 px-2 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300 ${
                         header.className || ""
                       }`}
                     >
@@ -179,55 +179,55 @@ export default function TableItems() {
                       key={item.id}
                       className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                     >
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-2 py-4">
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                           {(currentPage - 1) * perPage + index + 1}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-4 py-4">
+                      <TableCell className="px-2 py-4">
                         <span className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                           {item.code}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-2 py-4">
                         <p className="font-medium text-gray-900 dark:text-white">
                           {item.name}
                         </p>
                       </TableCell>
 
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-2 py-4">
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {item.brand || "-"}
                         </p>
                       </TableCell>
 
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-2 py-4">
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
                           {item.stock}
                         </p>
                       </TableCell>
 
-                      <TableCell className="px-4 py-4">
+                      <TableCell className="px-2 py-4">
                         <p className="inline-block rounded-lg border border-green-200 bg-lime-50 px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400 truncate max-w-35">
                           {item.category?.name || "-"}
                         </p>
                       </TableCell>
 
-                      <TableCell className="px-4 py-4">
+                      <TableCell className="px-2 py-4">
                         <span className="inline-block rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400 truncate max-w-35">
                           {item.subcategory?.name || "-"}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-6 py-4">
+                      <TableCell className="px-2 py-4">
                         <span className="text-sm font-semibold text-gray-900 dark:text-white">
                           {item.unit}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-6 py-4 text-center">
+                      <TableCell className="px-2 py-4 text-center">
                         <ActionButtonsItems item={item} onSuccess={fetchItems} />
                       </TableCell>
                     </TableRow>
