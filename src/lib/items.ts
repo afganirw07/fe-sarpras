@@ -1,3 +1,4 @@
+import { id } from "zod/v4/locales";
 import { api } from "./api";
 
 export interface Item {
@@ -33,6 +34,29 @@ export interface ApiResponse<T> {
     currentPage: number;
     perPage: number;
   };
+}
+
+export interface DetailItem {
+  id: string;
+  item_id: string;
+  transaction_id: string;
+  room_id: string;
+  migration_id: string | null;
+  serial_number: string;
+  condition: string;
+  status: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  room?: { name: string };
+  transaction?: { po_number: string };
+  item?: {
+    name: string;
+    category?: { name: string };
+    subcategory?: { name: string };
+  };
+  userId?: { username: string };
 }
 
 // CREATE - Menambah item baru
@@ -83,5 +107,31 @@ export async function restoreDeleteItems(id: string): Promise<ApiResponse<Item>>
 export async function getDeletedItems(page: number = 1, perPage: number = 10): Promise<ApiResponse<Item[]>> {
   return await api(`/api/items-deleted?page=${page}&perPage=${perPage}`, {
     method: 'GET',
+  });
+}
+
+export async function getDetailItemsByItemId(
+  itemId: string,
+  page: number = 1,
+  perPage: number = 10
+): Promise<ApiResponse<DetailItem[]>> {
+  return await api(`/api/detail-items?item_id=${itemId}&page=${page}&perPage=${perPage}`, {
+    method: 'GET',
+  });
+
+}
+export async function getDetailItemById(
+  id: string
+): Promise<ApiResponse<DetailItem>> {
+  return await api(`/api/detail-items/${id}`, {
+    method: 'GET',
+  });
+}
+
+export async function deleteDetailItems(
+  id: string
+): Promise<ApiResponse<DetailItem>> {
+  return await api(`/api/detail-items/${id}`, {
+    method: 'DELETE',
   });
 }

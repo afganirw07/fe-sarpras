@@ -192,7 +192,6 @@ export default function ActionButtonsItems({
       category: formData.category_id,
       subCategory: formData.subcategory_id,
       unit: formData.unit.trim(),
-      stock: formData.stock,
       brand: formData.brand.trim(),
     };
 
@@ -233,7 +232,6 @@ export default function ActionButtonsItems({
         subcategory_id: formData.subcategory_id || null,
         brand: formData.brand?.trim() || null,
         unit: formData.unit.trim(),
-        stock: formData.stock,
         type: formData.type,
       };
 
@@ -443,7 +441,7 @@ export default function ActionButtonsItems({
               </div>
 
               {/* Stok */}
-              <div className="grid gap-2">
+              {/* <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
                   <Label>Stok *</Label>
                   {errors.stock && (
@@ -460,7 +458,7 @@ export default function ActionButtonsItems({
                     disabled={loading}
                   />
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <DialogFooter className="mt-6">

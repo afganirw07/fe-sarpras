@@ -395,7 +395,7 @@ export default function DialogAddItems({
               </div>
 
               {/* Stok */}
-              <div className="grid gap-2">
+              {/* <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
                   <div className="flex gap-2 items-center">
                   <Label>Stok *</Label>
@@ -416,7 +416,7 @@ export default function DialogAddItems({
                     disabled={loading}
                   />
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <DialogFooter className="mt-6">

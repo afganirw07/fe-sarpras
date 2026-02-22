@@ -29,11 +29,6 @@ export const itemSchema = z.object ({
         .min(1, "unit tidak boleh kosong")
         .regex(/^[a-zA-Z0-9]+$/, "unit tidak boleh mengandung simbol")
         .max(6, "Unit terlalu panjang, buat lebih singkat"),
-    stock: z.coerce
-        .number()
-        .refine((val) => !isNaN(val), {
-            message: "Tidak boleh mengandung huruf",
-            }),
     brand: z
         .string()
         .regex(/^[a-zA-Z0-9\s]+$/, "merek tidak boleh mengandung simbol")

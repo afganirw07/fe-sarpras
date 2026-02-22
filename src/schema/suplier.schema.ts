@@ -13,7 +13,7 @@ export const supplierSchema = z.object({
         .max(16, "nomor telepon maximal 16 digit"),
     address: z
         .string()
-        .regex(/^[a-zA-Z0-9]+$/, "nama tidak boleh mengandung simbol")
+        .regex(/^[a-zA-Z0-9\s]+$/, "nama tidak boleh mengandung simbol")
         .min(1, "Alamat harus di isi")
 
     

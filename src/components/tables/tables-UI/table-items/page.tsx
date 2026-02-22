@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { getItems, Item } from "@/lib/items";
 import ActionButtonsItems from "@/components/dialog/dialogItems/dialogActionButtonsItems";
 import Pagination from "../../Pagination";
+import { log } from "console";
 
 export default function TableItems() {
   const [items, setItems] = useState<Item[]>([]);
@@ -80,6 +81,8 @@ export default function TableItems() {
       );
     });
   }, [search, items]);
+  
+  
 
   const tableHeaders = [
     { label: "No", className: "w-20" },
