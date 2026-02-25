@@ -9,7 +9,7 @@ interface BreadcrumbProps {
   pageTitle: string;
 }
 
-const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
+const PageBreadcrumb: React.FC<BreadcrumbProps> = () => {
 
   const pathName = usePathname()
   const segments = pathName
