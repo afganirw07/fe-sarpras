@@ -9,5 +9,5 @@ export function getAvailableDetailItems(
   );
 }
 export function getDetailItemsByRoom(roomId: string) {
-  return api(`/api/detail-items?room_id=${roomId}&status=available`);
+  return api(`/api/detail-items?room_id=${roomId}&status=available&limit=1000`);
 }

@@ -38,12 +38,12 @@ function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
           <Image
             width={44}
             height={44}
-            src="/images/user/owner.jpg"
+            src="https://lms.smktarunabhakti.sch.id/pluginfile.php/1/core_admin/logocompact/300x300/1760106345/Logo%20TB%20Teks%20Putih.png"
             alt="User"
           />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">Musharof</span>
+        <span className="block mr-1 font-medium text-theme-sm">{namaUser}</span>
 
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${

@@ -64,6 +64,7 @@ export default function Mutasi() {
     [migrations]
   );
 
+  
   const uniqueToRooms = useMemo(
     () => new Set(migrations.map((m) => m.to_room_id)).size,
     [migrations]
@@ -72,7 +73,6 @@ export default function Mutasi() {
   return (
     <div className="mx-auto w-full max-w-xs md:max-w-2xl lg:max-w-7xl">
 
-      {/* Header */}
       <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
@@ -92,10 +92,8 @@ export default function Mutasi() {
         </div>
       </div>
 
-      {/* Stat Cards */}
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
 
-        {/* Total Mutasi */}
         <div className="rounded-xl border border-gray-200/50 bg-white/80 p-4 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
@@ -112,7 +110,6 @@ export default function Mutasi() {
           </div>
         </div>
 
-        {/* Dari WH */}
         <div className="rounded-xl border border-gray-200/50 bg-white/80 p-4 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-orange-100 p-2 dark:bg-orange-900/30">
@@ -129,7 +126,6 @@ export default function Mutasi() {
           </div>
         </div>
 
-        {/* Ke WH */}
         <div className="rounded-xl border border-gray-200/50 bg-white/80 p-4 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/30">
@@ -145,8 +141,6 @@ export default function Mutasi() {
             </div>
           </div>
         </div>
-
-        {/* Hasil Cari */}
         <div className="rounded-xl border border-gray-200/50 bg-white/80 p-4 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-violet-100 p-2 dark:bg-violet-900/30">
