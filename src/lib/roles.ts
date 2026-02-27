@@ -7,6 +7,21 @@ export interface Employee {
   isRoleDeleted: boolean;
 }
 
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface GetEmployeesResponse {
+  success: boolean;
+  data: Employee[];
+  pagination: Pagination;
+  message: string;
+}
+
+
 export interface EmployeeRole {
   full_name: string;
   id: string;
