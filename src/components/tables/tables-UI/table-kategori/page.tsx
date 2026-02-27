@@ -8,17 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import { Button } from "../../../ui/button";
 import {
   Search,
-  Pencil,
-  Trash2,
-  SquareArrowOutUpRight,
-  ArrowRightFromLine,
-  FolderOpen,
   Tag,
-  Building2,
-  List,
+
 } from "lucide-react";
 import DialogCategory from "@/components/dialog/dialogCategory/dialogAddCategory";
 import { useEffect, useState } from "react";
@@ -30,7 +23,6 @@ import {
 } from "@/lib/category";
 import { toast } from "sonner";
 import ActionButtonsCategory from "@/components/dialog/dialogCategory/dialogActionCategory";
-import ButtonTrashed from "@/components/ui/button/trashedButton";
 import Pagination from "../../Pagination";
 
 export default function TableKategori() {
@@ -124,7 +116,7 @@ export default function TableKategori() {
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                   <TableCell
                     isHeader
-                    className="bg-linear-to-br w-20 from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br w-20 from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-center text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     No
                   </TableCell>
@@ -199,8 +191,8 @@ export default function TableKategori() {
                       key={category.id}
                       className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                     >
-                      <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
+                     <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-center">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-[clamp(10px,0.7rem,10px)] font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300 mx-auto">
                           {(currentPage - 1) * perPage + index + 1}
                         </span>
                       </TableCell>

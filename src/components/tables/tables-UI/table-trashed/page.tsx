@@ -29,26 +29,35 @@ export default function TableTrashedItems() {
   };
 
   const fetchDeletedItems = async (page = currentPage) => {
-    try {
-      setLoading(true);
-      const response = await getDeletedItems();
-      
-      if (response?.data && Array.isArray(response.data)) {
-        setItems(response.data);
-      } else if (Array.isArray(response)) {
-        setItems(response);
+  try {
+    setLoading(true);
+    const response = await getDeletedItems(page, perPage);
+    console.log("Sample deleted item:", response.data[0]);
+    if (response?.data && Array.isArray(response.data)) {
+      setItems(response.data);
+      if (response.pagination) {
+        setTotalPages(response.pagination.totalPages || 1);
+        setTotalItems(response.pagination.total || 0);
       } else {
-        console.warn("Invalid response format:", response);
-        setItems([]);
+        setTotalPages(1);
+        setTotalItems(response.data.length);
       }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Gagal ambil data items terhapus");
+    } else if (Array.isArray(response)) {
+      setItems(response);
+      setTotalPages(1);
+      setTotalItems(response.length);
+    } else {
+      console.warn("Invalid response format:", response);
       setItems([]);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    toast.error("Gagal ambil data items terhapus");
+    setItems([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchDeletedItems(currentPage);
@@ -120,10 +129,9 @@ export default function TableTrashedItems() {
               <Table className="w-full">
                 <TableHeader>
                   <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                    {/* ✅ Kolom sama seperti TableItems */}
                     <TableCell
                       isHeader
-                      className="w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="text-center w-20 bg-linear-to-br from-gray-50 to-gray-100/50 px-8 py-4 lg:px-4 text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       No
                     </TableCell>
@@ -250,7 +258,7 @@ export default function TableTrashedItems() {
 
                         <TableCell className="px-4 py-4">
                           <p className="text-sm text-gray-900 dark:text-white truncate max-w-30">
-                            {item.category?.name} 
+                             {item.category?.name || "-"}
                           </p>
                         </TableCell>
 

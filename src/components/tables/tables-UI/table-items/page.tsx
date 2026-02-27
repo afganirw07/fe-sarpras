@@ -85,7 +85,7 @@ export default function TableItems() {
   
 
   const tableHeaders = [
-    { label: "No", className: "w-20" },
+    { label: "No", className: "w-20 text-center" },
     { label: "Kode" },
     { label: "Nama" },
     { label: "Merek" },
@@ -156,9 +156,9 @@ export default function TableItems() {
                     <TableCell
                       key={index}
                       isHeader
-                      className={`bg-linear-to-br from-gray-50 to-gray-100/50 px-2 py-4 text-left text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300 ${
-                        header.className || ""
-                      }`}
+                      className={`bg-linear-to-br from-gray-50 to-gray-100/50 px-2 py-4 text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300 ${
+                                header.className || "text-left"  
+                              }`}
                     >
                       {header.label}
                     </TableCell>
@@ -182,8 +182,8 @@ export default function TableItems() {
                       key={item.id}
                       className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                     >
-                      <TableCell className="px-2 py-4">
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
+                      <TableCell className="px-2 py-4 text-center">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300 mx-auto">
                           {(currentPage - 1) * perPage + index + 1}
                         </span>
                       </TableCell>

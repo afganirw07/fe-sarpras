@@ -88,7 +88,7 @@ export interface TransactionPaginationResponse {
 export interface BaseTransactionPayload {
   user_id: string;
   supplier_id: string;
-  po_number: string;
+  po_number: number;
   transaction_date: Date;
   status: TransactionStatus;
 }

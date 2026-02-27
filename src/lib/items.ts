@@ -53,8 +53,8 @@ export interface DetailItem {
   transaction?: { po_number: string };
   item?: {
     name: string;
-    category?: { name: string };
     subcategory?: { name: string };
+     category?: { name: string }; 
   };
   userId?: { username: string };
 }
@@ -133,5 +133,30 @@ export async function deleteDetailItems(
 ): Promise<ApiResponse<DetailItem>> {
   return await api(`/api/detail-items/${id}`, {
     method: 'DELETE',
+  });
+}
+
+export async function getDeletedDetailItems(
+  page: number = 1, perPage: number = 10
+): Promise<ApiResponse<DetailItem[]>>{
+  return await api(`/api/detail-items-deleted?page=${page}&limit=${perPage}`, {
+    method: "GET",
+  });
+}
+
+export async function hardDeleteDetailItem(
+  id:string
+):Promise<ApiResponse<DetailItem>>{
+  return await api(`/api/detail-items-deleted/${id}`, {
+    method:'DELETE'
+  }
+  )
+}
+
+export async function getDeletedDetailItemById(
+  id: string
+): Promise<ApiResponse<DetailItem>> {
+  return await api(`/api/detail-items-deleted-show/${id}`, {
+    method: "GET",
   });
 }

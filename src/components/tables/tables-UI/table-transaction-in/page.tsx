@@ -182,23 +182,17 @@ export default function TableTransactionIn() {
             <Table className="w-full">
               <TableHeader>
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                  {[
-                    "No",
-                    "User",
-                    "Tipe",
-                    "Warehouse",
-                    "Tanggal",
-                    "Status",
-                    "Aksi",
-                  ].map((header, i) => (
-                    <TableCell
-                      key={header}
-                      isHeader
-                      className={`bg-linear-to-br dark:text-gray-300} w-20 from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-200`}
-                    >
-                      {header}
-                    </TableCell>
-                  ))}
+                 {["No", "User", "Tipe", "Warehouse", "Tanggal", "Status", "Aksi"].map((header, i) => (
+                  <TableCell
+                    key={header}
+                    isHeader
+                    className={`bg-linear-to-br dark:text-gray-300} from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-200 ${
+                      header === "No" ? "w-20 text-center" : "text-left"  // ← tambah kondisi ini
+                    }`}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
                 </TableRow>
               </TableHeader>
 
@@ -246,8 +240,8 @@ export default function TableTransactionIn() {
                         key={trx.id}
                         className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                       >
-                        <TableCell className=" px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-[clamp(10px,0.7rem,10px)] font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
+                       <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-center">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-[clamp(10px,0.7rem,10px)] font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300 mx-auto">
                             {(currentPage - 1) * limit + index + 1}
                           </span>
                         </TableCell>
@@ -324,10 +318,10 @@ export default function TableTransactionIn() {
 
                           {/* {(session?.user.role === "admin" || session?.user.role === "approver") && ( */}
                           <ActionButtonIn
-          key={trx.id}
-          transaction={trx}
-          onSuccess={fetchTransactions} // 🔥 INI KUNCINYA
-        />
+                          key={trx.id}
+                          transaction={trx}
+                          onSuccess={fetchTransactions} 
+                          />
                           {/* )} */}
                         </TableCell>
                       </TableRow>
