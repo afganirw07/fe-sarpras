@@ -39,6 +39,7 @@ import { getRoomById, Room } from "@/lib/warehouse";
 import { Label } from "@/components/ui/label";
 import { getDetailItemsByRoom } from "@/lib/detail-items";
 import ExportExcelButton from "@/components/button-excell/buttonExcell";
+import ButtonBack from "@/components/ui/button/backButton";
 
 interface Item {
   id: string;
@@ -63,7 +64,6 @@ export default function TableDetailWarehouse() {
       try {
         setLoading(true);
 
-        // ✅ Fetch warehouse dan items secara paralel
         const [warehouseData, itemsData] = await Promise.all([
           getRoomById(id as string),
           getDetailItemsByRoom(id as string),
@@ -154,7 +154,7 @@ export default function TableDetailWarehouse() {
 
   return (
     <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
-      <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
+      <div className="flex items-center justify-between mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         <div className="flex items-center gap-3">
           <div className="bg-linear-to-br rounded-xl from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
             <Warehouse className="h-6 w-6 text-white" />
@@ -168,6 +168,7 @@ export default function TableDetailWarehouse() {
             </p>
           </div>
         </div>
+        <ButtonBack route="/warehouse"/>
       </div>
 
       <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
