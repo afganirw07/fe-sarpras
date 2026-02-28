@@ -107,47 +107,37 @@ export default function TableTransactionIn() {
   }, [room]);
 
   const getStatusConfig = (status: string) => {
-    const statusLower = status.toLowerCase();
-    if (
-      statusLower.includes("approved") ||
-      statusLower.includes("selesai") ||
-      statusLower.includes("success")
-    )
-      return {
-        class:
-          "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
-        icon: <CheckCircle2 className="h-3.5 w-3.5" />,
-      };
-    if (statusLower.includes("pending") || statusLower.includes("process"))
-      return {
-        class:
-          "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800",
-        icon: <Clock className="h-3.5 w-3.5" />,
-      };
-    if (
-      statusLower.includes("reject") ||
-      statusLower.includes("gagal") ||
-      statusLower.includes("failed")
-    )
-      return {
-        class:
-          "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800",
-        icon: <XCircle className="h-3.5 w-3.5" />,
-      };
+  const s = status.toLowerCase();
+
+  if (s === "draft")
     return {
-      class:
-        "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
+      class: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
       icon: <Package className="h-3.5 w-3.5" />,
     };
+
+  if (s === "approved")
+    return {
+      class: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800",
+      icon: <Clock className="h-3.5 w-3.5" />,
+    };
+
+  if (s === "received")
+    return {
+      class: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
+      icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+    };
+
+  return {
+    class: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700",
+    icon: <Package className="h-3.5 w-3.5" />,
   };
+};
 
   const getTypeConfig = (type: string) => {
     const typeLower = type.toLowerCase();
     if (typeLower.includes("in") || typeLower.includes("masuk"))
       return "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-800";
-    if (typeLower.includes("out") || typeLower.includes("keluar"))
-      return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800";
-    return "bg-gray-100 text-gray-700 border-gray-200";
+
   };
 
   const totalPending = transactions.filter((t) =>
@@ -267,8 +257,8 @@ export default function TableTransactionIn() {
                           <div className="flex items-center gap-2">
                             <Warehouse className="h-4 w-4 text-gray-400" />
                             <span className="text-[clamp(10px,0.7rem,10px)] text-gray-700 dark:text-gray-300">
-                              {trx.detail_items?.[0].room_id ? roomMap[trx.detail_items[0].room_id] ?? "Loading..." : "N/A"}
-                              </span>
+                             {roomMap[trx.detail_items?.[0]?.room_id] ?? "Loading..."}
+                            </span>
                           </div>
                         </TableCell>
 

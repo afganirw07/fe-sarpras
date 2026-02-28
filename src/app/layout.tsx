@@ -22,18 +22,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.className} ${figtree.className} ${quicksand.className} dark:bg-gray-900`}>
-<<<<<<< HEAD
-        <ThemeProvider>
-          <SidebarProvider>
-            <Providers>
-              <div className="flex">
-                <main className="flex-1 min-h-screen">
-                  {children}
-                  <Toaster position='top-right'/>
-                </main>
-              </div>
-            </Providers>
-=======
         <SessionProvider>
           <SessionExpiryWatcher /> 
           <ThemeProvider>
@@ -46,7 +34,6 @@ export default function RootLayout({
                   </main>
                 </div>
               </Providers>
->>>>>>> 20db1bec57d1eebbbbb7ec76ca75d5add72f1386
             </SidebarProvider>
           </ThemeProvider>
         </SessionProvider>
