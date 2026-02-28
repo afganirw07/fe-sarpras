@@ -42,7 +42,7 @@ import { useState } from "react";
 import { toast, Toaster } from "sonner";
 import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { z } from "zod";
+import { any, z } from "zod";
 import { tansactionInSchema } from "@/schema/transaction_jn.schema"; 
 
 interface TransactionItemRow {
@@ -206,7 +206,7 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
     };
 
     try {
-      const result = await createTransactionIn(payload);
+      const result = await createTransactionIn(payload as any);
       console.log("===============================", result);
       toast.success("Transaction berhasil dibuat");
       await onSuccess?.();
@@ -227,7 +227,6 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
 
   return (
     <div className="flex justify-end">
-      <Toaster richColors />
       <Dialog onOpenChange={(open) => open && fetchAll()}>
         <DialogTrigger asChild>
           <Button size="sm" className="bg-blue-800 text-white hover:bg-blue-900">

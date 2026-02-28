@@ -109,7 +109,7 @@ export default function TableTransactionOut() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
+ <div className="w-full lg:max-w-7xl md:max-w-4xl max-w-xs">
       <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         <div className="flex flex-col gap-3 border-b border-gray-200/50 p-6 sm:flex-row sm:items-center sm:justify-between dark:border-white/5">
           <div className="relative w-full md:w-80">
@@ -146,7 +146,7 @@ export default function TableTransactionOut() {
                     <TableCell
                       key={h.label}
                       isHeader
-                      className={`bg-linear-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300 ${h.cls}`}
+                      className={`bg-linear-to-br from-gray-50 to-gray-100/50  px-[clamp(10px,1vw,16px)] py-[clamp(10px,0.9vw,16px)] text-left text-[clamp(8px,0.7rem,8px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300 ${h.cls}`}
                     >
                       {h.label}
                     </TableCell>
@@ -219,7 +219,7 @@ export default function TableTransactionOut() {
                       </TableCell>
 
                       <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
-                        <span className="text-[clamp(10px,0.7rem,13px)] font-medium text-gray-800 dark:text-gray-200">
+                        <span className="text-[clamp(8px,0.7rem,13px)] font-medium text-gray-800 dark:text-gray-200">
                           {trx.item?.item?.name ?? "-"}
                         </span>
                       </TableCell>
@@ -272,7 +272,7 @@ export default function TableTransactionOut() {
                       <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
                         <StatusBadge status={trx.status} />
                       </TableCell>
-                      <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
+                      <TableCell className="border border-gray-200 px-[clamp(10px,1vw,18px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
                         <div className="flex flex-row items-center gap-2">
                         <Tooltip>
                             <TooltipTrigger asChild>

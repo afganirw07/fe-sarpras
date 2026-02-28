@@ -10,27 +10,17 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { getUsers } from "@/lib/user";
-import {
-  getTransactionById,
-  Transaction,
-  TransactionDetail,
-  ItemConditions,
-} from "@/lib/transaction";
+import { getTransactionById, Transaction, ItemConditions } from "@/lib/transaction";
+import { getTransactionDetails } from "@/lib/transaction-details";
 import { getItems } from "@/lib/items";
 import { getRooms } from "@/lib/warehouse";
 import { getSuppliers } from "@/lib/supplier";
 import { useParams } from "next/navigation";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 const MONTH_NAMES = [
   "Januari","Februari","Maret","April","Mei","Juni",
   "Juli","Agustus","September","Oktober","November","Desember",
 ];
-
-function formatMonth(month: number, year: number) {
-  return `${MONTH_NAMES[month - 1] ?? month} ${year}`;
-}
 
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString("id-ID", {
@@ -38,9 +28,9 @@ function formatDate(date: Date | string) {
   });
 }
 
-function formatPrice(price: number | null) {
+function formatPrice(price: number | string | null) {
   if (price == null) return "-";
-  return `Rp ${price.toLocaleString("id-ID")}`;
+  return `Rp ${Number(price).toLocaleString("id-ID")}`;
 }
 
 function conditionBadgeClass(condition: string) {
@@ -52,27 +42,29 @@ function conditionBadgeClass(condition: string) {
   }
 }
 
-
 export default function ShowTransaction() {
   const { id } = useParams();
 
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
-  const [loading, setLoading]         = useState(true);
-  const [users, setUsers]             = useState<any[]>([]);
-  const [suppliers, setSuppliers]     = useState<any[]>([]);
-  const [item, setItem] = useState<any[]>([])
-  const [room, setRoom] = useState<any[]>([])
-  const [search, setSearch]           = useState("");
-
-  const transactionDetails: TransactionDetail[] = transaction?.transaction_details ?? [];
+  const [transaction, setTransaction]           = useState<Transaction | null>(null);
+  const [transactionDetails, setTransactionDetails] = useState<any[]>([]);
+  const [users, setUsers]                       = useState<any[]>([]);
+  const [suppliers, setSuppliers]               = useState<any[]>([]);
+  const [items, setItems]                       = useState<any[]>([]);
+  const [rooms, setRooms]                       = useState<any[]>([]);
+  const [search, setSearch]                     = useState("");
+  const [loading, setLoading]                   = useState(true);
 
   useEffect(() => {
     if (!id) return;
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await getTransactionById(id as string) as any;
-        setTransaction(res?.data ?? res);
+        const [transactionRes, detailsRes] = await Promise.all([
+          getTransactionById(id as string) as any,
+          getTransactionDetails(id as string),
+        ]);
+        setTransaction(transactionRes?.data ?? transactionRes);
+        setTransactionDetails(detailsRes?.data ?? []);
       } catch {
         toast.error("Gagal ambil detail transaksi");
       } finally {
@@ -87,59 +79,41 @@ export default function ShowTransaction() {
   }, []);
 
   useEffect(() => {
-    getSuppliers().then((res: any) => {
-      setSuppliers(res?.data ?? res);
-    });
+    getSuppliers().then((res: any) => setSuppliers(res?.data ?? res));
   }, []);
 
   useEffect(() => {
-    getRooms().then((res: any) => {
-      setRoom (res?.data ?? res);
-    });
+    getRooms().then((res: any) => setRooms(res?.data ?? res));
   }, []);
 
-   useEffect(() => {
-    getItems().then((res: any) => {
-      setItem (res?.data ?? []);
-    });
+  useEffect(() => {
+    getItems().then((res: any) => setItems(res?.data ?? []));
   }, []);
 
-   const roomMap = useMemo(() => {
-    return room.reduce((acc, room) => {
-      acc[room.id] = room.name;
-      return acc;
-    }, {} as Record<string, string>);
-  }, [room]);
+  const userMap = useMemo(() =>
+    users.reduce((acc, u) => ({ ...acc, [u.id]: u.username }), {} as Record<string, string>)
+  , [users]);
 
-  const itemMap = useMemo(() => {
-    return item.reduce((acc, item) => {
-      acc[item.id] = item.name;
-      return acc;
-    }, {} as Record<string, string>);
-  }, [item]);
+  const supplierMap = useMemo(() =>
+    suppliers.reduce((acc, s) => ({ ...acc, [s.id]: s.name }), {} as Record<string, string>)
+  , [suppliers]);
 
-  const userMap = useMemo(() => {
-    return users.reduce((acc, user) => {
-      acc[user.id] = user.username;
-      return acc;
-    }, {} as Record<string, string>);
-  }, [users]);
+  const roomMap = useMemo(() =>
+    rooms.reduce((acc, r) => ({ ...acc, [r.id]: r.name }), {} as Record<string, string>)
+  , [rooms]);
 
-  const supplierMap = useMemo(() => {
-    return suppliers.reduce((acc, s) => {
-      acc[s.id] = s.name;
-      return acc;
-    }, {} as Record<string, string>);
-  }, [suppliers]);
+  const itemMap = useMemo(() =>
+    items.reduce((acc, i) => ({ ...acc, [i.id]: i.name }), {} as Record<string, string>)
+  , [items]);
 
   const filteredDetails = useMemo(() => {
     const keyword = search.toLowerCase();
-    return transactionDetails.filter((item) =>
-      item.item_id.toLowerCase().includes(keyword) ||
-      item.room_id.toLowerCase().includes(keyword) ||
-      item.condition.toLowerCase().includes(keyword)
+    return transactionDetails.filter((detail) =>
+      (itemMap[detail.item_id] ?? detail.item_id).toLowerCase().includes(keyword) ||
+      (roomMap[detail.room_id] ?? detail.room_id).toLowerCase().includes(keyword) ||
+      detail.condition.toLowerCase().includes(keyword)
     );
-  }, [search, transactionDetails]);
+  }, [search, transactionDetails, itemMap, roomMap]);
 
   if (loading) {
     return (
@@ -169,7 +143,6 @@ export default function ShowTransaction() {
 
   return (
     <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
-      <Toaster />
 
       <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
         <div className="flex items-center gap-3">
@@ -194,14 +167,13 @@ export default function ShowTransaction() {
         </h2>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <User className="h-4 w-4 text-blue-500" />
               Created By
             </label>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
-              {userMap[transaction.user_id] ?? "Loading..."}
+              {userMap[transaction.user_id] ?? "-"}
             </div>
           </div>
 
@@ -241,11 +213,10 @@ export default function ShowTransaction() {
               Supplier
             </label>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
-              {supplierMap[transaction.supplier_id] ?? "Loading..."}
+              {supplierMap[transaction.supplier_id] ?? "-"}
             </div>
           </div>
 
-          {/* Tanggal Transaksi */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <CalendarDays className="h-4 w-4 text-blue-500" />
@@ -255,11 +226,9 @@ export default function ShowTransaction() {
               {formatDate(transaction.transaction_date)}
             </div>
           </div>
-
         </div>
       </div>
 
-      {/* ── Table Section ── */}
       <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
         <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -277,7 +246,7 @@ export default function ShowTransaction() {
           <div className="mt-4 relative w-full md:w-80">
             <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              placeholder="Cari item ID, room, atau kondisi..."
+              placeholder="Cari item, room, atau kondisi..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
@@ -289,11 +258,11 @@ export default function ShowTransaction() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                {["No", "Item ID", "Room ID", "Quantity", "Price", "Kondisi", "Tahun Pengadaan"].map((col) => (
+                {["No", "Nama Item", "Room", "Quantity", "Price", "Kondisi", "Tahun Pengadaan"].map((col) => (
                   <TableCell
                     key={col}
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     {col}
                   </TableCell>
@@ -321,44 +290,42 @@ export default function ShowTransaction() {
               ) : (
                 filteredDetails.map((detail, index) => (
                   <TableRow
-                    key={detail.item_id}
+                    key={detail.id}
                     className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                   >
-                    {/* No */}
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                    <TableCell className="px-6 py-4">
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                         {index + 1}
                       </span>
                     </TableCell>
 
-                    {/* Item ID */}
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
-                      <span className="font-mono text-xs text-gray-600 dark:text-gray-400">
-                        {itemMap[detail.item_id] ?? "Loading..."}
+                    <TableCell className="px-6 py-4">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        {itemMap[detail.item_id] ?? "-"}
                       </span>
                     </TableCell>
 
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
-                      <span className="font-mono text-xs text-gray-600 dark:text-gray-400">
-                           {roomMap[detail.room_id] ?? "Loading..."}
+                    <TableCell className="px-6 py-4">
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {roomMap[detail.room_id] ?? "-"}
                       </span>
                     </TableCell>
 
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                       {detail.quantity}
                     </TableCell>
 
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                       {formatPrice(detail.price)}
                     </TableCell>
 
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                    <TableCell className="px-6 py-4">
                       <span className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${conditionBadgeClass(detail.condition)}`}>
                         {detail.condition}
                       </span>
                     </TableCell>
 
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-sm text-gray-700 dark:text-gray-300">
+                    <TableCell className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                       {detail.procurement_year}
                     </TableCell>
                   </TableRow>

@@ -209,7 +209,7 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-full max-w-5xl p-6">
+      <DialogContent className="w-full max-w-5xl p-6 bg-black">
         <DialogHeader>
           <DialogTitle>Tambah Mutasi</DialogTitle>
         </DialogHeader>
@@ -322,7 +322,7 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
               type="button"
               onClick={handlePindahkan}
               disabled={selectedIds.length === 0}
-              className="mt-4 bg-blue-800 hover:bg-blue-900 disabled:opacity-50"
+              className="mt-4 bg-blue-800 hover:bg-blue-900 disabled:opacity-50 dark:text-white"
             >
               Pindahkan
               <ArrowRightFromLine className="ml-2" />
@@ -406,7 +406,7 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
             type="button"
             onClick={handleSubmit}
             disabled={loading}
-            className="bg-blue-800 hover:bg-blue-900"
+            className="bg-blue-800 hover:bg-blue-900 dark:text-white"
           >
             {loading ? "Menyimpan..." : "Save"}
           </Button>

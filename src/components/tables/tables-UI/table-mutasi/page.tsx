@@ -123,8 +123,6 @@ export default function TableMutasi({
 
   return (
     <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
-      <Toaster richColors />
-
       <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
 
         <div className="border-b border-gray-200/50 p-6 dark:border-white/5">

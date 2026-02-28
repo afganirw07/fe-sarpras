@@ -244,7 +244,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="max-h-[90vh] w-full max-w-6xl overflow-y-auto p-8">
+        <DialogContent className="max-h-[90vh] w-full max-w-6xl overflow-y-auto p-8 bg-black">
           <form>
             <DialogHeader className="mb-6">
               <DialogTitle className="text-xl font-semibold">
@@ -398,7 +398,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
                     ) : (
                       users.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
-                          {user.name}
+                          {user.username}
                         </SelectItem>
                       ))
                     )}
@@ -412,7 +412,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
                   mode="single"
                   selected={borrowDate}
                   onSelect={setBorrowDate}
-                  className="rounded-lg border"
+                  className="rounded-lg border bg-black"
                 />
               </div>
 
@@ -422,7 +422,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
                   mode="single"
                   selected={returnDate}
                   onSelect={setReturnDate}
-                  className="rounded-lg border"
+                  className="rounded-lg border bg-black"
                 />
               </div>
             </div>
@@ -439,11 +439,11 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
               </Button>
             </div>
 
-            <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+            <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
               <div className="relative overflow-x-auto">
                 <div className="inline-block min-w-full align-middle">
-                  <Table className="w-full min-w-[800px] table-auto">
-                    <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
+                  <Table className="w-full min-w-200 table-auto">
+                    <TableHeader className="border border-gray-100 dark:border-white/5">
                       <TableRow>
                         {[
                           "No",
