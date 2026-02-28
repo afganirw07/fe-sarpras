@@ -26,24 +26,225 @@ import {
 } from "@/components/ui/select";
 import Label from "../../../form/Label";
 import { Input } from "../../../ui/input";
-import { getCategoryById } from "@/lib/category";
+import { createLoanRequest } from "@/lib/loan-request";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { getAvailableDetailItems } from "@/lib/detail-items";
+import { getRooms, Room } from "@/lib/warehouse";
+import { getItems, Item } from "@/lib/items";
+import { getUsers, User } from "@/lib/user";
+import { getCategories, Category } from "@/lib/category";
+import { Calendar } from "@/components/ui/calendar";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-export default function DialogTransactionOut() {
-  const tableData: any[] = [];
+interface DetailItem {
+  id: string;
+  item_id: string;
+  room_id: string;
+  serial_number: string;
+  condition: string;
+  status: string;
+  room: { name: string };
+  item: {
+    name: string;
+    category: { name: string };
+    subcategory: { name: string };
+  };
+}
+
+interface TransactionOutRow {
+  detail_item_id: string;
+  item_id: string;
+  item_name: string;
+  serial_number: string;
+  subcategory: string;
+  condition: string;
+  warehouse_name: string;
+  remarks: string;
+}
+
+interface DialogTransactionOutProps {
+  onSuccess?: () => void;
+}
+
+export default function DialogTransactionOut({ onSuccess }: DialogTransactionOutProps) {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const [open, setOpen] = useState(false);
+  const [warehouse, setWarehouse] = useState<Room[]>([]);
+  const [category, setCategory] = useState<Category[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
+  const [rows, setRows] = useState<TransactionOutRow[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState("");
+  const [borrowerWarehouseId, setBorrowerWarehouseId] = useState("");
+  const [originWarehouseId, setOriginWarehouseId] = useState("");
+  const [selectedUsersId, setSelectedUsersId] = useState("");
+  const [remarks, setRemarks] = useState("");
+  const [borrowDate, setBorrowDate] = useState<Date | undefined>();
+  const [returnDate, setReturnDate] = useState<Date | undefined>();
+
+  const [availableDetailItems, setAvailableDetailItems] = useState<DetailItem[]>([]);
+  const [selectedDetailItemId, setSelectedDetailItemId] = useState("");
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const fetchAll = async () => {
+      try {
+        const [roomRes, itemRes, usersRes, categoryRes] = await Promise.all([
+          getRooms(),
+          getItems(),
+          getUsers(),
+          getCategories(),
+        ]);
+        setWarehouse(roomRes.data);
+        setItems(itemRes.data);
+        setUsers(usersRes);
+        setCategory(categoryRes.data);
+      } catch (error) {
+        console.error("Fetch dialog data error:", error);
+      }
+    };
+    fetchAll();
+  }, [open]);
+
+  useEffect(() => {
+    if (!selectedItemId || !originWarehouseId) {
+      setAvailableDetailItems([]);
+      setSelectedDetailItemId("");
+      return;
+    }
+    const fetchDetailItems = async () => {
+      try {
+        setLoadingDetail(true);
+        const res = await getAvailableDetailItems(selectedItemId, originWarehouseId);
+        const alreadyAdded = new Set(rows.map((r) => r.detail_item_id));
+       setAvailableDetailItems(
+  (res.data ?? []).filter(
+    (d: DetailItem) =>
+      !alreadyAdded.has(d.id) &&
+      d.status.toLowerCase() !== "borrowed"
+  )
+);
+        setSelectedDetailItemId("");
+      } catch (error) {
+        console.error("Fetch detail items error:", error);
+      } finally {
+        setLoadingDetail(false);
+      }
+    };
+    fetchDetailItems();
+  }, [selectedItemId, originWarehouseId]);
+
+  const resetForm = () => {
+    setRows([]);
+    setBorrowDate(undefined);
+    setReturnDate(undefined);
+    setSelectedItemId("");
+    setSelectedCategoryId("");
+    setOriginWarehouseId("");
+    setBorrowerWarehouseId("");
+    setRemarks("");
+    setAvailableDetailItems([]);
+    setSelectedDetailItemId("");
+    setSelectedUsersId("");
+  };
+
+  const handleAddItem = () => {
+    if (!selectedDetailItemId) {
+      toast.error("Pilih unit (serial number) terlebih dahulu");
+      return;
+    }
+    const detail = availableDetailItems.find((d) => d.id === selectedDetailItemId);
+    if (!detail) return;
+
+    setRows((prev) => [
+      ...prev,
+      {
+        detail_item_id: detail.id,
+        item_id: detail.item_id,
+        item_name: detail.item.name,
+        serial_number: detail.serial_number,
+        subcategory: detail.item.subcategory?.name ?? "-",
+        condition: detail.condition,
+        warehouse_name: detail.room?.name ?? warehouse.find((w) => w.id === originWarehouseId)?.name ?? "-",
+        remarks: remarks,
+      },
+    ]);
+    setAvailableDetailItems((prev) => prev.filter((d) => d.id !== selectedDetailItemId));
+    setSelectedDetailItemId("");
+  };
+
+  const handleRemoveRow = (detail_item_id: string) => {
+    setRows((prev) => prev.filter((r) => r.detail_item_id !== detail_item_id));
+  };
+
+  const handleSave = async () => {
+    if (!borrowDate || !returnDate) {
+      toast.error("Tanggal wajib diisi");
+      return;
+    }
+    if (!borrowerWarehouseId || !originWarehouseId) {
+      toast.error("Warehouse belum dipilih");
+      return;
+    }
+    if (!rows.length) {
+      toast.error("Belum ada item dipilih");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await Promise.all(
+        rows.map((row) =>
+          createLoanRequest({
+            user_id: selectedUsersId,
+            item_id: row.detail_item_id,
+            qty: 1,
+            borrow_date: borrowDate?.toISOString(),
+            return_date: returnDate?.toISOString() ?? undefined,
+            description: row.remarks || remarks,
+            origin_warehouse_id: originWarehouseId,
+            borrower_warehouse_id: borrowerWarehouseId,
+          })
+        )
+      );
+      toast.success(`${rows.length} transaksi berhasil dibuat`);
+      resetForm();
+      setOpen(false);
+      onSuccess?.();
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error("Gagal membuat transaksi. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredItems = selectedCategoryId
+    ? items.filter((item) => item.category_id === selectedCategoryId)
+    : items;
+
+  const addedDetailIds = new Set(rows.map((r) => r.detail_item_id));
 
   return (
     <div className="flex justify-end">
-      <Dialog>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
         <DialogTrigger asChild>
-          <Button
-            size="sm"
-            className="bg-blue-800 text-white hover:bg-blue-900"
-          >
+          <Button size="sm" className="bg-blue-800 text-white hover:bg-blue-900">
             + Add Transaction Out
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="max-h-[90vh] w-full max-w-6xl overflow-y-auto p-8">
+        <DialogContent className="max-h-[90vh] w-full max-w-6xl overflow-y-auto p-8 bg-black">
           <form>
             <DialogHeader className="mb-6">
               <DialogTitle className="text-xl font-semibold">
@@ -52,179 +253,251 @@ export default function DialogTransactionOut() {
             </DialogHeader>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              
               <div className="flex flex-col gap-2">
                 <Label>Warehouse Peminjam</Label>
-                <Select>
+                <Select value={borrowerWarehouseId} onValueChange={setBorrowerWarehouseId}>
                   <SelectTrigger className="h-11 w-full">
-                    <SelectValue placeholder="Pilih Warehouse" />
+                    <SelectValue placeholder="Pilih Warehouse Peminjam" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="w1">Warehouse 1</SelectItem>
+                    {warehouse.map((room) => (
+                      <SelectItem key={room.id} value={room.id} disabled={room.id === originWarehouseId}>
+                        {room.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex flex-col gap-2">
-                <Label>Warehouse Asal Items :</Label>
-                <Select>
+                <Label>Warehouse Asal Items</Label>
+                <Select
+                  value={originWarehouseId}
+                  onValueChange={(val) => {
+                    setOriginWarehouseId(val);
+                    setSelectedDetailItemId("");
+                  }}
+                >
                   <SelectTrigger className="h-11 w-full">
-                    <SelectValue placeholder="Pilih Warehouse" />
+                    <SelectValue placeholder="Pilih Warehouse Asal" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="w1">Warehouse 1</SelectItem>
+                    {warehouse.map((room) => (
+                      <SelectItem key={room.id} value={room.id} disabled={room.id === borrowerWarehouseId}>
+                        {room.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex flex-col gap-2">
                 <Label>Kategori</Label>
-                <Select>
+                <Select
+                  value={selectedCategoryId}
+                  onValueChange={(val) => {
+                    setSelectedCategoryId(val);
+                    setSelectedItemId("");
+                    setAvailableDetailItems([]);
+                    setSelectedDetailItemId("");
+                  }}
+                >
                   <SelectTrigger className="h-11 w-full">
-                    <SelectValue placeholder="Pilih Warehouse" />
+                    <SelectValue placeholder="Pilih Kategori" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="w1">Warehouse 1</SelectItem>
+                    {category.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex flex-col gap-2">
                 <Label>Item</Label>
-                <Select>
+                <Select
+                  value={selectedItemId}
+                  onValueChange={(val) => {
+                    setSelectedItemId(val);
+                    setSelectedDetailItemId("");
+                  }}
+                >
                   <SelectTrigger className="h-11 w-full">
-                    <SelectValue placeholder="Pilih Supplier" />
+                    <SelectValue placeholder="Pilih Item" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="s1">Supplier 1</SelectItem>
+                    {filteredItems.map((item) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>
+                  Pilih Unit (Serial Number)
+                  {loadingDetail && (
+                    <span className="ml-2 text-xs text-gray-400">Loading...</span>
+                  )}
+                  {!loadingDetail && selectedItemId && originWarehouseId && (
+                    <span className="ml-2 text-xs text-gray-400">
+                      {availableDetailItems.length} unit tersedia
+                    </span>
+                  )}
+                </Label>
+                <Select
+                  value={selectedDetailItemId}
+                  onValueChange={setSelectedDetailItemId}
+                  disabled={!selectedItemId || !originWarehouseId || loadingDetail}
+                >
+                  <SelectTrigger className="h-11 w-full">
+                    <SelectValue placeholder="Pilih unit..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableDetailItems.length === 0 ? (
+                      <SelectItem value="empty" disabled>
+                        {loadingDetail ? "Loading..." : "Tidak ada unit tersedia"}
+                      </SelectItem>
+                    ) : (
+                      availableDetailItems
+                        .filter((d) => !addedDetailIds.has(d.id))
+                        .map((d) => (
+                          <SelectItem key={d.id} value={d.id}>
+                            {d.serial_number} — {d.condition}
+                          </SelectItem>
+                        ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex flex-col gap-2">
                 <Label>Remark</Label>
-                <Input placeholder="Item" />
+                <Input
+                  placeholder="Masukkan keterangan..."
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                />
               </div>
 
               <div className="flex flex-col gap-2">
                 <Label>Bertanggung Jawab</Label>
-                <Select>
+                <Select value={selectedUsersId} onValueChange={setSelectedUsersId}>
                   <SelectTrigger className="h-11 w-full">
-                    <SelectValue placeholder="Pilih Kategori" />
+                    <SelectValue placeholder="Pilih User" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="k1">Kategori 1</SelectItem>
+                    {users.length === 0 ? (
+                      <SelectItem value="empty" disabled>
+                        Tidak ada user
+                      </SelectItem>
+                    ) : (
+                      users.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.username}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
+            <div className="flex flex-row py-4 space-x-6">
+              <div className="flex flex-col gap-2">
+                <Label>Borrow Date</Label>
+                <Calendar
+                  mode="single"
+                  selected={borrowDate}
+                  onSelect={setBorrowDate}
+                  className="rounded-lg border bg-black"
+                />
+              </div>
 
+              <div className="flex flex-col gap-2">
+                <Label>Return Date</Label>
+                <Calendar
+                  mode="single"
+                  selected={returnDate}
+                  onSelect={setReturnDate}
+                  className="rounded-lg border bg-black"
+                />
+              </div>
+            </div>
             </div>
 
             <div className="mt-6">
               <Button
                 type="button"
-                className="bg-blue-800 text-white hover:bg-blue-900"
+                onClick={handleAddItem}
+                disabled={!selectedDetailItemId}
+                className="bg-blue-800 text-white hover:bg-blue-900 disabled:opacity-50"
               >
                 Add Item +
               </Button>
             </div>
 
-            <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+            <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
               <div className="relative overflow-x-auto">
                 <div className="inline-block min-w-full align-middle">
-                  <Table className="w-full min-w-[800px] table-auto">
-                    <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
+                  <Table className="w-full min-w-200 table-auto">
+                    <TableHeader className="border border-gray-100 dark:border-white/5">
                       <TableRow>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-xs font-medium text-gray-200"
-                        >
-                          No
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                          Item ID
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                          Item Name
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                          Item SN Number
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[220px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                          Item Subcategory
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                           Item WH Asal
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                           Item condition
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                            Tahun QTY
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                           Item Remarks
-                        </TableCell>
-                        <TableCell
-                          isHeader
-                          className="min-w-[30px] rounded-r-md border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                           Action
-                        </TableCell>
+                        {[
+                          "No",
+                          "Item ID",
+                          "Item Name",
+                          "Item SN Number",
+                          "Item Subcategory",
+                          "Item WH Asal",
+                          "Item Condition",
+                          "QTY",
+                          "Item Remarks",
+                          "Action",
+                        ].map((header, i) => (
+                          <TableCell
+                            key={header}
+                            isHeader
+                            className={`border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200 ${
+                              i === 0 ? "rounded-l-md border-r-0" : ""
+                            } ${i === 9 ? "rounded-r-md" : ""}`}
+                          >
+                            {header}
+                          </TableCell>
+                        ))}
                       </TableRow>
                     </TableHeader>
 
                     <TableBody>
-                      {tableData.length === 0 ? (
+                      {rows.length === 0 ? (
                         <TableRow>
-                          <td
-                            colSpan={10}
-                            className="border px-6 py-6 text-center text-sm text-gray-500"
-                          >
-                            Tidak ada Kategori
+                          <td colSpan={10} className="py-6 text-center text-gray-400">
+                            No items selected
                           </td>
                         </TableRow>
                       ) : (
-                        tableData.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="border px-6 py-4">
-                              {user.id}
-                            </TableCell>
+                        rows.map((row, index) => (
+                          <TableRow key={row.detail_item_id}>
+                            <TableCell className="border px-6 py-4">{index + 1}</TableCell>
+                            <TableCell className="border px-4 py-4 text-xs">{row.item_id}</TableCell>
+                            <TableCell className="border px-4 py-4">{row.item_name}</TableCell>
+                            <TableCell className="border px-4 py-4 text-xs">{row.serial_number}</TableCell>
+                            <TableCell className="border px-4 py-4">{row.subcategory}</TableCell>
+                            <TableCell className="border px-4 py-4">{row.warehouse_name}</TableCell>
+                            <TableCell className="border px-4 py-4">{row.condition}</TableCell>
+                            <TableCell className="border px-4 py-4">1</TableCell>
+                            <TableCell className="border px-4 py-4">{row.remarks || "-"}</TableCell>
                             <TableCell className="border px-4 py-4">
-                              {user.id}
-                            </TableCell>
-                            <TableCell className="border px-4 py-4">
-                              {user.nama}
-                            </TableCell>
-                            <TableCell className="border px-4 py-4">
-                              {user.nama}
-                            </TableCell>
-                            <TableCell className="border px-4 py-4">
-                              {user.nama}
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                type="button"
+                                onClick={() => handleRemoveRow(row.detail_item_id)}
+                              >
+                                Remove
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))
@@ -237,10 +510,24 @@ export default function DialogTransactionOut() {
 
             <DialogFooter className="mt-8 gap-3">
               <DialogClose asChild>
-                <Button variant="outline">Close</Button>
+                <Button variant="outline" type="button">
+                  Close
+                </Button>
               </DialogClose>
-              <Button className="bg-blue-800 text-white hover:bg-blue-900">
-                Save
+              <Button
+                type="button"
+                onClick={handleSave}
+                disabled={loading}
+                className="bg-blue-800 text-white hover:bg-blue-900"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </span>
+                ) : (
+                  "Save"
+                )}
               </Button>
             </DialogFooter>
           </form>

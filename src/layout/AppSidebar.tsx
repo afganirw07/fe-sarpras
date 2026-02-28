@@ -50,9 +50,8 @@ const navItems: NavItem[] = [
     name: "Transaksi",
     icon: <Package />,
     subItems: [
-      { name: "Barang Masuk", path: "/dashboard/transaction/transaction-in", pro: false },
-      { name: "Peminjaman Barang", path: "/dashboard/transaction/transaction-out", pro: false },
-      { name: "Pengembalian Barang", path: "/dashboard/transaction/transaction-return", pro: false },
+      { name: "Barang Masuk", path: "/dashboard/transaction-in", pro: false },
+      { name: "Peminjaman Barang", path: "/dashboard/transaction-out", pro: false },
     ],
   },
    {

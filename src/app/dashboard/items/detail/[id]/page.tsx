@@ -213,7 +213,7 @@ export default function DetailItems() {
                     type="button"
                     onClick={() => {
                       if (detail.transaction_id) {
-                        window.location.href = `/dashboard/transaction/${detail.transaction_id}`;
+                        window.location.href = `/dashboard/transaction-in/show/${detail.transaction_id}`;
                       }
                     }}
                     className="font-quicksand inline-flex h-11 w-fit items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:bg-blue-700 hover:shadow-blue-500/30 active:scale-95"

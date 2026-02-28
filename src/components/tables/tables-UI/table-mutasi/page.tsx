@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactElement } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -11,489 +11,259 @@ import {
 import { Button } from "../../../ui/button";
 import {
   Search,
-  Pencil,
-  Trash2,
   SquareArrowOutUpRight,
-  ArrowRightFromLine,
+  ArrowRightLeft,
+  Trash2,
+  FileX,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "../../../ui/label";
-import Input from "../../../form/input/InputField";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import { Textarea } from "../../../ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { getMigrations, deleteMigration, ItemMigration } from "@/lib/migration";
+import { getRooms, Room } from "@/lib/warehouse";
+import { getUsers } from "@/lib/user";
+import Pagination from "../../Pagination";
 
-interface User {
-  id: number;
-  nama: string;
-  role: string[];
+interface TableMutasiProps {
+  search?: string;
+  onSearchChange?: (value: string) => void;
 }
 
-const tableData: User[] = [
- 
-];
+export default function TableMutasi({
+  search: externalSearch,
+  onSearchChange,
+}: TableMutasiProps) {
+  const [migrations, setMigrations] = useState<ItemMigration[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [internalSearch, setInternalSearch] = useState("");
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const limit = 10;
 
-export default function TableMutasi() {
-  function ActionButtons() {
-    return (
-      <div className="flex justify-center gap-4">
-        {/* EDIT */}
-        <Dialog>
-          <form onSubmit={kirimAlert}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DialogTrigger asChild>
-                  <button type="button">
-                    <Pencil size={16} className="cursor-pointer" />
-                  </button>
-                </DialogTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Edit</TooltipContent>
-            </Tooltip>
-            <DialogContent className="max-w-xl p-6">
-              <DialogHeader>
-                <DialogTitle>Update Supplier</DialogTitle>
-              </DialogHeader>
+  const search = externalSearch ?? internalSearch;
 
-              <div className="grid grid-cols-1 gap-4">
-                <div className="grid gap-2">
-                  <Label>Nama</Label>
-                  <Input placeholder="Nama Lengkap" />
-                </div>
+  const handleSearchChange = (value: string) => {
+    if (onSearchChange) {
+      onSearchChange(value);
+    } else {
+      setInternalSearch(value);
+    }
+  };
 
-                <div className="grid gap-2">
-                  <Label>Contact</Label>
-                  <Input placeholder="Nomor Telepon / Email" />
-                </div>
+  useEffect(() => {
+    getRooms().then((res) => setRooms(res.data ?? []));
+    getUsers().then(setUsers);
+  }, []);
 
-                <div className="grid gap-2">
-                  <Label>Address</Label>
-                  <Textarea
-                    placeholder="Alamat Lengkap"
-                    className="min-h-[120px]"
-                  />
-                </div>
-              </div>
+  const fetchMigrations = async (page = currentPage) => {
+    setLoading(true);
+    try {
+      const res = await getMigrations(page, limit);
+      setMigrations(res.data ?? []);
+      setTotalPages(res.pagination.totalPages);
+      setTotalItems(res.pagination.total);
+    } catch {
+      toast.error("Gagal mengambil data mutasi");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-              <DialogFooter className="mt-6">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button className="bg-blue-800 hover:bg-blue-900">Save</Button>
-              </DialogFooter>
-            </DialogContent>
-          </form>
-        </Dialog>
+  useEffect(() => {
+    fetchMigrations(currentPage);
+  }, [currentPage]);
 
-        {/* DELETE */}
-        <AlertDialog>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <AlertDialogTrigger asChild>
-                <button type="button">
-                  <Trash2 size={16} />
-                </button>
-              </AlertDialogTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Delete</TooltipContent>
-          </Tooltip>
+  const roomMap = useMemo(
+    () =>
+      rooms.reduce(
+        (acc, r) => { acc[r.id] = r.name; return acc; },
+        {} as Record<string, string>
+      ),
+    [rooms]
+  );
 
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Yakin hapus supplier?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tindakan ini tidak bisa dibatalkan
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+  const userMap = useMemo(
+    () =>
+      users.reduce(
+        (acc, u) => { acc[u.id] = u.username; return acc; },
+        {} as Record<string, string>
+      ),
+    [users]
+  );
 
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction className="bg-red-600 text-white">
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button type="button">
-              <Link href={"/dashboard/items/show/id"}>
-                <SquareArrowOutUpRight size={16} />
-              </Link>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Show</TooltipContent>
-        </Tooltip>
-      </div>
+  const filtered = useMemo(() => {
+    const kw = search.toLowerCase();
+    return migrations.filter(
+      (m) =>
+        m.notes?.toLowerCase().includes(kw) ||
+        m.id.toLowerCase().includes(kw) ||
+        roomMap[m.from_room_id]?.toLowerCase().includes(kw) ||
+        roomMap[m.to_room_id]?.toLowerCase().includes(kw)
     );
-  }
+  }, [migrations, search, roomMap]);
 
-  const kirimAlert = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("selamat kamu sukses");
+  const formatDate = (date: string | Date) =>
+    new Date(date).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMigration(id);
+      toast.success("Mutasi berhasil dihapus");
+      fetchMigrations(currentPage);
+    } catch {
+      toast.error("Gagal menghapus mutasi");
+    }
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-4 md:max-w-6xl lg:max-w-6xl dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h1 className="font-figtree text-2xl font-semibold text-gray-800 dark:text-white">
-            Data Mutasi
-          </h1>
-          <div className="flex flex-col items-center justify-end gap-2 md:flex-row">
-            <Dialog>
-              <form onSubmit={kirimAlert}>
-                <DialogTrigger asChild>
-                  <Button
-                    size={"lg"}
-                    className="font-quicksand text-md bg-blue-800 text-white transition duration-300 hover:bg-blue-900"
-                  >
-                    + Add Mutasi
-                  </Button>
-                </DialogTrigger>
+    <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
+      <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
 
-                <DialogContent className="w-full w-screen max-w-5xl p-6">
-                  <DialogHeader>
-                    <DialogTitle>Tambah Mutasi</DialogTitle>
-                  </DialogHeader>
-
-                  <div className="mb-6 grid grid-cols-2 gap-6">
-                    <div className="grid w-full gap-2">
-                      <Label>WH Awal</Label>
-                      <Select>
-                        <SelectTrigger className="w-full max-w-md">
-                          <SelectValue placeholder="Pilih WH Awal" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="old">OLD SARPRAS</SelectItem>
-                          <SelectItem value="new">NEW SARPRAS</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>WH Tujuan</Label>
-                      <Select>
-                        <SelectTrigger className="w-full max-w-md">
-                          <SelectValue placeholder="Pilih WH Tujuan" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="old">OLD SARPRAS</SelectItem>
-                          <SelectItem value="new">NEW SARPRAS</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <Label>WH Awal</Label>
-                      <div className="mb-4 flex w-full items-end justify-end gap-3 md:w-auto">
-                        <div className="relative w-full md:w-72">
-                          <Search
-                            size={18}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                          />
-                          <input
-                            placeholder="Search item"
-                            className="w-full rounded-md border border-gray-400 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
-                          />
-                        </div>
-                      </div>
-                      <Table className="w-full table-auto ">
-                        <TableHeader className="rounded-l-md border border-gray-100 dark:border-white/[0.05]">
-                          <TableRow>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 border-b-none flex justify-center border px-3 py-3 font-medium text-gray-800"
-                            >
-                              <Checkbox />
-                            </TableCell>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 min-w-[100px] border px-5 py-3 text-start text-xs font-medium text-gray-500"
-                            >
-                              No
-                            </TableCell>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 min-w-[80px] border px-5 py-3 text-start text-xs font-medium text-gray-500"
-                            >
-                              Nama
-                            </TableCell>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 min-w-[160px] border px-5 py-3 text-start text-xs font-medium text-gray-500"
-                            >
-                              SN Nama
-                            </TableCell>
-                          </TableRow>
-                        </TableHeader>
-
-                        <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                          {tableData.length === 0 ? (
-                            <TableRow>
-                              <td
-                                colSpan={5}
-                                className="border px-6 py-6 text-center text-sm text-gray-500"
-                              >
-                                Tidak ada Kategori
-                              </td>
-                            </TableRow>
-                          ) : (
-                            tableData.map((user) => (
-                              <TableRow key={user.id}>
-                              
-                                <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                                  {user.id}
-                                </TableCell>
-                                <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                                  {user.nama}
-                                </TableCell>
-                                <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                                  {user.nama}
-                                </TableCell>
-                              </TableRow>
-                            ))
-                          )}
-                        </TableBody>
-                      </Table>
-
-                      <Button className="mt-4 bg-blue-800 hover:bg-blue-900">
-                        Pindahkan
-                        <ArrowRightFromLine />
-                      </Button>
-                    </div>
-
-                    <div>
-                      <Label>WH Tujuan</Label>
-                      <div className="mb-4 flex w-full items-end justify-end gap-3 md:w-auto">
-                        <div className="relative w-full md:w-72">
-                          <Search
-                            size={18}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                          />
-                          <input
-                            placeholder="Search item"
-                            className="w-full rounded-md border border-gray-400 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
-                          />
-                        </div>
-                      </div>
-                      <Table className="w-full table-auto ">
-                        <TableHeader className="rounded-l-md border border-gray-100 dark:border-white/[0.05]">
-                          <TableRow>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 border-b-none flex justify-center border px-3 py-3 font-medium text-gray-800"
-                            >
-                              <Checkbox />
-                            </TableCell>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 min-w-[80px] border px-5 py-3 text-start text-xs font-medium text-gray-500"
-                            >
-                              Nama
-                            </TableCell>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 min-w-[120px] border px-5 py-3 text-start text-xs font-medium text-gray-500"
-                            >
-                              SN Number
-                            </TableCell>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 min-w-[100px] border px-5 py-3 text-start text-xs font-medium text-gray-500"
-                            >
-                              WH Asal
-                            </TableCell>
-                            <TableCell
-                              isHeader
-                              className="light:border-gray-100 min-w-[120px] border px-5 py-3 text-start text-xs font-medium text-gray-500"
-                            >
-                              Action
-                            </TableCell>
-                          </TableRow>
-                        </TableHeader>
-
-                        <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                         {tableData.length === 0 ? (
-                            <TableRow>
-                              <td
-                                colSpan={5}
-                                className="border px-6 py-6 text-center text-sm text-gray-500"
-                              >
-                                Tidak ada Kategori
-                              </td>
-                            </TableRow>
-                          ) : (
-                          tableData.map((user) => (
-                            <TableRow key={user.id}>
-                              <TableCell className="light:border-gray-100 border-b-none border px-6 py-4">
-                                {""}
-                              </TableCell>
-                              <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                                {user.id}
-                              </TableCell>
-                              <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                                {user.nama}
-                              </TableCell>
-                              <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                                {user.nama}
-                              </TableCell>
-                              <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                                {user.nama}
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                        </TableBody>
-                      </Table>
-
-                      <div className="mt-4 grid gap-2">
-                        <Label>Remarks</Label>
-                        <Input placeholder="Remarks" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <DialogFooter className="mt-6">
-                    <DialogClose asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </DialogClose>
-                    <Button className="bg-blue-800 hover:bg-blue-900">
-                      Save
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </form>
-            </Dialog>
+        <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
+          <div className="relative w-full md:w-80">
+            <Search
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+            <input
+              placeholder="Cari ruangan, catatan..."
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-11 pr-4 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+            />
           </div>
         </div>
-        <div className="mt-20">
-          <div className="flex w-full items-end justify-end gap-3 md:w-auto">
-            <div className="relative w-full md:w-72">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                placeholder="Search item"
-                className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 md:w-72 dark:bg-transparent"
-              />
-            </div>
-          </div>
 
-          <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <div className="relative overflow-x-auto">
-              <div className="inline-block min-w-full align-middle">
-                <Table className="w-full table-auto ">
-                  <TableHeader className="border border-gray-100 dark:border-white/[0.05]">
-                    <TableRow>
+        <div className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="border-b border-gray-200/50 dark:border-white/5">
+                  {["No", "Tanggal", "Dari WH", "Ke WH", "Dipindahkan Oleh", "Catatan"].map(
+                    (header) => (
                       <TableCell
+                        key={header}
                         isHeader
-                        className="light:border-gray-100 min-w-[80px] rounded-b-none rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-start text-xs font-medium text-gray-200"
+                        className="bg-linear-to-br from-gray-50 to-gray-100/50 px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                       >
-                        No
+                        {header}
                       </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Tanggal Transaksi
+                    )
+                  )}
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {loading && (
+                  <TableRow>
+                    <td colSpan={7} className="py-16">
+                      <div className="flex flex-col items-center justify-center gap-3">
+                        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 dark:border-gray-700 dark:border-t-blue-400" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Memuat data...
+                        </p>
+                      </div>
+                    </td>
+                  </TableRow>
+                )}
+
+                {!loading && filtered.length === 0 && (
+                  <TableRow>
+                    <td colSpan={7} className="py-16">
+                      <div className="flex flex-col items-center justify-center gap-3">
+                        <div className="rounded-full bg-gray-100 p-4 dark:bg-white/5">
+                          <FileX className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {search ? "Data tidak ditemukan" : "Belum ada data mutasi"}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {search
+                            ? "Coba kata kunci pencarian lain"
+                            : "Tambahkan mutasi baru untuk memulai"}
+                        </p>
+                      </div>
+                    </td>
+                  </TableRow>
+                )}
+
+                {/* Rows */}
+                {!loading &&
+                  filtered.map((m, index) => (
+                    <TableRow
+                      key={m.id}
+                      className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
+                    >
+                      <TableCell className="px-5 py-4">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-xs font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
+                          {(currentPage - 1) * limit + index + 1}
+                        </span>
                       </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[80px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Username
+
+                      <TableCell className="px-5 py-4">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {formatDate(m.migrated_at)}
+                        </span>
                       </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[160px] border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        WH Tujuan
+
+                      <TableCell className="px-5 py-4">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                          {roomMap[m.from_room_id] ?? (
+                            <span className="italic text-gray-400">Loading...</span>
+                          )}
+                        </span>
                       </TableCell>
-                      <TableCell
-                        isHeader
-                        className="light:border-gray-100 min-w-[80px] rounded-b-none rounded-r-md border bg-blue-800 px-5 py-3 text-start text-xs font-medium text-gray-200"
-                      >
-                        Remarks
+
+                      <TableCell className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <ArrowRightLeft className="h-3.5 w-3.5 text-gray-400" />
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                            {roomMap[m.to_room_id] ?? (
+                              <span className="italic text-gray-400">Loading...</span>
+                            )}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="px-5 py-4">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {userMap[m.migrated_by] ?? (
+                            <span className="italic text-xs text-gray-400">Loading...</span>
+                          )}
+                        </span>
+                      </TableCell>
+
+                      <TableCell className="max-w-45 px-5 py-4">
+                        <span className="block truncate text-sm text-gray-500 dark:text-gray-400">
+                          {m.notes ?? (
+                            <span className="italic text-gray-300 dark:text-gray-600">—</span>
+                          )}
+                        </span>
                       </TableCell>
                     </TableRow>
-                  </TableHeader>
-
-                  <TableBody className="divide-gray-100 dark:divide-white/[0.05]">
-                   {tableData.length === 0 ? (
-                            <TableRow>
-                              <td
-                                colSpan={5}
-                                className="border px-6 py-6 text-center text-sm text-gray-500"
-                              >
-                                Tidak ada Kategori
-                              </td>
-                            </TableRow>
-                          ) : (
-                  tableData.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="light:border-gray-100 border px-6 py-4">
-                          <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-                            {user.id}
-                          </span>
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.id}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                        <TableCell className="light:border-gray-100 border px-4 py-4 text-sm text-gray-500 dark:text-white/90">
-                          {user.nama}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
+                  ))}
+              </TableBody>
+            </Table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-gray-200/50 p-4 dark:border-white/5">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                Showing {(currentPage - 1) * limit + 1}–{Math.min(currentPage * limit, totalItems)} of {totalItems}
+              </span>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setCurrentPage(page)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

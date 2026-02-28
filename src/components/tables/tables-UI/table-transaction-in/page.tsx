@@ -300,7 +300,7 @@ export default function TableTransactionIn() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Link
-                                href={`/dashboard/transaction/show/${trx.id}`}
+                                href={`/dashboard/transaction-in/show/${trx.id}`}
                               >
                                 <Button
                                   size="sm"
