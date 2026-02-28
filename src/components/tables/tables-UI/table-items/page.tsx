@@ -13,9 +13,18 @@ import { toast } from "sonner";
 import { getItems, Item } from "@/lib/items";
 import ActionButtonsItems from "@/components/dialog/dialogItems/dialogActionButtonsItems";
 import Pagination from "../../Pagination";
-import { log } from "console";
 
-export default function TableItems() {
+type ItemStats = {
+  totalItems: number;
+  totalStock: number;
+  totalCategories: number;
+};
+
+export default function TableItems({
+  onStatsUpdate,
+}: {
+  onStatsUpdate?: (stats: ItemStats) => void;
+}) {
   const [items, setItems] = useState<Item[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,27 +37,48 @@ export default function TableItems() {
     try {
       setLoading(true);
       const response = await getItems(page, perPage);
-      console.log("Response:", response);
 
       if (response?.data && Array.isArray(response.data)) {
         setItems(response.data);
-        if (response.pagination) {
-          setTotalPages(response.pagination.totalPages || 1);
-          setTotalItems(response.pagination.total || 0);
-        } else {
-          setTotalPages(1);
-          setTotalItems(response.data.length);
-        }
+
+        const total = response.pagination?.total || response.data.length;
+        const pages = response.pagination?.totalPages || 1;
+        setTotalPages(pages);
+        setTotalItems(total);
+
+        const stock = response.data.reduce((sum, item) => sum + (item.stock || 0), 0);
+        const uniqueCategories = new Set(
+          response.data.map((item) => item.category_id).filter(Boolean)
+        );
+
+        onStatsUpdate?.({
+          totalItems: total,          
+          totalStock: stock,          
+          totalCategories: uniqueCategories.size,
+        });
+
       } else if (Array.isArray(response)) {
         setItems(response);
+
+        const stock = response.reduce((sum, item) => sum + (item.stock || 0), 0);
+        const uniqueCategories = new Set(
+          response.map((item) => item.category_id).filter(Boolean)
+        );
+
+        onStatsUpdate?.({
+          totalItems: response.length,
+          totalStock: stock,
+          totalCategories: uniqueCategories.size,
+        });
+
       } else {
-        console.warn("Invalid response format:", response);
         setItems([]);
+        onStatsUpdate?.({ totalItems: 0, totalStock: 0, totalCategories: 0 });
       }
     } catch (error) {
-      console.error("Error:", error);
       toast.error("Gagal ambil data items");
       setItems([]);
+      onStatsUpdate?.({ totalItems: 0, totalStock: 0, totalCategories: 0 });
     } finally {
       setLoading(false);
     }
@@ -63,15 +93,11 @@ export default function TableItems() {
   };
 
   const filteredRows = useMemo(() => {
-    if (!Array.isArray(items)) {
-      console.warn("Items is not an array:", items);
-      return [];
-    }
+    if (!Array.isArray(items)) return [];
     const keyword = search.toLowerCase();
     return items.filter((item) => {
       const categoryName = item.category?.name || "";
       const subcategoryName = item.subcategory?.name || "";
-
       return (
         item.name.toLowerCase().includes(keyword) ||
         item.code.toLowerCase().includes(keyword) ||
@@ -81,8 +107,6 @@ export default function TableItems() {
       );
     });
   }, [search, items]);
-  
-  
 
   const tableHeaders = [
     { label: "No", className: "w-20 text-center" },
@@ -103,12 +127,8 @@ export default function TableItems() {
           <div className="rounded-full bg-gray-100 p-4 dark:bg-white/5">
             <Search className="h-8 w-8 text-gray-400" />
           </div>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
-            {message}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {description}
-          </p>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{message}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
         </div>
       </td>
     </TableRow>
@@ -119,9 +139,7 @@ export default function TableItems() {
       <td colSpan={9} className="py-16">
         <div className="flex flex-col items-center justify-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 dark:border-gray-700 dark:border-t-blue-400"></div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Memuat data...
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Memuat data...</p>
         </div>
       </td>
     </TableRow>
@@ -133,10 +151,7 @@ export default function TableItems() {
         {/* Search Bar */}
         <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
           <div className="relative w-full md:w-80">
-            <Search
-              size={20}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
+            <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               placeholder="Cari berdasarkan nama, kode, atau merek..."
               value={search}
@@ -157,8 +172,8 @@ export default function TableItems() {
                       key={index}
                       isHeader
                       className={`bg-linear-to-br from-gray-50 to-gray-100/50 px-2 py-4 text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300 ${
-                                header.className || "text-left"  
-                              }`}
+                        header.className || "text-left"
+                      }`}
                     >
                       {header.label}
                     </TableCell>
@@ -169,12 +184,8 @@ export default function TableItems() {
               <TableBody>
                 {loading && renderLoadingState()}
 
-                {!loading &&
-                  filteredRows.length === 0 &&
-                  renderEmptyState(
-                    "Data tidak ditemukan",
-                    "Coba kata kunci pencarian lain"
-                  )}
+                {!loading && filteredRows.length === 0 &&
+                  renderEmptyState("Data tidak ditemukan", "Coba kata kunci pencarian lain")}
 
                 {!loading &&
                   filteredRows.map((item, index) => (
@@ -195,21 +206,15 @@ export default function TableItems() {
                       </TableCell>
 
                       <TableCell className="px-2 py-4">
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {item.name}
-                        </p>
+                        <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
                       </TableCell>
 
                       <TableCell className="px-2 py-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {item.brand || "-"}
-                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{item.brand || "-"}</p>
                       </TableCell>
 
                       <TableCell className="px-2 py-4">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {item.stock}
-                        </p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.stock}</p>
                       </TableCell>
 
                       <TableCell className="px-2 py-4">
@@ -225,9 +230,7 @@ export default function TableItems() {
                       </TableCell>
 
                       <TableCell className="px-2 py-4">
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {item.unit}
-                        </span>
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">{item.unit}</span>
                       </TableCell>
 
                       <TableCell className="px-2 py-4 text-center">
@@ -251,7 +254,6 @@ export default function TableItems() {
               <span className="text-gray-400">|</span>
               <span>{perPage} rows per page</span>
             </div>
-
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

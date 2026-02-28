@@ -11,6 +11,7 @@ import { Label } from "../../../ui/label";
 import { Input } from "../../../ui/input";
 import { getDetailItemsByItemId, DetailItem } from "@/lib/items";
 import ActionButtonsDetailItems from "@/components/dialog/dialogItems/Detail/dialogActionButtonDetails";
+import ButtonBack from "@/components/ui/button/backButton";
 
 interface ItemDetail {
   id: string;
@@ -101,7 +102,12 @@ const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by
         </div>
 
         <div className="mt-12">
+          <div className="flex w-full justify-between">
           <h1 className="font-quicksand text-2xl font-semibold mb-6">Data Item</h1>
+          <ButtonBack
+          route="/items"
+          />
+          </div>
 
           <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
             {/* Search & Buttons */}

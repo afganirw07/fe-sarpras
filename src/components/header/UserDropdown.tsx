@@ -14,7 +14,7 @@ export default function UserDropdown() {
   const namaUser = session?.user.username
   const handleLogout = () => {
     setIsLoggingOut(true);
-    
+    localStorage.setItem("theme", "light");
     signOut({
       callbackUrl: "/auth/login",
     });

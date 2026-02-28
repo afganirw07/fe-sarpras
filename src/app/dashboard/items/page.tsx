@@ -2,77 +2,18 @@
 
 import TableItems from "@/components/tables/tables-UI/table-items/page";
 import DialogAddItems from "@/components/dialog/dialogItems/dialogAddItems";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Package, Layers, FolderTree } from "lucide-react";
-import { getItems, Item } from "@/lib/items";
+
+type ItemStats = {
+  totalItems: number;
+  totalStock: number;
+  totalCategories: number;
+} | null;
 
 export default function ItemPage() {
   const [refreshKey, setRefreshKey] = useState(0);
-  const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalStock, setTotalStock] = useState(0);
-  const [totalCategories, setTotalCategories] = useState(0);
-
-  const fetchStats = async () => {
-    try {
-      setLoading(true);
-      const response = await getItems(1, 9999);
-      console.log("Stats Response:", response);
-      
-      if (response?.data && Array.isArray(response.data)) {
-        setItems(response.data);
-        
-        const total = response.pagination?.total || response.data.length;
-        setTotalItems(total);
-        
-        const stock = response.data.reduce((sum, item) => {
-          return sum + (item.stock || 0);
-        }, 0);
-        setTotalStock(stock);
-        
-        const uniqueCategories = new Set(
-          response.data
-            .map(item => item.category_id)
-            .filter(id => id !== undefined && id !== null)
-        );
-        setTotalCategories(uniqueCategories.size);
-        
-      } else if (Array.isArray(response)) {
-        setItems(response);
-        setTotalItems(response.length);
-        
-        const stock = response.reduce((sum, item) => {
-          return sum + (item.stock || 0);
-        }, 0);
-        setTotalStock(stock);
-        
-        const uniqueCategories = new Set(
-          response
-            .map(item => item.category_id)
-            .filter(id => id !== undefined && id !== null)
-        );
-        setTotalCategories(uniqueCategories.size);
-      } else {
-        setItems([]);
-        setTotalItems(0);
-        setTotalStock(0);
-        setTotalCategories(0);
-      }
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-      setItems([]);
-      setTotalItems(0);
-      setTotalStock(0);
-      setTotalCategories(0);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, [refreshKey]); 
+  const [stats, setStats] = useState<ItemStats>(null);
 
   const handleRefresh = () => {
     setRefreshKey(prev => prev + 1);
@@ -102,7 +43,7 @@ export default function ItemPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Stats Cards */}
         <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {/* Total Item */}
@@ -113,11 +54,11 @@ export default function ItemPage() {
               </div>
               <div className="flex-1">
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Item</p>
-                {loading ? (
-                  <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+                {stats === null ? (
+                  <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                 ) : (
                   <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalItems.toLocaleString('id-ID')}
+                    {stats.totalItems.toLocaleString("id-ID")}
                   </p>
                 )}
               </div>
@@ -132,11 +73,11 @@ export default function ItemPage() {
               </div>
               <div className="flex-1">
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Stok</p>
-                {loading ? (
-                  <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+                {stats === null ? (
+                  <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                 ) : (
                   <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalStock.toLocaleString('id-ID')}
+                    {stats.totalStock.toLocaleString("id-ID")}
                   </p>
                 )}
               </div>
@@ -151,11 +92,11 @@ export default function ItemPage() {
               </div>
               <div className="flex-1">
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Kategori</p>
-                {loading ? (
-                  <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+                {stats === null ? (
+                  <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                 ) : (
                   <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                    {totalCategories.toLocaleString('id-ID')}
+                    {stats.totalCategories.toLocaleString("id-ID")}
                   </p>
                 )}
               </div>
@@ -163,9 +104,8 @@ export default function ItemPage() {
           </div>
         </div>
 
-        {/* Table */}
-        <TableItems key={refreshKey}  />
+        <TableItems key={refreshKey} onStatsUpdate={setStats} />
       </div>
     </>
-  )
+  );
 }

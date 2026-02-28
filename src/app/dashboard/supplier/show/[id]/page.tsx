@@ -40,6 +40,7 @@ import { toast } from "sonner";
 
 import { Supplier, getSupplierById } from "@/lib/supplier";
 import { Button } from "@/components/ui/button";
+import ButtonBack from "@/components/ui/button/backButton";
 
 interface Item {
   id: string;
@@ -134,7 +135,7 @@ export default function SupplierShowPage() {
 
   return (
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-4 sm:mb-6 rounded-xl sm:rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 rounded-xl sm:rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="rounded-lg sm:rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-2 sm:p-3 shadow-lg shadow-blue-500/20">
               <Truck className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
@@ -148,6 +149,7 @@ export default function SupplierShowPage() {
               </p>
             </div>
           </div>
+            <ButtonBack route="/supplier"/>
         </div>
 
         <div className="mb-4 sm:mb-6 rounded-xl sm:rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
