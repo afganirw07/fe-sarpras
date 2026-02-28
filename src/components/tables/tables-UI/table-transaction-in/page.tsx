@@ -267,8 +267,8 @@ export default function TableTransactionIn() {
                           <div className="flex items-center gap-2">
                             <Warehouse className="h-4 w-4 text-gray-400" />
                             <span className="text-[clamp(10px,0.7rem,10px)] text-gray-700 dark:text-gray-300">
-                              {roomMap[trx.transaction_details?.[0]?.room_id] ?? "-"}
-                            </span>
+                              {trx.detail_items?.[0].room_id ? roomMap[trx.detail_items[0].room_id] ?? "Loading..." : "N/A"}
+                              </span>
                           </div>
                         </TableCell>
 

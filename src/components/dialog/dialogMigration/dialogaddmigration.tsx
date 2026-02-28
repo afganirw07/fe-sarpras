@@ -87,7 +87,7 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
         const res = await getDetailItemsByRoom(fromRoomId);
         setAllRoomItems(res.data ?? []);
         setSelectedIds([]);
-      } catch {
+      } catch (error) {
         toast.error("Gagal memuat detail item.");
       } finally {
         setLoadingItems(false);
@@ -209,7 +209,7 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-full max-w-5xl p-6 bg-black">
+      <DialogContent className="w-full max-w-5xl p-6 dark:bg-black">
         <DialogHeader>
           <DialogTitle>Tambah Mutasi</DialogTitle>
         </DialogHeader>
