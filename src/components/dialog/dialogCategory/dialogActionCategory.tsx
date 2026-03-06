@@ -49,6 +49,7 @@ import {
 } from "@/lib/category";
 import { z } from "zod";
 import { categorySchema } from "@/schema/category.schema";
+import { useSession } from "next-auth/react";
 
 type Subcategory = {
   id: string;
@@ -78,7 +79,8 @@ export default function ActionButtonsCategory({
   const [subcategoryCode, setSubcategoryCode] = useState("");
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [errors, setErrors] = useState<CategoryError>({});
-
+  const { data:session} = useSession();
+  const user = session?.user.id;
   useEffect(() => {
     if (!open) return;
 
@@ -235,6 +237,7 @@ export default function ActionButtonsCategory({
       await updateCategory(categoryId, {
         name: categoryName.trim(),
         code: categoryCode.trim(),
+        created_by: user || "unknown"
       });
 
       const newSubs = subcategories.filter((s) => s.id.startsWith("temp"));
@@ -245,6 +248,7 @@ export default function ActionButtonsCategory({
             category_id: categoryId,
             name: s.name,
             code: s.code,
+             created_by: user || "unknown"
           }),
         ),
       );
@@ -259,6 +263,7 @@ export default function ActionButtonsCategory({
             category_id: categoryId,
             name: s.name,
             code: s.code,
+             created_by: user || "unknown"
           }),
         ),
       );

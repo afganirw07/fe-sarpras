@@ -40,6 +40,7 @@ import {
   updateSupplier,
   deleteSupplier,
 } from "@/lib/supplier";
+import { useSession } from "next-auth/react";
 
 interface Props {
   supplier: Supplier;
@@ -59,11 +60,14 @@ export default function ActionButtonsSupplier({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const { data: session } = useSession();
+  const user = session?.user.id;
   const [form, setForm] = useState({
     name: supplier.name,
     email: supplier.email,
     phone_number: supplier.phone_number,
     address: supplier.address,
+    created_by: user || "",
   });
   const [errors, setErrors] = useState<SupplierError>({});
 
@@ -78,6 +82,7 @@ export default function ActionButtonsSupplier({
         email: supplier.email,
         phone_number: supplier.phone_number,
         address: supplier.address,
+        created_by: user || "",
       });
       // Reset errors
       setErrors({});

@@ -6,11 +6,22 @@ export function getAvailableDetailItems(itemId: string, roomId: string) {
   );
 }
 
-export function getDetailItemsByRoom(roomId: string) {
-  return api(`/api/detail-items?room_id=${roomId}&status=available&limit=100`);
+export function getDetailItemsByRoom(
+  roomId: string,
+  page: number = 1,
+  limit: number = 10,
+  search: string = ""
+) {
+  const params = new URLSearchParams({
+    room_id: roomId,
+    status: "available",
+    page: String(page),
+    limit: String(limit),
+    ...(search ? { search } : {}),
+  });
+  return api(`/api/detail-items?${params.toString()}`);
 }
 
-// Fetch all pages to get complete data
 async function fetchAllPages(baseUrl: string) {
   const firstRes = await api(`${baseUrl}&page=1&limit=100`);
   const totalPages = firstRes.pagination?.totalPages ?? 1;
@@ -32,12 +43,12 @@ export async function getCategoriesByWarehouse(roomId: string) {
     `/api/detail-items?room_id=${roomId}&status=available`
   );
 
-  console.log("available items for room:", detailItems.length);
-
   const categoryMap = new Map();
   detailItems.forEach((d: any) => {
-    const cat = d.item?.category;
-    // fallback: use name as id if no id field exists
+    // ✅ Skip jika item master sudah dihapus (relasi item jadi null)
+    if (!d.item || !d.item.name || !d.item.category) return;
+
+    const cat = d.item.category;
     const catId = cat?.id ?? cat?.name;
     if (catId && cat?.name && !categoryMap.has(catId)) {
       categoryMap.set(catId, { id: catId, name: cat.name });
@@ -54,11 +65,14 @@ export async function getItemsByWarehouseAndCategory(roomId: string, categoryId:
 
   const itemMap = new Map();
   detailItems.forEach((d: any) => {
+    // ✅ Skip jika item master sudah dihapus (relasi item jadi null)
+    if (!d.item || !d.item.name || !d.item.category) return;
+
     const item = d.item;
-    const cat = item?.category;
+    const cat = item.category;
     const catId = cat?.id ?? cat?.name;
 
-    if (item?.name && catId === categoryId && !itemMap.has(d.item_id)) {
+    if (catId === categoryId && !itemMap.has(d.item_id)) {
       itemMap.set(d.item_id, {
         id: d.item_id,
         name: item.name,

@@ -18,6 +18,7 @@ export interface Item {
   brand?: string;
   stock: number;
   unit: string;
+  created_by: string;
   category: {
     name: string;
   };

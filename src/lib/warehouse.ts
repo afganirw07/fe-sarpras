@@ -15,6 +15,7 @@ export interface Room {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  created_by: string;
 }
 
 export interface Pagination {
@@ -41,6 +42,7 @@ export interface RoomPayload {
   code: string;
   name: string;
   type: string;
+  created_by: string;
 }
 
 export async function getRooms(

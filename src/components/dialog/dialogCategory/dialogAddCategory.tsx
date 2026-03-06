@@ -36,6 +36,7 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { categorySchema } from "@/schema/category.schema";
+import { useSession } from "next-auth/react";
 
 interface SubcategoryTableItem {
   id: string;
@@ -59,6 +60,8 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<CategoryError>({});
   const [subcategories, setSubcategories] = useState<SubcategoryTableItem[]>([]);
+  const { data: session} = useSession();
+  const user = session?.user;
 
   const resetForm = () => {
     setCategoryName("");
@@ -202,6 +205,7 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
       const categoryRes = await createCategory({
         name: categoryName.trim(),
         code: categoryCode.trim(),
+        created_by: user?.id || "unknown",
       });
 
       const categoryId = categoryRes.data.id;
@@ -210,6 +214,7 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
           category_id: categoryId,
           name: sub.name,
           code: sub.code,
+          created_by: user?.id || "unknown",
         });
       }
 

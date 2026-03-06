@@ -9,6 +9,7 @@ export interface Supplier {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  created_by: string;
 }
 
 export interface Pagination {
@@ -36,6 +37,7 @@ export interface SupplierPayload {
   email: string;
   phone_number: string;
   address: string;
+  created_by: string;
 }
 
 export async function getSuppliers(

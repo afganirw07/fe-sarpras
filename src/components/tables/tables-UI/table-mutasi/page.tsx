@@ -22,6 +22,7 @@ import { getMigrations, deleteMigration, ItemMigration } from "@/lib/migration";
 import { getRooms, Room } from "@/lib/warehouse";
 import { getUsers } from "@/lib/user";
 import Pagination from "../../Pagination";
+import ActionButtonsMigration from "@/components/dialog/dialogMigration/dialogActionButtonsItems";
 
 interface TableMutasiProps {
   search?: string;
@@ -145,7 +146,7 @@ export default function TableMutasi({
             <Table className="w-full">
               <TableHeader>
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                  {["No", "Tanggal", "Dari WH", "Ke WH", "Dipindahkan Oleh", "Catatan"].map(
+                  {["No", "Tanggal","Nama Item", "Dari WH", "Ke WH", "Dipindahkan Oleh", "Catatan", "Aksi"].map(
                     (header) => (
                       <TableCell
                         key={header}
@@ -205,10 +206,16 @@ export default function TableMutasi({
                           {(currentPage - 1) * limit + index + 1}
                         </span>
                       </TableCell>
-
                       <TableCell className="px-5 py-4">
                         <span className="text-sm text-gray-700 dark:text-gray-300">
                           {formatDate(m.migrated_at)}
+                        </span>
+                      </TableCell>
+
+                      <TableCell className="px-5 py-4">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                      {m.detail_items?.[0]?.item?.name}
+                        
                         </span>
                       </TableCell>
 
@@ -245,6 +252,9 @@ export default function TableMutasi({
                             <span className="italic text-gray-300 dark:text-gray-600">—</span>
                           )}
                         </span>
+                      </TableCell>
+                          <TableCell className="max-w-45 px-5 py-4">
+                     <ActionButtonsMigration mutasi={m}/>
                       </TableCell>
                     </TableRow>
                   ))}

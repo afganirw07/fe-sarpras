@@ -52,6 +52,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Barang Masuk", path: "/dashboard/transaction-in", pro: false },
       { name: "Peminjaman Barang", path: "/dashboard/transaction-out", pro: false },
+      { name: "Pengembalian Barang", path: "/dashboard/transaction-return", pro: false },
     ],
   },
    {

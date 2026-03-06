@@ -25,6 +25,7 @@ import { createRoom, TypeRoom } from "@/lib/warehouse";
 import { toast } from "sonner";
 import { z } from "zod";
 import { WareHouseSchema } from "@/schema/warehouse.schema";
+import { useSession } from "next-auth/react";
 
 interface WarehouseError {
   code?: string;
@@ -43,6 +44,8 @@ export default function DialogAddWarehouse({
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState<WarehouseError>({});
+  const { data: session } = useSession();
+  const user = session?.user.id;
 
   const handleDialogChange = (open: boolean) => {
     setIsOpen(open);
@@ -105,6 +108,8 @@ export default function DialogAddWarehouse({
         code: code.trim(),
         name: name.trim(),
         type: type as TypeRoom,
+        created_by: user || "",
+
       });
       
       toast.success("Warehouse berhasil ditambahkan");

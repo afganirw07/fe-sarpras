@@ -44,6 +44,7 @@ import { getCategories, Category, Subcategory } from "@/lib/category";
 import Link from "next/link";
 import { z } from "zod";
 import { itemSchema } from "@/schema/items.schema";
+import { useSession } from "next-auth/react";
 
 interface CategoryWithSubcategories extends Category {
   subcategories: Subcategory[];
@@ -58,6 +59,7 @@ interface ItemFormData {
   unit: string;
   stock: number;
   type: string;
+  created_by?: string;
 }
 
 interface FormErrors {
@@ -82,6 +84,8 @@ export default function ActionButtonsItems({
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   const [selectedCategorySubcategories, setSelectedCategorySubcategories] = useState<Subcategory[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
+  const { data:session} = useSession();
+  const user = session?.user.id;
   
   const [formData, setFormData] = useState<ItemFormData>({
     code: item.code || "",
@@ -92,6 +96,7 @@ export default function ActionButtonsItems({
     unit: item.unit || "",
     stock: item.stock || 0,
     type: item.type || "Loanable",
+    created_by: user || "unknown",
   });
 
   // Fetch categories
@@ -136,6 +141,7 @@ export default function ActionButtonsItems({
         unit: item.unit || "",
         stock: item.stock || 0,
         type: item.type || "Loanable",
+         created_by: user || "unknown",
       });
       // Reset errors
       setErrors({});
@@ -165,6 +171,7 @@ export default function ActionButtonsItems({
       ...prev,
       category_id: value,
       subcategory_id: "", 
+      created_by: user || "unknown",
     }));
 
     // Clear category & subcategory errors
@@ -193,6 +200,7 @@ export default function ActionButtonsItems({
       subCategory: formData.subcategory_id,
       unit: formData.unit.trim(),
       brand: formData.brand.trim(),
+      
     };
 
     console.log("Validation data:", validationData);

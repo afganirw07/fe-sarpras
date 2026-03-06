@@ -49,6 +49,7 @@ import {
 import Link from "next/link";
 import { z } from "zod";
 import { WareHouseSchema } from "@/schema/warehouse.schema";
+import { useSession } from "next-auth/react";
 
 interface WarehouseError {
   code?: string;
@@ -70,10 +71,13 @@ export default function ActionButtonsWarehouse({
 }) {
   const [loading, setLoading] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const { data: session } = useSession();
+  const user = session?.user.id;
   const [payload, setPayload] = useState<RoomPayload>({
     code: "",
     name: "",
     type: TypeRoom.GUDANG,
+      created_by: user || "",
   });
   const [errors, setErrors] = useState<WarehouseError>({});
 
@@ -87,6 +91,7 @@ export default function ActionButtonsWarehouse({
           code: data.code ?? "",
           name: data.name ?? "",
           type: data.type as TypeRoom,
+          created_by: data.created_by || "",
         });
       } catch {
         toast.error("Gagal ambil data warehouse");
@@ -160,6 +165,7 @@ export default function ActionButtonsWarehouse({
         code: payload.code.trim(),
         name: payload.name.trim(),
         type: payload.type,
+        created_by: payload.created_by,
       });
       
       toast.success("Warehouse berhasil diperbarui");

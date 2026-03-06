@@ -24,6 +24,7 @@ import { getCategories, Category, Subcategory } from "@/lib/category";
 import { createItem, Item } from "@/lib/items";
 import { z } from "zod";
 import { itemSchema } from "@/schema/items.schema";
+import { useSession } from "next-auth/react";
 
 interface CategoryWithSubcategories extends Category {
   subcategories: Subcategory[];
@@ -37,6 +38,7 @@ interface ItemFormData {
   brand: string;
   unit: string;
   stock: number;
+  created_by?: string;
 }
 
 interface FormErrors {
@@ -60,6 +62,8 @@ export default function DialogAddItems({
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const { data:session} = useSession();
+  const user = session?.user.id;
 
   const [formData, setFormData] = useState<ItemFormData>({
     code: "",
@@ -69,6 +73,7 @@ export default function DialogAddItems({
     brand: "",
     unit: "",
     stock: 0,
+    created_by: user || "unknown",
   });
 
   // Fetch categories
@@ -136,6 +141,7 @@ export default function DialogAddItems({
         brand: "",
         unit: "",
         stock: 0,
+        created_by: user
       });
       setSelectedCategorySubcategories([]);
       setErrors({});
@@ -157,6 +163,7 @@ export default function DialogAddItems({
       unit: formData.unit.trim(),
       stock: formData.stock,
       brand: formData.brand.trim(),
+        created_by: formData.created_by,
     };
 
     console.log("Validation data:", validationData);
@@ -194,6 +201,7 @@ export default function DialogAddItems({
         unit: formData.unit.trim(),
         stock: formData.stock,
         type: "Loanable",
+        created_by: formData.created_by,
       };
 
       console.log("Submitting data:", itemData);
@@ -210,6 +218,7 @@ export default function DialogAddItems({
         brand: "",
         unit: "",
         stock: 0,
+        created_by: user 
       });
       setSelectedCategorySubcategories([]);
       setErrors({});

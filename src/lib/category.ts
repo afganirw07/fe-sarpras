@@ -5,6 +5,7 @@ export interface Category {
   code: string;
   name: string;
   instansi?: string;
+  created_by:string;
 }
 
 export interface Subcategory {
@@ -34,18 +35,21 @@ export interface PaginatedResponse<T> {
 export interface CategoryPayload {
   name: string;
   code: string;
+  created_by: string;
 }
 
 export interface CreateSubcategoryPayload {
   category_id: string;
   name: string;
   code: string;
+  created_by: string;
 }
 
 export interface UpdateSubcategoryPayload {
   category_id: string;
   name: string;
   code: string;
+  created_by: string;
 }
 
 export async function getCategories(
@@ -62,7 +66,11 @@ export async function getSubcategories(
   return api(`/api/subcategory?page=${page}&limit=${limit}`);
 }
 
-export async function createCategory(payload: CategoryPayload) {
+export async function createCategory(payload: {
+  name: string;
+  code: string;
+  created_by: string; 
+}) {
   return api("/api/categories", {
     method: "POST",
     body: JSON.stringify(payload),

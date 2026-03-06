@@ -56,25 +56,6 @@ export default function ActionButtonLoan({ loanRequest, onSuccess }: ActionButto
     }
   };
 
-  const handleReturn = async () => {
-    if (currentStatus !== LoanStatus.APPROVED) return;
-    setLoading(true);
-    try {
-      const updated = await updateLoanRequest(loanRequest.id, {
-        ...basePayload,
-        status: LoanStatus.RETURNED,
-      });
-      setCurrentStatus(updated.status);
-      toast.success("Status berhasil diupdate ke Returned");
-      await onSuccess?.();
-    } catch (error) {
-      console.error(error);
-      toast.error("Gagal mengupdate status");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="flex items-center justify-center gap-2">
       <Tooltip>
@@ -89,19 +70,6 @@ export default function ActionButtonLoan({ loanRequest, onSuccess }: ActionButto
           </Button>
         </TooltipTrigger>
         <TooltipContent>Approve</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            onClick={handleReturn}
-            disabled={loading || currentStatus !== LoanStatus.APPROVED}
-            className="rounded-lg border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 dark:border-white/10 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/20 text-[clamp(1px,0.7rem,10px)] disabled:opacity-30"
-          >
-            <Undo2 size={14} className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Return</TooltipContent>
       </Tooltip>
     </div>
   );

@@ -44,6 +44,8 @@ import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { any, z } from "zod";
 import { tansactionInSchema } from "@/schema/transaction_jn.schema"; 
+import { getMyEmployeeId } from "@/lib/roles";
+import { create } from "domain";
 
 interface TransactionItemRow {
   item_id: string;
@@ -111,7 +113,7 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
 
   const handleaddItem = () => {
     if (!selectedItemId || !selectedWarehouseId) return;
-
+    
     const item = items.find((i) => i.id === selectedItemId);
     if (!item) return;
 
@@ -145,8 +147,9 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
   const handleSubmit = async () => {
     // ✅ Reset errors sebelum validasi
     setErrors({});
-
+    
     // ✅ Siapkan data untuk validasi Zod
+    const employeeId = await getMyEmployeeId(userId);
     const validationData = {
       poNumber: poNumber ? Number(poNumber) : 0,
       warehouse: selectedWarehouseId,
@@ -183,8 +186,10 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
       po_number: poNumber,
       transaction_date: new Date(transactionDate),
       status: TransactionStatus.DRAFT,
+      returned_by: employeeId,
       in_type: inType,
       transaction_details: rows.map((row) => ({
+        created_by: userId,
         item_id: row.item_id,
         room_id: selectedWarehouseId,
         quantity: row.qty_receive,
