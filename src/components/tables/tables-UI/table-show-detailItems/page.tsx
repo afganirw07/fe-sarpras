@@ -13,12 +13,6 @@ import { getDetailItemsByItemId, DetailItem } from "@/lib/items";
 import ActionButtonsDetailItems from "@/components/dialog/dialogItems/Detail/dialogActionButtonDetails";
 import ButtonBack from "@/components/ui/button/backButton";
 
-interface ItemDetail {
-  id: string;
-  name: string;
-  category: { name: string };
-  subcategory: { name: string };
-}
 
 export default function TableShow() {
   const params = useParams();

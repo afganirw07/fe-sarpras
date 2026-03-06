@@ -24,6 +24,7 @@ export interface Item {
   subcategory?: {
     name: string;
   };
+  created_by: string
 }
 
 export interface ApiResponse<T> {

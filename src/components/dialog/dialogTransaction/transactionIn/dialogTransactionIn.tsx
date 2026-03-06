@@ -55,7 +55,6 @@ interface TransactionItemRow {
   procurement_year: number;
 }
 
-// ✅ Tipe untuk form errors dari Zod
 interface FormErrors {
   poNumber?: string;
   warehouse?: string;
@@ -71,7 +70,7 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
   const [warehouses, setWarehouses] = useState<Room[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [poNumber, setPoNumber] = useState("");
-  const [detailTransaction, setDetailTransaction] = useState(""); // ✅ tambah state
+  const [detailTransaction, setDetailTransaction] = useState(""); 
   const { data: session } = useSession();
   const userId: any = session?.user?.id;
   const [transactionDate, setTransactionDate] = useState(
@@ -85,7 +84,6 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
 
   const [rows, setRows] = useState<TransactionItemRow[]>([]);
 
-  // ✅ State untuk errors
   const [errors, setErrors] = useState<FormErrors>({});
 
   const filteredItems = selectedCategoryId
@@ -263,7 +261,7 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                     setPoNumber(e.target.value);
                     clearError("poNumber");
                   }}
-                  type="number"
+                  // type="number"
                   className={`no-spinner ${errors.poNumber ? "border-red-500" : ""}`}
                 />
               </div>

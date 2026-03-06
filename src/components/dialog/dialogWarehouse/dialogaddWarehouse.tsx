@@ -25,6 +25,7 @@ import { createRoom, TypeRoom } from "@/lib/warehouse";
 import { toast } from "sonner";
 import { z } from "zod";
 import { WareHouseSchema } from "@/schema/warehouse.schema";
+import { useSession } from "next-auth/react";
 
 interface WarehouseError {
   code?: string;
@@ -32,93 +33,83 @@ interface WarehouseError {
   name?: string;
 }
 
-export default function DialogAddWarehouse({ 
-  onSuccess 
+interface FormData {
+  code: string;
+  name: string;
+  type: TypeRoom | "";
+}
+
+const initialForm: FormData = {
+  code: "",
+  name: "",
+  type: "",
+};
+
+export default function DialogAddWarehouse({
+  onSuccess,
 }: {
   onSuccess?: () => void;
 }) {
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [type, setType] = useState<TypeRoom | "">("");
+  const { data: session } = useSession();
+  const [form, setForm] = useState<FormData>(initialForm);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState<WarehouseError>({});
 
   const handleDialogChange = (open: boolean) => {
     setIsOpen(open);
-    
     if (open) {
-      setCode("");
-      setName("");
-      setType("");
+      setForm(initialForm);
       setErrors({});
     }
   };
 
-  const handleInputChange = (field: 'code' | 'name' | 'type', value: string) => {
-    if (field === 'code') setCode(value);
-    else if (field === 'name') setName(value);
-    else if (field === 'type') setType(value as TypeRoom);
-    
-    setErrors(prev => ({ ...prev, [field]: undefined }));
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setErrors({});
 
-    const validationData = {
-      code: code.trim(),
-      type: type,
-      name: name.trim(),
-    };
-
-    console.log("Validation data:", validationData);
+    const userId = session?.user?.id;
+    if (!userId) {
+      toast.error("Session tidak ditemukan, silakan login ulang");
+      return;
+    }
 
     try {
-      WareHouseSchema.parse(validationData);
+      WareHouseSchema.parse({
+        code: form.code.trim(),
+        type: form.type,
+        name: form.name.trim(),
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         const formattedErrors: WarehouseError = {};
-        
         error.issues.forEach((err) => {
           const field = err.path[0] as keyof WarehouseError;
           formattedErrors[field] = err.message;
         });
-        
-        console.log("Validation errors:", formattedErrors);
         setErrors(formattedErrors);
-        
-        const firstError = Object.values(formattedErrors)[0];
-        if (firstError) {
-        }
-        
         return;
       }
     }
 
     setLoading(true);
-
     try {
       await createRoom({
-        code: code.trim(),
-        name: name.trim(),
-        type: type as TypeRoom,
+        code: form.code.trim(),
+        name: form.name.trim(),
+        type: form.type as TypeRoom,
+        created_by: userId
       });
-      
+
       toast.success("Warehouse berhasil ditambahkan");
-      
-      // Reset form
-      setCode("");
-      setName("");
-      setType("");
+      setForm(initialForm);
       setErrors({});
-      
-      // Close dialog
       setIsOpen(false);
-      
-      // Trigger parent refresh
       await onSuccess?.();
     } catch (error: any) {
       toast.error(error?.message || "Gagal menambahkan warehouse");
@@ -140,9 +131,7 @@ export default function DialogAddWarehouse({
           <form onSubmit={handleSubmit}>
             <DialogHeader className="mb-6">
               <DialogTitle className="text-xl">Add Warehouse</DialogTitle>
-              <DialogDescription>
-                Tambahkan data warehouse baru
-              </DialogDescription>
+              <DialogDescription>Tambahkan data warehouse baru</DialogDescription>
             </DialogHeader>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -150,37 +139,32 @@ export default function DialogAddWarehouse({
               <div className="flex flex-col gap-2">
                 <div className="flex gap-2 items-center">
                   <Label className="text-sm font-medium">Kode Warehouse *</Label>
-                  {errors.code && (
-                    <p className="text-xs text-red-500">{errors.code}</p>
-                  )}
+                  {errors.code && <p className="text-xs text-red-500">{errors.code}</p>}
                 </div>
-                <div className={`${errors.code ? 'border-red-500' : ''}`}>
-                  <Input
-                    value={code}
-                    onChange={(e) => handleInputChange('code', e.target.value)}
-                    placeholder="Kode (HURUF BESAR, tanpa simbol)"
-                    disabled={loading}
-                  />
-                </div>
+                <Input
+                  value={form.code}
+                  onChange={(e) => handleInputChange("code", e.target.value)}
+                  placeholder="Kode (HURUF BESAR, tanpa simbol)"
+                  disabled={loading}
+                  className={errors.code ? "border-red-500" : ""}
+                />
               </div>
 
               {/* Warehouse Type */}
               <div className="flex flex-col gap-2">
                 <div className="flex gap-2 items-center">
                   <Label className="text-sm font-medium">Warehouse Type *</Label>
-                  {errors.type && (
-                    <p className="text-xs text-red-500">{errors.type}</p>
-                  )}
+                  {errors.type && <p className="text-xs text-red-500">{errors.type}</p>}
                 </div>
                 <Select
-                  value={type}
-                  onValueChange={(val) => handleInputChange('type', val)}
+                  value={form.type}
+                  onValueChange={(val) => handleInputChange("type", val)}
                   disabled={loading}
                 >
-                  <SelectTrigger className={`h-11 ${errors.type ? 'border-red-500' : ''}`}>
+                  <SelectTrigger className={`h-11 ${errors.type ? "border-red-500" : ""}`}>
                     <SelectValue placeholder="Pilih tipe" />
                   </SelectTrigger>
-                  <SelectContent className="max-w-md w-full">
+                  <SelectContent>
                     {Object.values(TypeRoom).map((item) => (
                       <SelectItem key={item} value={item}>
                         {item.toUpperCase()}
@@ -194,29 +178,21 @@ export default function DialogAddWarehouse({
               <div className="flex flex-col gap-2 md:col-span-2">
                 <div className="flex gap-2 items-center">
                   <Label className="text-sm font-medium">Nama Warehouse *</Label>
-                  {errors.name && (
-                    <p className="text-xs text-red-500">{errors.name}</p>
-                  )}
+                  {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
                 </div>
-                <div className={`${errors.name ? 'border-red-500' : ''}`}>
-                  <Input
-                    value={name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Nama warehouse (tanpa simbol)"
-                    disabled={loading}
-                  />
-                </div>
+                <Input
+                  value={form.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  placeholder="Nama warehouse (tanpa simbol)"
+                  disabled={loading}
+                  className={errors.name ? "border-red-500" : ""}
+                />
               </div>
             </div>
 
             <DialogFooter className="mt-10 flex justify-end gap-3">
               <DialogClose asChild>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="px-6"
-                  disabled={loading}
-                >
+                <Button type="button" variant="outline" className="px-6" disabled={loading}>
                   Cancel
                 </Button>
               </DialogClose>

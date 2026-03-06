@@ -24,6 +24,7 @@ import { getCategories, Category, Subcategory } from "@/lib/category";
 import { createItem, Item } from "@/lib/items";
 import { z } from "zod";
 import { itemSchema } from "@/schema/items.schema";
+import { useSession } from "next-auth/react";
 
 interface CategoryWithSubcategories extends Category {
   subcategories: Subcategory[];
@@ -37,6 +38,7 @@ interface ItemFormData {
   brand: string;
   unit: string;
   stock: number;
+  created_by: string
 }
 
 interface FormErrors {
@@ -54,12 +56,15 @@ export default function DialogAddItems({
 }: {
   onSuccess?: () => void;
 }) {
+  const { data: session } = useSession();
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<CategoryWithSubcategories[]>([]);
   const [selectedCategorySubcategories, setSelectedCategorySubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+
+     const userId = session?.user?.id as string ;
 
   const [formData, setFormData] = useState<ItemFormData>({
     code: "",
@@ -69,7 +74,9 @@ export default function DialogAddItems({
     brand: "",
     unit: "",
     stock: 0,
+    created_by: userId
   });
+  
 
   // Fetch categories
   const fetchCategories = useCallback(async () => {
@@ -136,6 +143,7 @@ export default function DialogAddItems({
         brand: "",
         unit: "",
         stock: 0,
+        created_by: userId
       });
       setSelectedCategorySubcategories([]);
       setErrors({});
@@ -183,7 +191,7 @@ export default function DialogAddItems({
     }
 
     setLoading(true);
-
+   
     try {
       const itemData = {
         code: formData.code.trim(),
@@ -194,6 +202,7 @@ export default function DialogAddItems({
         unit: formData.unit.trim(),
         stock: formData.stock,
         type: "Loanable",
+        created_by: userId
       };
 
       console.log("Submitting data:", itemData);
@@ -210,6 +219,8 @@ export default function DialogAddItems({
         brand: "",
         unit: "",
         stock: 0,
+        created_by: userId
+
       });
       setSelectedCategorySubcategories([]);
       setErrors({});

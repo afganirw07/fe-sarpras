@@ -17,7 +17,7 @@ export const itemSchema = z.object ({
                     message: "Seluruh Kode harus menggunakan huruf kapital"
                 }
             )
-        .regex(/^[a-zA-Z\s]+$/, "Kode tidak boleh mengandung simbol"),
+        .regex(/^[a-zA-Z0-9\s]+$/, "Kode tidak boleh mengandung simbol"),
     category: z
         .string()
         .min(1, "Kategori harus di isi"),

@@ -18,6 +18,8 @@ import { createSupplier } from "@/lib/supplier";
 import { toast } from "sonner";
 import { supplierSchema } from "@/schema/suplier.schema";
 import { z } from "zod";
+import { useSession } from "next-auth/react";
+import { strict } from "assert";
 
 interface Props {
   onSuccess?: () => void;
@@ -31,6 +33,8 @@ interface SupplierError {
 }
 
 export default function DialogAddSupplier({ onSuccess }: Props) {
+  const {data: session} = useSession()
+  const userId = session?.user?.id as string ;
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({
@@ -38,6 +42,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
     email: "",
     phone_number: "",
     address: "",
+    created_by: userId
   });
   const [errors, setErrors] = useState<SupplierError>({});
 
@@ -51,6 +56,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
         email: "",
         phone_number: "",
         address: "",
+        created_by: userId
       });
       // Reset errors
       setErrors({});
@@ -115,6 +121,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
         email: "",
         phone_number: "",
         address: "",
+        created_by: userId
       });
       setErrors({});
 
