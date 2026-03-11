@@ -2,29 +2,58 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  Table, TableBody, TableCell, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
-  Search, User, Building2, Tag,
-  FileText, Package, CalendarDays, Hash, Info, ArrowDownCircle,
+  Search,
+  User,
+  Building2,
+  Tag,
+  FileText,
+  Package,
+  CalendarDays,
+  Hash,
+  Info,
+  ArrowDownCircle,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { getUsers } from "@/lib/user";
-import { getTransactionById, Transaction, ItemConditions } from "@/lib/transaction";
+import {
+  getTransactionById,
+  Transaction,
+  ItemConditions,
+} from "@/lib/transaction";
 import { getTransactionDetails } from "@/lib/transaction-details";
 import { getItems } from "@/lib/items";
 import { getRooms } from "@/lib/warehouse";
 import { getSuppliers } from "@/lib/supplier";
 import { useParams } from "next/navigation";
+import ExportExcel from "@/components/exports/button-excell/buttonExcell";
 
 const MONTH_NAMES = [
-  "Januari","Februari","Maret","April","Mei","Juni",
-  "Juli","Agustus","September","Oktober","November","Desember",
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
 ];
 
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString("id-ID", {
-    day: "2-digit", month: "long", year: "numeric",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   });
 }
 
@@ -35,24 +64,28 @@ function formatPrice(price: number | string | null) {
 
 function conditionBadgeClass(condition: string) {
   switch (condition) {
-    case ItemConditions.GOOD: return "border-emerald-200 bg-emerald-100 text-emerald-700";
-    case ItemConditions.FAIR: return "border-amber-200 bg-amber-100 text-amber-700";
-    case ItemConditions.POOR: return "border-rose-200 bg-rose-100 text-rose-700";
-    default:                  return "border-gray-200 bg-gray-100 text-gray-700";
+    case ItemConditions.GOOD:
+      return "border-emerald-200 bg-emerald-100 text-emerald-700";
+    case ItemConditions.FAIR:
+      return "border-amber-200 bg-amber-100 text-amber-700";
+    case ItemConditions.POOR:
+      return "border-rose-200 bg-rose-100 text-rose-700";
+    default:
+      return "border-gray-200 bg-gray-100 text-gray-700";
   }
 }
 
 export default function ShowTransaction() {
   const { id } = useParams();
 
-  const [transaction, setTransaction]           = useState<Transaction | null>(null);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [transactionDetails, setTransactionDetails] = useState<any[]>([]);
-  const [users, setUsers]                       = useState<any[]>([]);
-  const [suppliers, setSuppliers]               = useState<any[]>([]);
-  const [items, setItems]                       = useState<any[]>([]);
-  const [rooms, setRooms]                       = useState<any[]>([]);
-  const [search, setSearch]                     = useState("");
-  const [loading, setLoading]                   = useState(true);
+  const [users, setUsers] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
@@ -63,8 +96,14 @@ export default function ShowTransaction() {
           getTransactionById(id as string) as any,
           getTransactionDetails(id as string),
         ]);
-        setTransaction(transactionRes?.data ?? transactionRes);
-        setTransactionDetails(detailsRes?.data ?? []);
+
+        const trx = transactionRes?.data ?? transactionRes;
+        setTransaction(trx);
+
+        // Filter manual by transaction_id karena API tidak filter dengan benar
+        const allDetails = detailsRes?.data ?? [];
+        const filtered = allDetails.filter((d: any) => d.transaction_id === id);
+        setTransactionDetails(filtered);
       } catch {
         toast.error("Gagal ambil detail transaksi");
       } finally {
@@ -90,37 +129,76 @@ export default function ShowTransaction() {
     getItems().then((res: any) => setItems(res?.data ?? []));
   }, []);
 
-  const userMap = useMemo(() =>
-    users.reduce((acc, u) => ({ ...acc, [u.id]: u.username }), {} as Record<string, string>)
-  , [users]);
+  const userMap = useMemo(
+    () =>
+      users.reduce(
+        (acc, u) => ({ ...acc, [u.id]: u.username }),
+        {} as Record<string, string>,
+      ),
+    [users],
+  );
 
-  const supplierMap = useMemo(() =>
-    suppliers.reduce((acc, s) => ({ ...acc, [s.id]: s.name }), {} as Record<string, string>)
-  , [suppliers]);
+  const supplierMap = useMemo(
+    () =>
+      suppliers.reduce(
+        (acc, s) => ({ ...acc, [s.id]: s.name }),
+        {} as Record<string, string>,
+      ),
+    [suppliers],
+  );
 
-  const roomMap = useMemo(() =>
-    rooms.reduce((acc, r) => ({ ...acc, [r.id]: r.name }), {} as Record<string, string>)
-  , [rooms]);
+  const roomMap = useMemo(
+    () =>
+      rooms.reduce(
+        (acc, r) => ({ ...acc, [r.id]: r.name }),
+        {} as Record<string, string>,
+      ),
+    [rooms],
+  );
 
-  const itemMap = useMemo(() =>
-    items.reduce((acc, i) => ({ ...acc, [i.id]: i.name }), {} as Record<string, string>)
-  , [items]);
+  const itemMap = useMemo(
+    () =>
+      items.reduce(
+        (acc, i) => ({ ...acc, [i.id]: i.name }),
+        {} as Record<string, string>,
+      ),
+    [items],
+  );
+
+  
 
   const filteredDetails = useMemo(() => {
     const keyword = search.toLowerCase();
-    return transactionDetails.filter((detail) =>
-      (itemMap[detail.item_id] ?? detail.item_id).toLowerCase().includes(keyword) ||
-      (roomMap[detail.room_id] ?? detail.room_id).toLowerCase().includes(keyword) ||
-      detail.condition.toLowerCase().includes(keyword)
+    return transactionDetails.filter(
+      (detail) =>
+        (itemMap[detail.item_id] ?? detail.item_id)
+          .toLowerCase()
+          .includes(keyword) ||
+        (roomMap[detail.room_id] ?? detail.room_id)
+          .toLowerCase()
+          .includes(keyword) ||
+        detail.condition.toLowerCase().includes(keyword),
     );
   }, [search, transactionDetails, itemMap, roomMap]);
+
+  const excelData = filteredDetails.map((detail, index) => ({
+  No: index + 1,
+  "Nama Item": itemMap[detail.item_id] ?? "-",
+  Room: roomMap[detail.room_id] ?? "-",
+  Quantity: detail.quantity,
+  Price: `Rp ${Number(detail.price).toLocaleString("id-ID")}`,
+  Kondisi: detail.condition,
+  "Tahun Pengadaan": detail.procurement_year,
+}));
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 dark:border-gray-700 dark:border-t-blue-400" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Memuat data...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Memuat data...
+          </p>
         </div>
       </div>
     );
@@ -143,10 +221,9 @@ export default function ShowTransaction() {
 
   return (
     <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
-
-      <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
+      <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
+          <div className="bg-linear-to-br rounded-xl from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
             <FileText className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -160,7 +237,7 @@ export default function ShowTransaction() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
+      <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         <h2 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
           <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           Informasi Transaksi
@@ -229,7 +306,7 @@ export default function ShowTransaction() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-sm dark:border-white/5 dark:bg-white/5">
+      <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
@@ -241,10 +318,20 @@ export default function ShowTransaction() {
                 {filteredDetails.length} Item
               </p>
             </div>
+          <div className="flex justify-end mb-4">
+  <ExportExcel
+    data={excelData}
+    fileName="transaction-items"
+    sheetName="Items"
+  />
+</div>
           </div>
 
-          <div className="mt-4 relative w-full md:w-80">
-            <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <div className="relative mt-4 w-full md:w-80">
+            <Search
+              size={20}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
             <input
               placeholder="Cari item, room, atau kondisi..."
               value={search}
@@ -258,7 +345,15 @@ export default function ShowTransaction() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                {["No", "Nama Item", "Room", "Quantity", "Price", "Kondisi", "Tahun Pengadaan"].map((col) => (
+                {[
+                  "No",
+                  "Nama Item",
+                  "Room",
+                  "Quantity",
+                  "Price",
+                  "Kondisi",
+                  "Tahun Pengadaan",
+                ].map((col) => (
                   <TableCell
                     key={col}
                     isHeader
@@ -282,7 +377,9 @@ export default function ShowTransaction() {
                         {search ? "Data tidak ditemukan" : "Tidak ada item"}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {search ? "Coba kata kunci lain" : "Belum ada item di transaksi ini"}
+                        {search
+                          ? "Coba kata kunci lain"
+                          : "Belum ada item di transaksi ini"}
                       </p>
                     </div>
                   </td>
@@ -320,7 +417,9 @@ export default function ShowTransaction() {
                     </TableCell>
 
                     <TableCell className="px-6 py-4">
-                      <span className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${conditionBadgeClass(detail.condition)}`}>
+                      <span
+                        className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${conditionBadgeClass(detail.condition)}`}
+                      >
                         {detail.condition}
                       </span>
                     </TableCell>

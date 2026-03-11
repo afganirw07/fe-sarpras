@@ -38,7 +38,7 @@ import { useParams } from "next/navigation";
 import { getRoomById, Room } from "@/lib/warehouse";
 import { Label } from "@/components/ui/label";
 import { getDetailItemsByRoom } from "@/lib/detail-items";
-import ExportExcelButton from "@/components/button-excell/buttonExcell";
+import ExportExcelButton from "@/components/exports/button-excell/buttonExcell";
 import ButtonBack from "@/components/ui/button/backButton";
 
 interface Item {
