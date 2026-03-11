@@ -2,13 +2,11 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState, useMemo } from "react";
-import { getDeletedDetailItems } from "@/lib/items";
+import { getPurgings } from "@/lib/purging";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-
 type Period = "1M" | "6M" | "1Y";
-
 
 function getMonthKey(iso: string): string {
   const d = new Date(iso);
@@ -20,9 +18,7 @@ function buildMonthRange(months: number): string[] {
   const now = new Date();
   for (let i = months - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    result.push(
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
-    );
+    result.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
   }
   return result;
 }
@@ -39,15 +35,13 @@ const PERIOD_MONTHS: Record<Period, number> = {
   "1Y": 12,
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+export default function PurgingLineChart() {
+  const [allItems, setAllItems] = useState<any[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [period, setPeriod]     = useState<Period>("6M");
+  const [isDark, setIsDark]     = useState(false);
 
-export default function DamagedItemsLineChart() {
-  const [allItems, setAllItems]   = useState<any[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [period, setPeriod]       = useState<Period>("6M");
-  const [isDark, setIsDark]       = useState(false);
-
-  // ── Dark mode detector ────────────────────────────────────────────────────
+  // ── Dark mode detector ──────────────────────────────────────────────────
   useEffect(() => {
     const check = () =>
       setIsDark(document.documentElement.classList.contains("dark"));
@@ -60,22 +54,21 @@ export default function DamagedItemsLineChart() {
     return () => observer.disconnect();
   }, []);
 
+  // ── Fetch semua data purging ────────────────────────────────────────────
   useEffect(() => {
     const fetchAll = async () => {
       try {
         setLoading(true);
-        // First fetch to get total
-        const first = await getDeletedDetailItems(1, 100);
+        const first = await getPurgings(1, 100);
         const total = first?.pagination?.total ?? first?.data?.length ?? 0;
         const totalPages = Math.ceil(total / 100);
 
         let all = [...(first?.data ?? [])];
 
-        // Fetch remaining pages if more than 1
         if (totalPages > 1) {
           const rest = await Promise.all(
             Array.from({ length: totalPages - 1 }, (_, i) =>
-              getDeletedDetailItems(i + 2, 100)
+              getPurgings(i + 2, 100)
             )
           );
           rest.forEach((r) => {
@@ -85,7 +78,7 @@ export default function DamagedItemsLineChart() {
 
         setAllItems(all);
       } catch (err) {
-        console.error("DamagedItemsLineChart fetch error:", err);
+        console.error("PurgingLineChart fetch error:", err);
       } finally {
         setLoading(false);
       }
@@ -93,11 +86,10 @@ export default function DamagedItemsLineChart() {
     fetchAll();
   }, []);
 
-  // ── Build chart data based on period ─────────────────────────────────────
+  // ── Build chart data ────────────────────────────────────────────────────
   const { categories, seriesData, totalCount } = useMemo(() => {
     const months = buildMonthRange(PERIOD_MONTHS[period]);
 
-    // Count damaged items per month
     const countMap: Record<string, number> = {};
     months.forEach((m) => (countMap[m] = 0));
 
@@ -108,9 +100,9 @@ export default function DamagedItemsLineChart() {
       }
     });
 
-    const seriesData = months.map((m) => countMap[m]);
-    const categories = months.map(formatMonthLabel);
-    const totalCount = seriesData.reduce((a, b) => a + b, 0);
+    const seriesData  = months.map((m) => countMap[m]);
+    const categories  = months.map(formatMonthLabel);
+    const totalCount  = seriesData.reduce((a, b) => a + b, 0);
 
     return { categories, seriesData, totalCount };
   }, [allItems, period]);
@@ -121,10 +113,7 @@ export default function DamagedItemsLineChart() {
       fontFamily: "Outfit, sans-serif",
       toolbar: { show: false },
       background: "transparent",
-      animations: {
-        enabled: true,
-        speed: 400,
-      },
+      animations: { enabled: true, speed: 400 },
     },
     colors: ["#ef4444"],
     fill: {
@@ -136,10 +125,7 @@ export default function DamagedItemsLineChart() {
         stops: [0, 100],
       },
     },
-    stroke: {
-      curve: "smooth",
-      width: 2,
-    },
+    stroke: { curve: "smooth", width: 2 },
     markers: {
       size: 4,
       colors: ["#ef4444"],
@@ -174,37 +160,36 @@ export default function DamagedItemsLineChart() {
     },
     tooltip: {
       theme: isDark ? "dark" : "light",
-      x: { show: true },
-      y: { formatter: (val) => `${val} barang rusak` },
+      x: { show: false },
+      y: { formatter: (val) => `${val} pemutihan` },
     },
   };
 
-  const series = [{ name: "Barang Rusak", data: seriesData }];
+  const series = [{ name: "Pemutihan", data: seriesData }];
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/3 sm:p-6">
 
       {/* Header */}
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Barang Rusak per Bulan
+            Pemutihan per Bulan
           </h3>
           <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-            Tren kerusakan barang berdasarkan periode
+            Tren pemutihan barang berdasarkan periode
           </p>
         </div>
 
         {/* Period toggle */}
-        <div className="flex items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="flex items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1 dark:border-gray-800 dark:bg-white/3">
           {(["1M", "6M", "1Y"] as Period[]).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                 period === p
-                  ? "bg-white text-gray-800 shadow-sm dark:bg-white/[0.08] dark:text-white"
+                  ? "bg-white text-gray-800 shadow-sm dark:bg-white/8 dark:text-white"
                   : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
@@ -218,7 +203,7 @@ export default function DamagedItemsLineChart() {
       {!loading && (
         <div className="mb-4 flex items-center gap-2">
           <span className="flex h-7 items-center rounded-full bg-red-50 px-3 text-xs font-semibold text-red-600 dark:bg-red-500/10 dark:text-red-400">
-            {totalCount} rusak
+            {totalCount} pemutihan
           </span>
           <span className="text-xs text-gray-400 dark:text-gray-600">
             dalam {PERIOD_MONTHS[period]} bulan terakhir
@@ -228,7 +213,7 @@ export default function DamagedItemsLineChart() {
 
       {/* Chart */}
       {loading ? (
-        <div className="flex h-[220px] items-center justify-center">
+        <div className="flex h-55 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-red-500 dark:border-gray-700 dark:border-t-red-400" />
         </div>
       ) : (

@@ -1,8 +1,9 @@
 "use client"
 
 import TablePemutihan from "@/components/tables/tables-UI/table-pemutihan/page";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Package, Layers, FolderTree } from "lucide-react";
+import DialogAddPemutihan from "@/components/dialog/dialogPemutihan/dialogAddPemutihan";
 
 type PemutihanStats = {
   totalDeleted: number;
@@ -11,12 +12,16 @@ type PemutihanStats = {
 } | null;
 
 export default function Pemutihan() {
-  const [stats, setStats] = useState<PemutihanStats>(null); 
+  const [stats, setStats] = useState<PemutihanStats>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleSuccess = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   return (
     <>
       <div className="w-full lg:max-w-7xl md:max-w-2xl max-w-md mx-auto">
-        {/* Header */}
         <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-6 shadow-sm dark:border-white/5 dark:bg-white/5">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3">
@@ -32,21 +37,20 @@ export default function Pemutihan() {
                 </p>
               </div>
             </div>
+            <div className="flex gap-2">
+              <DialogAddPemutihan onSuccess={handleSuccess} />
+            </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
         <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {/* Total Barang Dihapus */}
           <div className="rounded-lg sm:rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-3 sm:p-4 shadow-sm dark:border-white/5 dark:bg-white/5 transition-all hover:shadow-md">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="rounded-lg bg-red-100 p-2 dark:bg-red-900/30">
                 <Package className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 dark:text-red-400" />
               </div>
               <div className="flex-1">
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  Total Barang Dihapus
-                </p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Barang Dihapus</p>
                 {stats === null ? (
                   <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                 ) : (
@@ -58,16 +62,13 @@ export default function Pemutihan() {
             </div>
           </div>
 
-          {/* Total Jenis Barang */}
           <div className="rounded-lg sm:rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-3 sm:p-4 shadow-sm dark:border-white/5 dark:bg-white/5 transition-all hover:shadow-md">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/30">
                 <Layers className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="flex-1">
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  Total Jenis Barang
-                </p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Jenis Barang</p>
                 {stats === null ? (
                   <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                 ) : (
@@ -79,16 +80,13 @@ export default function Pemutihan() {
             </div>
           </div>
 
-          {/* Total Kategori */}
           <div className="rounded-lg sm:rounded-xl border border-gray-200/50 bg-white/80 backdrop-blur-sm p-3 sm:p-4 shadow-sm dark:border-white/5 dark:bg-white/5 transition-all hover:shadow-md">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/30">
                 <FolderTree className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div className="flex-1">
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  Total Kategori
-                </p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Kategori</p>
                 {stats === null ? (
                   <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
                 ) : (
@@ -101,8 +99,7 @@ export default function Pemutihan() {
           </div>
         </div>
 
-        {/* Table */}
-        <TablePemutihan onStatsUpdate={setStats} />
+        <TablePemutihan key={refreshKey} onStatsUpdate={setStats} />
       </div>
     </>
   );

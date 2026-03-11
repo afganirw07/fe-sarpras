@@ -16,7 +16,7 @@ export default function Ecommerce() {
 
       <div className="col-span-12 xl:col-span-8 flex flex-col gap-4 md:gap-6">
         <StatsTotal />
-        {/* <DamagedItemsLineChart /> */}
+        <DamagedItemsLineChart />
       </div>
 
       <div className="col-span-12 xl:col-span-4 xl:row-span-1">

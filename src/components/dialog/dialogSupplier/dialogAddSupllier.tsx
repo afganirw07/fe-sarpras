@@ -37,6 +37,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
   const userId = session?.user?.id as string ;
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const user = session?.user.id;
   const [form, setForm] = useState({
     name: "",
     email: "",

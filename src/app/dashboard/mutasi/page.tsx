@@ -19,10 +19,24 @@ export default function Mutasi() {
   const [search, setSearch] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const fetchAllData = async () => {
+  // const fetchAllData = async () => {
+  //   try {
+  //     const [migRes, roomRes] = await Promise.all([
+  //       getMigrations(1, 1000), // fetch semua untuk stat
+  //       getRooms(),
+  //     ]);
+  //     setMigrations(migRes.data ?? []);
+  //     setRooms(roomRes.data ?? []);
+  //   } catch {
+  //     toast.error("Gagal ambil data mutasi");
+  //   }
+  // };
+
+useEffect(() => {
+  const load = async () => {
     try {
       const [migRes, roomRes] = await Promise.all([
-        getMigrations(1, 1000), // fetch semua untuk stat
+        getMigrations(1, 1000),
         getRooms(),
       ]);
       setMigrations(migRes.data ?? []);
@@ -31,10 +45,8 @@ export default function Mutasi() {
       toast.error("Gagal ambil data mutasi");
     }
   };
-
-  useEffect(() => {
-    fetchAllData();
-  }, [refreshKey]);
+  load();
+}, [refreshKey]);
 
   const handleRefresh = () => setRefreshKey((prev) => prev + 1);
 

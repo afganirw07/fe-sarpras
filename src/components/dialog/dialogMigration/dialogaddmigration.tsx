@@ -1,31 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import React, { useState, useEffect, useCallback } from "react";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Search, ArrowRightFromLine, Trash2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Search, ArrowRightFromLine, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -35,6 +15,7 @@ import { getRooms, Room } from "@/lib/warehouse";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { getDetailItemsByRoom } from "@/lib/detail-items";
+import Pagination from "@/components/tables/Pagination";
 
 interface DetailItem {
   id: string;
@@ -45,6 +26,49 @@ interface DetailItem {
   room: { id: string; name: string };
 }
 
+// ─── Pagination Component ────────────────────────────────────────────────────
+function TablePagination({
+  page,
+  totalPages,
+  total,
+  limit,
+  onChange,
+}: {
+  page: number;
+  totalPages: number;
+  total: number;
+  limit: number;
+  onChange: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+  const from = (page - 1) * limit + 1;
+  const to = Math.min(page * limit, total);
+
+  return (
+    <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+      <span>{from}–{to} dari {total}</span>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onChange(page - 1)}
+          disabled={page === 1}
+          className="p-1 rounded border disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-white/10"
+        >
+          <ChevronLeft size={14} />
+        </button>
+        <span className="px-2 font-medium">{page} / {totalPages}</span>
+        <button
+          onClick={() => onChange(page + 1)}
+          disabled={page === totalPages}
+          className="p-1 rounded border disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-white/10"
+        >
+          <ChevronRight size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────
 export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -58,67 +82,86 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
   const [toRoomId, setToRoomId] = useState("");
   const [notes, setNotes] = useState("");
 
-  const [allRoomItems, setAllRoomItems] = useState<DetailItem[]>([]);
-  const [availableItems, setAvailableItems] = useState<DetailItem[]>([]);
+  // ── Tabel kiri: data dari backend ──
+  const [leftItems, setLeftItems] = useState<DetailItem[]>([]);
+  const [leftPage, setLeftPage] = useState(1);
+  const [leftTotalPages, setLeftTotalPages] = useState(1);
+  const [leftTotal, setLeftTotal] = useState(0);
+  const [searchLeft, setSearchLeft] = useState("");
+  const [searchLeftInput, setSearchLeftInput] = useState(""); // debounce input
+
+  // ── Tabel kanan: staged items (client-side) ──
   const [stagedItems, setStagedItems] = useState<DetailItem[]>([]);
+  const [searchRight, setSearchRight] = useState("");
+  const [rightPage, setRightPage] = useState(1);
+  const RIGHT_PAGE_SIZE = 10;
+
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const [searchLeft, setSearchLeft] = useState("");
-  const [searchRight, setSearchRight] = useState("");
-
+  // ── Fetch rooms ──
   useEffect(() => {
     getRooms()
       .then((res) => setRooms(res.data ?? []))
       .catch(() => toast.error("Gagal memuat data ruangan."));
   }, []);
 
+  // ── Debounce search kiri ──
   useEffect(() => {
-    if (!fromRoomId) {
-      setAllRoomItems([]);
-      setAvailableItems([]);
+    const timeout = setTimeout(() => {
+      setSearchLeft(searchLeftInput);
+      setLeftPage(1);
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [searchLeftInput]);
+
+  // ── Fetch detail items (backend pagination) ──
+  const fetchLeftItems = useCallback(async () => {
+    if (!fromRoomId) return;
+    setLoadingItems(true);
+    try {
+      const res = await getDetailItemsByRoom(fromRoomId, leftPage, 10, searchLeft);
+      // Filter out items yang sudah di staged
+      const stagedIds = new Set(stagedItems.map((s) => s.id));
+      const filtered = (res.data ?? []).filter((d: DetailItem) => !stagedIds.has(d.id));
+      setLeftItems(filtered);
+      setLeftTotal(res.pagination?.total ?? 0);
+      setLeftTotalPages(res.pagination?.totalPages ?? 1);
       setSelectedIds([]);
-      setStagedItems([]);
-      return;
+    } catch {
+      toast.error("Gagal memuat detail item.");
+    } finally {
+      setLoadingItems(false);
     }
-
-    const fetchDetailItems = async () => {
-      setLoadingItems(true);
-      try {
-        const res = await getDetailItemsByRoom(fromRoomId);
-        setAllRoomItems(res.data ?? []);
-        setSelectedIds([]);
-      } catch {
-        toast.error("Gagal memuat detail item.");
-      } finally {
-        setLoadingItems(false);
-      }
-    };
-
-    fetchDetailItems();
-  }, [fromRoomId]);
+  }, [fromRoomId, leftPage, searchLeft, stagedItems]);
 
   useEffect(() => {
-    const stagedIds = new Set(stagedItems.map((s) => s.id));
-    setAvailableItems(allRoomItems.filter((d) => !stagedIds.has(d.id)));
-  }, [allRoomItems, stagedItems]);
+    if (fromRoomId) fetchLeftItems();
+    else {
+      setLeftItems([]);
+      setLeftTotal(0);
+      setLeftTotalPages(1);
+    }
+  }, [fromRoomId, leftPage, searchLeft]);
 
-  const filteredLeft = availableItems.filter(
-    (item) =>
-      item.item.name.toLowerCase().includes(searchLeft.toLowerCase()) ||
-      item.serial_number.toLowerCase().includes(searchLeft.toLowerCase())
-  );
-
+  // ── Staged items pagination (client-side) ──
   const filteredRight = stagedItems.filter(
     (item) =>
       item.item.name.toLowerCase().includes(searchRight.toLowerCase()) ||
       item.serial_number.toLowerCase().includes(searchRight.toLowerCase())
   );
+  const rightTotalPages = Math.ceil(filteredRight.length / RIGHT_PAGE_SIZE);
+  const paginatedRight = filteredRight.slice(
+    (rightPage - 1) * RIGHT_PAGE_SIZE,
+    rightPage * RIGHT_PAGE_SIZE
+  );
 
-  const isAllSelected =
-    filteredLeft.length > 0 && selectedIds.length === filteredLeft.length;
+  useEffect(() => { setRightPage(1); }, [searchRight]);
+
+  // ── Select all (hanya di page ini) ──
+  const isAllSelected = leftItems.length > 0 && leftItems.every((i) => selectedIds.includes(i.id));
 
   const toggleSelectAll = () => {
-    setSelectedIds(isAllSelected ? [] : filteredLeft.map((i) => i.id));
+    setSelectedIds(isAllSelected ? [] : leftItems.map((i) => i.id));
   };
 
   const toggleSelect = (id: string) => {
@@ -132,16 +175,17 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
       toast.warning("Pilih item terlebih dahulu.");
       return;
     }
-
-    const toMove = availableItems.filter((item) => selectedIds.includes(item.id));
+    const toMove = leftItems.filter((item) => selectedIds.includes(item.id));
     const newItems = toMove.filter((item) => !stagedItems.find((s) => s.id === item.id));
-
     setStagedItems((prev) => [...prev, ...newItems]);
     setSelectedIds([]);
+    // Re-fetch kiri supaya item yang dipindah hilang
+    fetchLeftItems();
   };
 
   const handleRemoveStaged = (id: string) => {
     setStagedItems((prev) => prev.filter((i) => i.id !== id));
+    fetchLeftItems(); // kembalikan item ke kiri
   };
 
   const handleSubmit = async () => {
@@ -157,7 +201,6 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
       toast.error("Tidak ada item yang dipindahkan.");
       return;
     }
-
     setLoading(true);
     try {
       await createMigration({
@@ -167,7 +210,6 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
         detail_item_ids: stagedItems.map((i) => i.id),
         notes,
       });
-
       toast.success("Mutasi berhasil disimpan.");
       setOpen(false);
       resetForm();
@@ -184,70 +226,49 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
     setFromRoomId("");
     setToRoomId("");
     setNotes("");
-    setAllRoomItems([]);
-    setAvailableItems([]);
+    setLeftItems([]);
     setStagedItems([]);
     setSelectedIds([]);
+    setSearchLeftInput("");
     setSearchLeft("");
     setSearchRight("");
+    setLeftPage(1);
+    setRightPage(1);
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(val) => {
-        setOpen(val);
-        if (!val) resetForm();
-      }}
-    >
+    <Dialog open={open} onOpenChange={(val) => { setOpen(val); if (!val) resetForm(); }}>
       <DialogTrigger asChild>
-        <Button
-          size="lg"
-          className="font-quicksand text-md bg-blue-800 text-white transition duration-300 hover:bg-blue-900"
-        >
+        <Button size="lg" className="font-quicksand text-md bg-blue-800 text-white transition duration-300 hover:bg-blue-900">
           + Add Mutasi
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-full max-w-5xl p-6 bg-black">
+      <DialogContent className="w-full max-w-5xl p-6 dark:bg-black">
         <DialogHeader>
           <DialogTitle>Tambah Mutasi</DialogTitle>
         </DialogHeader>
 
+        {/* WH Select */}
         <div className="mb-6 grid grid-cols-2 gap-6">
           <div className="grid w-full gap-2">
             <Label>WH Awal</Label>
-            <Select
-              value={fromRoomId}
-              onValueChange={(val) => {
-                setFromRoomId(val);
-                setStagedItems([]);
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih WH Awal" />
-              </SelectTrigger>
+            <Select value={fromRoomId} onValueChange={(val) => { setFromRoomId(val); setStagedItems([]); setLeftPage(1); }}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Pilih WH Awal" /></SelectTrigger>
               <SelectContent>
                 {rooms.map((room) => (
-                  <SelectItem key={room.id} value={room.id} disabled={room.id === toRoomId}>
-                    {room.name}
-                  </SelectItem>
+                  <SelectItem key={room.id} value={room.id} disabled={room.id === toRoomId}>{room.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
           <div className="grid gap-2">
             <Label>WH Tujuan</Label>
             <Select value={toRoomId} onValueChange={setToRoomId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih WH Tujuan" />
-              </SelectTrigger>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Pilih WH Tujuan" /></SelectTrigger>
               <SelectContent>
                 {rooms.map((room) => (
-                  <SelectItem key={room.id} value={room.id} disabled={room.id === fromRoomId}>
-                    {room.name}
-                  </SelectItem>
+                  <SelectItem key={room.id} value={room.id} disabled={room.id === fromRoomId}>{room.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -255,28 +276,27 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
         </div>
 
         <div className="grid grid-cols-2 gap-6">
+          {/* ── Tabel Kiri ── */}
           <div>
             <Label>
               WH Awal
               {loadingItems && <span className="ml-2 text-xs text-gray-400">Loading...</span>}
               {!loadingItems && fromRoomId && (
-                <span className="ml-2 text-xs text-gray-400">
-                  {availableItems.length} item tersedia
-                </span>
+                <span className="ml-2 text-xs text-gray-400">{leftTotal} item tersedia</span>
               )}
             </Label>
 
             <div className="mb-4 mt-2 relative w-full">
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
-                value={searchLeft}
-                onChange={(e) => setSearchLeft(e.target.value)}
+                value={searchLeftInput}
+                onChange={(e) => setSearchLeftInput(e.target.value)}
                 placeholder="Search item / SN"
                 className="w-full rounded-md border border-gray-400 bg-white py-2 pl-10 pr-4 text-sm placeholder-gray-500 outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-transparent"
               />
             </div>
 
-            <div className="max-h-64 overflow-y-auto rounded-md border">
+       <div className="rounded-md border overflow-y-auto max-h-64">
               <Table className="w-full table-auto">
                 <TableHeader className="border border-gray-100 dark:border-white/5">
                   <TableRow>
@@ -289,26 +309,21 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredLeft.length === 0 ? (
+                  {leftItems.length === 0 ? (
                     <TableRow>
                       <td colSpan={4} className="border px-6 py-6 text-center text-sm text-gray-500">
-                        {!fromRoomId
-                          ? "Pilih WH Awal terlebih dahulu"
-                          : loadingItems
-                          ? "Memuat data..."
-                          : "Tidak ada item tersedia"}
+                        {!fromRoomId ? "Pilih WH Awal terlebih dahulu" : loadingItems ? "Memuat data..." : "Tidak ada item tersedia"}
                       </td>
                     </TableRow>
                   ) : (
-                    filteredLeft.map((item, index) => (
+                    leftItems.map((item, index) => (
                       <TableRow key={item.id}>
                         <TableCell className="border px-3 py-4">
-                          <Checkbox
-                            checked={selectedIds.includes(item.id)}
-                            onCheckedChange={() => toggleSelect(item.id)}
-                          />
+                          <Checkbox checked={selectedIds.includes(item.id)} onCheckedChange={() => toggleSelect(item.id)} />
                         </TableCell>
-                        <TableCell className="border px-4 py-4 text-sm text-gray-500">{index + 1}</TableCell>
+                        <TableCell className="border px-4 py-4 text-sm text-gray-500">
+                          {(leftPage - 1) * 10 + index + 1}
+                        </TableCell>
                         <TableCell className="border px-4 py-4 text-sm text-gray-500">{item.item.name}</TableCell>
                         <TableCell className="border px-4 py-4 text-xs text-gray-500">{item.serial_number}</TableCell>
                       </TableRow>
@@ -317,18 +332,25 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
                 </TableBody>
               </Table>
             </div>
-
-            <Button
+{fromRoomId && (
+  <div className="mt-2">
+  <Pagination
+    currentPage={leftPage}
+    totalPages={leftTotalPages}
+    onPageChange={setLeftPage}
+    />
+    </div>
+)}       <Button
               type="button"
               onClick={handlePindahkan}
               disabled={selectedIds.length === 0}
-              className="mt-4 bg-blue-800 hover:bg-blue-900 disabled:opacity-50 dark:text-white"
+              className="mt-3 bg-blue-800 hover:bg-blue-900 disabled:opacity-50 dark:text-white"
             >
-              Pindahkan
-              <ArrowRightFromLine className="ml-2" />
+              Pindahkan <ArrowRightFromLine className="ml-2" />
             </Button>
           </div>
 
+          {/* ── Tabel Kanan ── */}
           <div>
             <Label>
               WH Tujuan
@@ -347,6 +369,8 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
               />
             </div>
 
+<div className="rounded-md border overflow-y-auto max-h-64">
+
             <Table className="w-full table-auto">
               <TableHeader className="border border-gray-100 dark:border-white/5">
                 <TableRow>
@@ -358,26 +382,23 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRight.length === 0 ? (
+                {paginatedRight.length === 0 ? (
                   <TableRow>
                     <td colSpan={5} className="border px-6 py-6 text-center text-sm text-gray-500">
                       Belum ada item dipindahkan
                     </td>
                   </TableRow>
                 ) : (
-                  filteredRight.map((item, index) => (
+                  paginatedRight.map((item, index) => (
                     <TableRow key={item.id}>
-                      <TableCell className="border px-4 py-4 text-sm text-gray-500">{index + 1}</TableCell>
+                      <TableCell className="border px-4 py-4 text-sm text-gray-500">
+                        {(rightPage - 1) * RIGHT_PAGE_SIZE + index + 1}
+                      </TableCell>
                       <TableCell className="border px-4 py-4 text-sm text-gray-500">{item.item.name}</TableCell>
                       <TableCell className="border px-4 py-4 text-xs text-gray-500">{item.serial_number}</TableCell>
                       <TableCell className="border px-4 py-4 text-sm text-gray-500">{item.room.name}</TableCell>
                       <TableCell className="border px-4 py-4">
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          type="button"
-                          onClick={() => handleRemoveStaged(item.id)}
-                        >
+                        <Button size="sm" variant="destructive" type="button" onClick={() => handleRemoveStaged(item.id)}>
                           <Trash2 size={14} />
                         </Button>
                       </TableCell>
@@ -386,6 +407,17 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
                 )}
               </TableBody>
             </Table>
+              </div>
+           
+{stagedItems.length > 0 && (
+  <div className="mt-2">
+  <Pagination
+    currentPage={rightPage}
+    totalPages={rightTotalPages}
+    onPageChange={setRightPage}
+    />
+    </div>
+)}
 
             <div className="mt-4 grid gap-2">
               <Label>Remarks</Label>
@@ -402,12 +434,7 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
           <DialogClose asChild>
             <Button variant="outline" type="button">Cancel</Button>
           </DialogClose>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-blue-800 hover:bg-blue-900 dark:text-white"
-          >
+          <Button type="button" onClick={handleSubmit} disabled={loading} className="bg-blue-800 hover:bg-blue-900 dark:text-white">
             {loading ? "Menyimpan..." : "Save"}
           </Button>
         </DialogFooter>

@@ -64,7 +64,7 @@ export default function DialogAddItems({
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
-     const userId = session?.user?.id as string ;
+  const userId = session?.user?.id as string ;
 
   const [formData, setFormData] = useState<ItemFormData>({
     code: "",
@@ -165,6 +165,7 @@ export default function DialogAddItems({
       unit: formData.unit.trim(),
       stock: formData.stock,
       brand: formData.brand.trim(),
+        created_by: formData.created_by,
     };
 
     console.log("Validation data:", validationData);

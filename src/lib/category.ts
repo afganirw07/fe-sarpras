@@ -67,7 +67,11 @@ export async function getSubcategories(
   return api(`/api/subcategory?page=${page}&limit=${limit}`);
 }
 
-export async function createCategory(payload: CategoryPayload) {
+export async function createCategory(payload: {
+  name: string;
+  code: string;
+  created_by: string; 
+}) {
   return api("/api/categories", {
     method: "POST",
     headers: {

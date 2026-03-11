@@ -12,7 +12,10 @@ import { Input } from "../../../ui/input";
 import { getDetailItemsByItemId, DetailItem } from "@/lib/items";
 import ActionButtonsDetailItems from "@/components/dialog/dialogItems/Detail/dialogActionButtonDetails";
 import ButtonBack from "@/components/ui/button/backButton";
+import Pagination from "../../Pagination"; 
 
+
+const PER_PAGE = 10;
 
 export default function TableShow() {
   const params = useParams();
@@ -22,40 +25,50 @@ export default function TableShow() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-const fetchData = useCallback(async () => {
-  try {
-    setLoading(true);
-    const detailRes = await getDetailItemsByItemId(itemId);
-    setDetailItems(detailRes.data);
-  } catch (error) {
-    console.error("Failed to fetch:", error);
-  } finally {
-    setLoading(false);
-  }
-}, [itemId]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-useEffect(() => {
-  if (!itemId) return;
-  fetchData();
-}, [itemId, fetchData]);
+  const fetchData = useCallback(async (page: number = 1, keyword: string = "") => {
+    if (!itemId) return;
+    try {
+      setLoading(true);
+      const detailRes = await getDetailItemsByItemId(itemId, page, PER_PAGE, keyword);
+      setDetailItems(detailRes.data);
+      if (detailRes.pagination) {
+        setTotalPages(detailRes.pagination.totalPages);
+        setTotalItems(detailRes.pagination.total);
+      }
+    } catch (error) {
+      console.error("Failed to fetch:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [itemId]);
 
+  // Fetch saat page berubah
+  useEffect(() => {
+    fetchData(currentPage, search);
+  }, [currentPage, itemId]);
 
-const firstItem = detailItems[0];
-const itemName     = firstItem?.item?.name ?? "-";
-const categoryName = firstItem?.item?.category?.name ?? "-";
-const subCategory  = firstItem?.item?.subcategory?.name ?? "-";
-const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by ?? "-";
+  // Debounce search — reset ke page 1 saat keyword berubah
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+      fetchData(1, search);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const filteredDetailItems = detailItems.filter((d) => {
-    const keyword = search.toLowerCase();
-    return (
-      d.serial_number?.toLowerCase().includes(keyword) ||
-      d.room?.name?.toLowerCase().includes(keyword) ||
-      d.status?.toLowerCase().includes(keyword)
-    );
-  });
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
- 
+  const firstItem = detailItems[0];
+  const itemName     = firstItem?.item?.name ?? "-";
+  const categoryName = firstItem?.item?.category?.name ?? "-";
+  const subCategory  = firstItem?.item?.subcategory?.name ?? "-";
+  const createdBy    = firstItem?.userId?.username ?? firstItem?.created_by ?? "-";
 
   return (
     <div className="flex flex-col">
@@ -65,7 +78,7 @@ const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by
             Detail Master Item
           </h1>
 
-          {loading ? (
+          {loading && detailItems.length === 0 ? (
             <div className="flex items-center gap-3 text-sm text-gray-500">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
               Memuat data...
@@ -76,17 +89,14 @@ const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by
                 <Label>Nama Item :</Label>
                 <Input value={itemName} readOnly />
               </div>
-
               <div className="grid gap-2">
                 <Label>Subkategori Item :</Label>
                 <Input value={subCategory} readOnly />
               </div>
-
               <div className="grid gap-2">
                 <Label>Kategori Item :</Label>
                 <Input value={categoryName} readOnly />
               </div>
-
               <div className="grid gap-2">
                 <Label>Created By :</Label>
                 <Input value={createdBy} readOnly />
@@ -97,10 +107,8 @@ const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by
 
         <div className="mt-12">
           <div className="flex w-full justify-between">
-          <h1 className="font-quicksand text-2xl font-semibold mb-6">Data Item</h1>
-          <ButtonBack
-          route="/items"
-          />
+            <h1 className="font-quicksand text-2xl font-semibold mb-6">Data Item</h1>
+            <ButtonBack route="/items" />
           </div>
 
           <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
@@ -152,18 +160,21 @@ const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by
                           Memuat data...
                         </td>
                       </TableRow>
-                    ) : filteredDetailItems.length === 0 ? (
+                    ) : detailItems.length === 0 ? (
                       <TableRow>
                         <td colSpan={7} className="py-12 text-center text-sm text-gray-500">
                           Tidak ada data item
                         </td>
                       </TableRow>
                     ) : (
-                      filteredDetailItems.map((d, index) => (
-                        <TableRow key={d.id} className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5">
+                      detailItems.map((d, index) => (
+                        <TableRow
+                          key={d.id}
+                          className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
+                        >
                           <TableCell className="px-2 py-4">
                             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
-                              {index + 1}
+                              {(currentPage - 1) * PER_PAGE + index + 1}
                             </span>
                           </TableCell>
 
@@ -186,7 +197,15 @@ const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by
                           </TableCell>
 
                           <TableCell className="px-2 py-4">
-                            <span className="inline-block rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            <span
+                              className={`inline-block rounded-lg border px-2.5 py-1 text-xs font-semibold ${
+                                d.condition === "Poor"
+                                  ? "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400"
+                                  : d.condition === "Fair"
+                                  ? "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                  : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
+                              }`}
+                            >
                               {d.condition}
                             </span>
                           </TableCell>
@@ -198,9 +217,9 @@ const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by
                           </TableCell>
 
                           <TableCell className="px-2 py-4 text-center">
-                            <ActionButtonsDetailItems 
-                                item={d}           
-                                onSuccess={fetchData} 
+                            <ActionButtonsDetailItems
+                              item={d}
+                              onSuccess={() => fetchData(currentPage, search)}
                             />
                           </TableCell>
                         </TableRow>
@@ -211,11 +230,24 @@ const createdBy = detailItems[0]?.userId?.username ?? detailItems[0]?.created_by
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-gray-200/50 dark:border-white/5">
+            {/* Footer + Pagination */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-200/50 p-4 dark:border-white/5">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total Item: {filteredDetailItems.length} item
+                Total Item: <span className="font-medium">{totalItems}</span> item
+                {totalPages > 1 && (
+                  <span className="ml-2 text-gray-400">
+                    · Halaman {currentPage} dari {totalPages}
+                  </span>
+                )}
               </p>
+
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              )}
             </div>
           </div>
         </div>

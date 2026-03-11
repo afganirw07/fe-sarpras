@@ -74,6 +74,7 @@ export default function ActionButtonsWarehouse({
    const userId = session?.user?.id as string ;
   const [loading, setLoading] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const user = session?.user.id;
   const [payload, setPayload] = useState<RoomPayload>({
     code: "",
     name: "",

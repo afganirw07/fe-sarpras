@@ -55,6 +55,7 @@ export default function DialogAddWarehouse({
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [errors, setErrors] = useState<WarehouseError>({});
+  const user = session?.user.id;
 
   const handleDialogChange = (open: boolean) => {
     setIsOpen(open);

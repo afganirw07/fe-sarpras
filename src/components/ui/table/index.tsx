@@ -31,6 +31,17 @@ interface TableCellProps {
   className?: string; // Optional className for styling
 }
 
+// Interface — extends HTMLAttributes agar dapat onClick, onKeyDown, dll
+interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+  children: ReactNode;
+  className?: string;
+}
+
+// Component — spread ...props ke <tr>
+const TableRow: React.FC<TableRowProps> = ({ children, className, ...props }) => {
+  return <tr className={className} {...props}>{children}</tr>;
+};
+
 // Table Component
 const Table: React.FC<TableProps> = ({ children, className }) => {
   return <table className={`min-w-full  ${className}`}>{children}</table>;
@@ -46,10 +57,7 @@ const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
   return <tbody className={className}>{children}</tbody>;
 };
 
-// TableRow Component
-const TableRow: React.FC<TableRowProps> = ({ children, className }) => {
-  return <tr className={className}>{children}</tr>;
-};
+
 
 // TableCell Component
 const TableCell: React.FC<TableCellProps> = ({

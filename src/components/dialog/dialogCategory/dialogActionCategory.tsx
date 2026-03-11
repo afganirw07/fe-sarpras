@@ -81,7 +81,7 @@ export default function ActionButtonsCategory({
   const [subcategoryCode, setSubcategoryCode] = useState("");
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [errors, setErrors] = useState<CategoryError>({});
-
+  const user = session?.user.id;
   useEffect(() => {
     if (!open) return;
 

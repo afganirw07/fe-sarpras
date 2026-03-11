@@ -42,6 +42,7 @@ import {
   EmployeeRole,
   updateEmployeeRole,
 } from "@/lib/roles";
+import { useSession } from "next-auth/react";
 
 export default function ActionButtonsRoles({
   employeeId,
@@ -58,7 +59,8 @@ export default function ActionButtonsRoles({
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [rows, setRows] = useState<EmployeeRole[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null); 
-
+  const { data:session} = useSession();
+  const user = session?.user.id;
 
 const fetchEmployees = useCallback(async () => {
   try {
@@ -209,6 +211,7 @@ async function handleDelete(e: React.MouseEvent) {
                   employee_id: selectedEmployeeId,
                   roleId: roleId,
                   role: selectedRoles,
+                  created_by: user,
                 });
                 toast.success("Role berhasil diperbarui");
               } catch (err: any) {

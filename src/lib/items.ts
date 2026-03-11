@@ -114,13 +114,21 @@ export async function getDeletedItems(page: number = 1, perPage: number = 10): P
 export async function getDetailItemsByItemId(
   itemId: string,
   page: number = 1,
-  perPage: number = 10
+  perPage: number = 10,
+  search: string = ""
 ): Promise<ApiResponse<DetailItem[]>> {
-  return await api(`/api/detail-items?item_id=${itemId}&page=${page}&perPage=${perPage}`, {
-    method: 'GET',
+  const params = new URLSearchParams({
+    item_id: itemId,
+    page: String(page),
+    limit: String(perPage),
+    ...(search ? { search } : {}),
   });
-
+  return await api(`/api/detail-items?${params.toString()}`, {
+    method: "GET",
+  });
 }
+
+
 export async function getDetailItemById(
   id: string
 ): Promise<ApiResponse<DetailItem>> {

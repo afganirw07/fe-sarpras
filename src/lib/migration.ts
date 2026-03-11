@@ -6,8 +6,48 @@ export interface ItemMigration {
   to_room_id: string;
   migrated_by: string;
   notes?: string | null;
-  migrated_at: Date;
-  deleted_at?: Date | null;
+  migrated_at: string;
+
+  detail_items?: DetailItem[];
+}
+
+export interface DetailItem {
+  id: string;
+  serial_number: string;
+  condition: string;
+  status: string;
+  room_id: string;
+
+  item: {
+    id: string;
+    name: string;
+    code: string;
+    brand: string | null;
+    unit: string;
+    type: string;
+
+    category?: {
+      id: string;
+      name: string;
+      code: string;
+    };
+
+    subcategory?: {
+      id: string;
+      name: string;
+      code: string;
+    };
+  };
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  pagination?: {
+    total: number;
+    totalPages: number;
+    currentPage: number;
+    perPage: number;
+  };
 }
 
 export interface Pagination {

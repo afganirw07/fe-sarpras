@@ -1,65 +1,37 @@
 "use client";
 import TableTrancsactionIn from "@/components/tables/tables-UI/table-transaction-in/page";
 
-import React, { useMemo, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import  { useMemo, useState } from "react";
 import {
   Search,
-  SquareArrowOutUpRight,
   ArrowDownToLine,
-  User,
-  Package,
-  Warehouse,
-  Calendar,
-  ArrowUpDown,
   Receipt,
   CheckCircle2,
   Clock,
-  XCircle,
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toast } from "sonner";
-import Link from "next/link";
 import DialogTransactionIn from "@/components/dialog/dialogTransaction/transactionIn/dialogTransactionIn"
 import { useEffect } from "react";
 import { getTransactions, Transaction } from "@/lib/transaction";
-import { useSession } from "next-auth/react";
-import ActionButtonIn from "@/components/dialog/dialogTransaction/transactionIn/actionButton";
 import { getUsers } from "@/lib/user";
 
-export default function TransactionIn({
-  onSuccess,
-}: {
-  onSuccess?: () => void;
+export default function TransactionIn( {
 })  {
 
-          const [loading, setLoading] = useState(false);
           const [search, setSearch] = useState("");
           const [users, setUsers] = useState<any[]>([]);
           const [transactions, setTransactions] = useState<Transaction[]>([])
           const [refreshKey, setRefreshKey] = useState(0);
-const [currentPage, setCurrentPage] = useState(1)
-const limit = 10
+          const [currentPage, setCurrentPage] = useState(1)
+          const limit = 10
 
-const fetchTransaction = async (page = currentPage) => {
-  const res = await getTransactions(page, limit)
-  setTransactions(res.data)
-}
-
-useEffect(() => {
-  fetchTransaction()
-}, [currentPage])
+          useEffect(() => {
+            const fetchTransaction = async () => {
+              const res = await getTransactions(currentPage, limit);
+              setTransactions(res.data);
+            };
+          
+            fetchTransaction();
+          }, [currentPage]);
           
         
           useEffect(() => {
@@ -100,9 +72,10 @@ useEffect(() => {
               t.status.toLowerCase().includes("received"),
           ).length; 
           
-           const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1)
-  }
+            const handleRefresh = () => {
+              setCurrentPage(1); 
+              setRefreshKey((prev) => prev + 1);
+            };
         
           return (
                  <div className="mx-auto w-full max-w-xs md:max-w-2xl lg:max-w-7xl">

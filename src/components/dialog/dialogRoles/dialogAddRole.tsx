@@ -28,6 +28,7 @@ import { getEmployees } from "@/lib/roles";
 import { Employee } from "@/lib/roles";
 import { addEmployeeRoles } from "@/lib/roles";
 import { getEmployeeRoles, EmployeeRole } from "@/lib/roles";
+import { useSession } from "next-auth/react";
 
 export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -37,6 +38,8 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
   const [rows, setRows] = useState<EmployeeRole[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const { data: session } = useSession();
+  const userId = session?.user?.id as string;
 
   const employeeWithRoleIds = new Set(rows.map((r) => r.employeeId));
 
@@ -44,7 +47,6 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
     (emp) => !employeeWithRoleIds.has(emp.id),
   );  
 
-  // Fungsi untuk fetch employees
   const fetchEmployees = useCallback(async () => {
     try {
       const data = await getEmployees();
@@ -54,7 +56,6 @@ export default function DialogAddRoles({onSuccess}: {onSuccess?: () => void}) {
     }
   }, []);
 
-  // Fungsi untuk fetch roles
   const fetchRoles = useCallback(async () => {
     try {
       const data = await getEmployeeRoles();

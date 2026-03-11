@@ -46,6 +46,7 @@ interface Item {
   nama: string;
   po_number: string;
   kondisi: string;
+  category: string,
   status: string;
   sn_number: string;
 }
@@ -76,6 +77,7 @@ export default function TableDetailWarehouse() {
           nama: item.item?.name ?? "-",
           po_number: item.transaction?.po_number ?? "-",
           kondisi: item.condition ?? "-",
+          category: item.item?.category?.name ?? "-",  
           status: item.status ?? "-",
           sn_number: item.serial_number ?? "-",
         }));
@@ -99,6 +101,7 @@ export default function TableDetailWarehouse() {
         item.po_number.toLowerCase().includes(keyword) ||
         item.kondisi.toLowerCase().includes(keyword) ||
         item.status.toLowerCase().includes(keyword) ||
+        item.category.toLowerCase().includes(keyword) ||
         item.sn_number.toLowerCase().includes(keyword)
       );
     });
@@ -278,6 +281,12 @@ export default function TableDetailWarehouse() {
                       isHeader
                       className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
+                      Kategori  
+                    </TableCell>
+                    <TableCell
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
                       PO Number
                     </TableCell>
                     <TableCell
@@ -340,6 +349,11 @@ export default function TableDetailWarehouse() {
                             </span>
                           </div>
                         </TableCell>
+                        <TableCell className="px-6 py-4">
+                            <span className="inline-block rounded-lg border border-green-200 bg-lime-50 px-2.5 py-1 text-xs font-semibold text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400">
+                              {item.category}
+                            </span>
+                          </TableCell>
 
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-2">

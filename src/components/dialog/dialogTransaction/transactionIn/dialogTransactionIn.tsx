@@ -44,6 +44,8 @@ import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { any, z } from "zod";
 import { tansactionInSchema } from "@/schema/transaction_jn.schema"; 
+import { getMyEmployeeId } from "@/lib/roles";
+import { create } from "domain";
 
 interface TransactionItemRow {
   item_id: string;
@@ -81,7 +83,8 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
   const [selectedSupplierId, setSelectedSupplierId] = useState<string>("");
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>("");
   const [selectedItemId, setSelectedItemId] = useState<string>("");
-
+  const [categoryCode, setCategoryCode] = useState<string>("");
+  const [itemCode, setItemCode] = useState<string>("");
   const [rows, setRows] = useState<TransactionItemRow[]>([]);
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -102,6 +105,9 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
       setSuppliers(supRes.data);
       setWarehouses(roomRes.data);
       setItems(itemRes.data);
+
+      
+      
     } catch (error) {
       console.error("Fetch dialog data error:", error);
     }
@@ -109,7 +115,7 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
 
   const handleaddItem = () => {
     if (!selectedItemId || !selectedWarehouseId) return;
-
+    
     const item = items.find((i) => i.id === selectedItemId);
     if (!item) return;
 
@@ -121,6 +127,7 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
       {
         item_id: item.id,
         item_name: item.name,
+        itemCode: item.code,
         price: item.price ?? 0,
         qty_request: 1,
         qty_receive: 1,
@@ -131,20 +138,17 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
 
     setSelectedItemId("");
 
-    // ✅ Clear error items saat item ditambahkan
     setErrors((prev) => ({ ...prev, items: undefined }));
   };
 
-  // ✅ Helper: clear error saat field diubah
   const clearError = (field: keyof FormErrors) => {
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const handleSubmit = async () => {
-    // ✅ Reset errors sebelum validasi
     setErrors({});
-
-    // ✅ Siapkan data untuk validasi Zod
+    
+    const employeeId = await getMyEmployeeId(userId);
     const validationData = {
       poNumber: poNumber ? Number(poNumber) : 0,
       warehouse: selectedWarehouseId,
@@ -154,7 +158,6 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
       items: rows.length > 0 ? "filled" : "", // cek apakah ada item
     };
 
-    // ✅ Validasi dengan Zod
     try {
       tansactionInSchema.parse(validationData);
     } catch (error) {
@@ -169,8 +172,6 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
         return;
       }
     }
-
-    // ✅ Lanjut submit jika validasi lolos
     const inType = rows.every((row) => row.price === 0)
       ? InType.DONATION
       : InType.BUY;
@@ -181,8 +182,10 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
       po_number: poNumber,
       transaction_date: new Date(transactionDate),
       status: TransactionStatus.DRAFT,
+      returned_by: employeeId,
       in_type: inType,
       transaction_details: rows.map((row) => ({
+        created_by: userId,
         item_id: row.item_id,
         room_id: selectedWarehouseId,
         quantity: row.qty_receive,
@@ -191,16 +194,19 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
         procurement_month: new Date().getMonth() + 1,
         procurement_year: row.procurement_year,
       })),
-      detail_items: rows.flatMap((row) =>
-        Array.from({ length: row.qty_receive }).map((_, i) => ({
-          item_id: row.item_id,
-          room_id: selectedWarehouseId,
-          serial_number: `${row.item_id}-${Date.now()}-${i}`,
-          condition: row.condition,
-          status: ItemStatus.AVAILABLE,
-          created_by: userId,
-        }))
-      ),
+        detail_items: rows.flatMap((row) => {
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+        
+      return Array.from({ length: row.qty_receive }).map((_, i) => ({
+        item_id: row.item_id,
+        room_id: selectedWarehouseId,
+        serial_number: `${categoryCode}-${poNumber}-${dateStr}-${i + 1}`,
+        condition: row.condition,
+        status: ItemStatus.AVAILABLE,
+        created_by: userId,
+      }));
+}),
     };
 
     try {
@@ -208,7 +214,6 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
       console.log("===============================", result);
       toast.success("Transaction berhasil dibuat");
       await onSuccess?.();
-      // ✅ Reset semua state
       setRows([]);
       setPoNumber("");
       setDetailTransaction("");
@@ -355,6 +360,9 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                     setSelectedCategoryId(v);
                     setSelectedItemId("");
                     clearError("categori");
+
+                    const category = categories.find((c) => c.id === v )
+                    setCategoryCode(category?.code ?? "")
                   }}
                 >
                   <SelectTrigger className={`h-11 ${errors.categori ? "border-red-500" : ""}`}>
@@ -380,8 +388,15 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                 </div>
                 <Select
                   value={selectedItemId}
-                  onValueChange={setSelectedItemId}
+                  onValueChange={(v) => {
+                    setSelectedItemId(v)
+                    const item = items.find((i) => i.id = v )
+                    setItemCode(item?.code ?? "")
+                    
+                  }}
                   disabled={!selectedCategoryId}
+
+
                 >
                   <SelectTrigger className={`h-11 ${errors.items ? "border-red-500" : ""}`}>
                     <SelectValue

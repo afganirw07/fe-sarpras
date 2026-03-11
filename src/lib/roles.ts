@@ -31,6 +31,7 @@ export interface EmployeeRole {
   updated_at: string;
   deleted_at: string | null;
   employee: RoleEmployee;
+  created_by: string;
 }
 
 export interface Roles {
@@ -96,6 +97,7 @@ export async function updateEmployeeRole(payload: {
   roleId: string;
   employee_id: string;
   role: string[];
+  created_by: any;
 }) {
   if (!payload.roleId) throw new Error("Role ID is required");
 
@@ -147,4 +149,19 @@ export async function restoreDeletedRole(roleId: string): Promise<EmployeeRole> 
   });
 
   return response.data;
+}
+
+export async function getMyEmployeeId(userId: string): Promise<string> {
+  const json = await api("/api/employees");
+
+  const employee = json.data.find(
+    (emp: any) =>
+      emp.created_by === userId && emp.deleted_at === null
+  );
+
+  if (!employee) {
+    throw new Error("Employee untuk user ini tidak ditemukan");
+  }
+
+  return employee.id;
 }

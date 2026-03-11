@@ -64,13 +64,14 @@ export interface Transaction {
   supplier_id: string;
   type: TransactionType;
   in_type?: InType;
-  po_number: string;
+  po_number: number;
   transaction_date: Date;
   status: TransactionStatus;
   created_at: Date;
   updated_at: Date;
   deleted_at?: Date | null;
-
+  returned_by?: string | null;
+  created_by?: string;
   transaction_details: TransactionDetail[];
   detail_items: DetailItem[];
 }
@@ -116,6 +117,7 @@ export interface TransactionInPayload extends BaseTransactionPayload {
   in_type: InType;
   transaction_details: TransactionDetailPayload[];
   detail_items: DetailItemPayload[];
+  returned_by?: string | null;
 }
 
 export interface TransactionOutPayload extends BaseTransactionPayload {

@@ -52,7 +52,6 @@ interface CategoryError {
 }
 
 export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
-    const { data: session } = useSession();
   const [categoryName, setCategoryName] = useState("");
   const [categoryCode, setCategoryCode] = useState("");
   const [subcategoryName, setSubcategoryName] = useState("");
@@ -61,6 +60,8 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<CategoryError>({});
   const [subcategories, setSubcategories] = useState<SubcategoryTableItem[]>([]);
+  const { data: session} = useSession();
+  const user = session?.user;
 
   const resetForm = () => {
     setCategoryName("");

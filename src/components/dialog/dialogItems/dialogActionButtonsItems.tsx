@@ -200,6 +200,7 @@ export default function ActionButtonsItems({
       subCategory: formData.subcategory_id,
       unit: formData.unit.trim(),
       brand: formData.brand.trim(),
+      
     };
 
     console.log("Validation data:", validationData);
