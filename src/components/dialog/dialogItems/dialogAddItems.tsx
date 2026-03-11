@@ -73,7 +73,7 @@ export default function DialogAddItems({
     brand: "",
     unit: "",
     stock: 0,
-    created_by: user || "unknown",
+    created_by:"unknown",
   });
 
   // Fetch categories
@@ -141,7 +141,7 @@ export default function DialogAddItems({
         brand: "",
         unit: "",
         stock: 0,
-        created_by: user
+        created_by: user ?? undefined
       });
       setSelectedCategorySubcategories([]);
       setErrors({});

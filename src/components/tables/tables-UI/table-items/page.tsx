@@ -37,6 +37,7 @@ export default function TableItems({
     try {
       setLoading(true);
       const response = await getItems(page, perPage);
+console.log("Response:", response);
 
       if (response?.data && Array.isArray(response.data)) {
         setItems(response.data);
@@ -45,6 +46,7 @@ export default function TableItems({
         const pages = response.pagination?.totalPages || 1;
         setTotalPages(pages);
         setTotalItems(total);
+        
 
         const stock = response.data.reduce((sum, item) => sum + (item.stock || 0), 0);
         const uniqueCategories = new Set(

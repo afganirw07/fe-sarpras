@@ -73,7 +73,7 @@ export default function RestoreAction({
           <TooltipContent className="font-quicksand">Restore</TooltipContent>
         </Tooltip>
 
-        <AlertDialogContent className="bg-black">
+        <AlertDialogContent className="dark:bg-black">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-figtree">Pulihkan Role?</AlertDialogTitle>
             <AlertDialogDescription className="font-quicksand">
