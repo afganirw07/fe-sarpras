@@ -45,7 +45,7 @@ export async function returnDetailItems(
       api(`/api/detail-items/${detail.id}`, {
         method: "PUT",
         body: JSON.stringify({
-          item_id: detail.item_id,           // ✅ dari response langsung
+          item_id: detail.item_id,          
           transaction_id: detail.transaction_id,
           room_id: detail.room_id,
           serial_number: detail.serial_number,
@@ -56,19 +56,9 @@ export async function returnDetailItems(
     )
   );
 
-  // 3. Auto-update LoanRequest terkait → returned
-  // 3. Auto-update LoanRequest terkait → returned
+
   const loanRes = await api(`/api/loan-requests?limit=100`);
   const allLoans: any[] = loanRes.data ?? [];
-
-  // Debug — hapus setelah fix
-  console.log("detailedItems ids:", detailedItems.map(e => e.detail.id));
-  console.log("allLoans item_ids (approved):", 
-    allLoans
-      .filter(l => l.status === "approved")
-      .map(l => ({ id: l.id, item_id: l.item_id }))
-  );
-
   const matchedLoans = allLoans.filter(
     (loan) =>
       detailedItems.some((e) => e.detail.id === loan.item_id) &&
@@ -84,7 +74,7 @@ export async function returnDetailItems(
           method: "PUT",
           body: JSON.stringify({
             user_id: loan.user_id,
-            item_id: loan.item_id,      // ✅ wajib disertakan
+            item_id: loan.item_id,     
             borrow_date: loan.borrow_date,
             return_date: new Date().toISOString(),
             status: "returned",

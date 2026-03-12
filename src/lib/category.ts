@@ -55,14 +55,14 @@ export interface UpdateSubcategoryPayload {
 
 export async function getCategories(
   page: number = 1,
-  limit: number = 10
+  limit: number = 100
 ): Promise<PaginatedResponse<Category>> {
   return api(`/api/categories?page=${page}&limit=${limit}`);
 }
 
 export async function getSubcategories(
   page: number = 1,
-  limit: number = 10
+  limit: number = 100
 ): Promise<PaginatedResponse<Subcategory>> {
   return api(`/api/subcategory?page=${page}&limit=${limit}`);
 }
@@ -176,7 +176,7 @@ export async function restoreDeletedSubcategory(
 
 export async function getDeletedCategories(
   page: number = 1,
-  limit: number = 10
+  limit: number = 100
 ): Promise<PaginatedResponse<Category>> {
   return api(`/api/categories-deleted?page=${page}&limit=${limit}`);
 }

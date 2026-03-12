@@ -82,7 +82,7 @@ export interface UpdateMigrationPayload {
 
 export async function getMigrations(
   page: number = 1,
-  limit: number = 10
+  limit: number = 100
 ): Promise<PaginatedResponse<ItemMigration>> {
   return api(`/api/item-migrations?page=${page}&limit=${limit}`);
 }

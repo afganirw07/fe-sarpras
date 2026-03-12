@@ -42,7 +42,7 @@ export interface SupplierPayload {
 
 export async function getSuppliers(
   page: number = 1,
-  limit: number = 10
+  limit: number = 100
 ): Promise<GetSuppliersResponse> {
   return api(`/api/suppliers?page=${page}&limit=${limit}`);
 }
@@ -91,7 +91,7 @@ export async function deleteSupplier(
 
 export async function getDeletedSuppliers(
   page: number = 1,
-  limit: number = 10
+  limit: number = 100
 ): Promise<GetSuppliersResponse> {
   return api(`/api/suppliers-deleted?page=${page}&limit=${limit}`);
 }

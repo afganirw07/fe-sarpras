@@ -59,7 +59,7 @@ export function getAvailableDetailItems(
 export function getDetailItemsByRoom(
   roomId: string,
   page: number = 1,
-  limit: number = 10,
+  limit: number = 100,
   search: string = "",
   
   

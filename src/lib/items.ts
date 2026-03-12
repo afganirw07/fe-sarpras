@@ -114,7 +114,7 @@ export async function getDeletedItems(page: number = 1, perPage: number = 10): P
 export async function getDetailItemsByItemId(
   itemId: string,
   page: number = 1,
-  perPage: number = 10,
+  perPage: number = 100,
   search: string = ""
 ): Promise<ApiResponse<DetailItem[]>> {
   const params = new URLSearchParams({
