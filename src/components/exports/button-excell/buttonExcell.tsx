@@ -1,6 +1,6 @@
 "use client";
 
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import { saveAs } from "file-saver";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,15 +30,12 @@ export default function ExportExcel({
 
     let exportData: any[];
 
-    // kalau ada custom column
     if (columns && columns.length > 0) {
       exportData = data.map((row, index) => {
         const obj: any = { No: index + 1 };
-
         columns.forEach((col) => {
           obj[col.label] = row[col.key];
         });
-
         return obj;
       });
     } else {
@@ -47,17 +44,49 @@ export default function ExportExcel({
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
 
-    // auto column width
-    const colWidths = Object.keys(exportData[0]).map((key) => ({
+    const headerStyle = {
+      font: {
+        bold: true,
+        color: { rgb: "FFFFFF" },
+        sz: 12,
+      },
+      fill: {
+        fgColor: { rgb: "059669" },
+      },
+      alignment: {
+        horizontal: "center",
+        vertical: "center",
+        wrapText: true,
+      },
+      border: {
+        top:    { style: "thin", color: { rgb: "CCCCCC" } },
+        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+        left:   { style: "thin", color: { rgb: "CCCCCC" } },
+        right:  { style: "thin", color: { rgb: "CCCCCC" } },
+      },
+      
+    };
+
+    const headers = Object.keys(exportData[0]);
+
+    headers.forEach((_, colIndex) => {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: colIndex });
+      if (worksheet[cellAddress]) {
+        worksheet[cellAddress].s = headerStyle;
+      }
+    });
+
+    const colWidths = headers.map((key) => ({
       wch: Math.max(
         key.length,
         ...exportData.map((row) =>
           row[key] ? row[key].toString().length : 10
         )
-      ),
+      ) + 6,
     }));
-
     worksheet["!cols"] = colWidths;
+
+    worksheet["!rows"] = [{ hpt: 30 }]; 
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
@@ -72,7 +101,6 @@ export default function ExportExcel({
     });
 
     saveAs(blob, `${fileName}.xlsx`);
-
     toast.success("Excel berhasil di download");
   };
 
