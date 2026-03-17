@@ -49,7 +49,6 @@ import { getUsers } from "@/lib/user";
 import { getRooms, Room } from "@/lib/warehouse";
 
 export default function TableTransactionIn() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState<any[]>([]);
@@ -58,28 +57,39 @@ export default function TableTransactionIn() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [limit] = useState(10);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]); // semua data
+const [transactions, setTransactions] = useState<Transaction[]>([]);        // halaman aktif
+
 
   const [filterType, setFilterType] = useState<string>("all");
   const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
+  
 
   useEffect(() => {
     getUsers().then(setUsers);
     getRooms().then((res) => setRooms(res.data));
   }, []);
-
-  const fetchTransactions = async (page = currentPage) => {
+const fetchTransactions = async (page = currentPage) => {
     try {
-      setLoading(true);
-      const res = await getTransactions(page, limit);
-      setTransactions(res.data);
-      setTotalPages(res.pagination.totalPages);
-      setTotalItems(res.pagination.total);
+        setLoading(true);
+        
+        // Fetch halaman aktif untuk tabel
+        const res = await getTransactions(page, limit);
+        setTransactions(res.data);
+        setTotalPages(res.pagination.totalPages);
+        setTotalItems(res.pagination.total);
+
+        // Fetch semua data sekali untuk search/filter (hanya saat pertama kali)
+        if (allTransactions.length === 0) {
+            const all = await getTransactions(1, 9999);
+            setAllTransactions(all.data);
+        }
     } catch (e) {
-      toast.error("Gagal mengambil transaksi");
+        toast.error("Gagal mengambil transaksi");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   useEffect(() => {
     fetchTransactions(currentPage);
@@ -87,24 +97,60 @@ export default function TableTransactionIn() {
 
   const filteredTransactions = useMemo(() => {
     const keyword = search.toLowerCase();
-    return transactions.filter((trx) => {
-      const matchSearch =
-        trx.user_id.toLowerCase().includes(keyword) ||
-        trx.in_type?.toLowerCase().includes(keyword) ||
-        trx.supplier_id.toLowerCase().includes(keyword) ||
-        trx.status.toLowerCase().includes(keyword);
+    const source = search || filterType !== "all" || filterDate
+        ? allTransactions  // ✅ pakai semua data saat ada filter/search
+        : transactions;    // pakai halaman aktif kalau tidak ada filter
 
-      const matchType =
-        filterType === "all" ||
-        trx.in_type?.toLowerCase().includes(filterType.toLowerCase());
+    return source.filter((trx) => {
+        const matchSearch =
+            !keyword ||
+            trx.user_id.toLowerCase().includes(keyword) ||
+            trx.in_type?.toLowerCase().includes(keyword) ||
+            trx.status.toLowerCase().includes(keyword);
 
-      const matchDate = filterDate
-        ? new Date(trx.transaction_date).toDateString() === filterDate.toDateString()
-        : true;
+        const matchType =
+            filterType === "all" ||
+            trx.in_type?.toLowerCase().includes(filterType.toLowerCase());
 
-      return matchSearch && matchType && matchDate;
+        const matchDate = filterDate
+            ? new Date(trx.transaction_date).toDateString() === filterDate.toDateString()
+            : true;
+
+        return matchSearch && matchType && matchDate;
     });
-  }, [transactions, search, filterType, filterDate]);
+}, [transactions, allTransactions, search, filterType, filterDate]);
+
+// Tambah state untuk client-side pagination saat filter aktif
+const isFiltered = search || filterType !== "all" || filterDate;
+
+// Client-side pagination untuk filtered results
+const [filteredPage, setFilteredPage] = useState(1);
+const filteredPerPage = limit;
+
+// Reset filtered page saat filter berubah
+useEffect(() => {
+    setFilteredPage(1);
+}, [search, filterType, filterDate]);
+
+// Data yang ditampilkan di tabel
+const displayedTransactions = useMemo(() => {
+    if (!isFiltered) return transactions; // pakai backend pagination
+    // client-side pagination dari filtered results
+    const start = (filteredPage - 1) * filteredPerPage;
+    return filteredTransactions.slice(start, start + filteredPerPage);
+}, [isFiltered, transactions, filteredTransactions, filteredPage, filteredPerPage]);
+
+const displayedTotalPages = isFiltered
+    ? Math.ceil(filteredTransactions.length / filteredPerPage)
+    : totalPages;
+
+const displayedTotal = isFiltered ? filteredTransactions.length : totalItems;
+const displayedPage = isFiltered ? filteredPage : currentPage;
+
+const handlePageChange = (page: number) => {
+    if (isFiltered) setFilteredPage(page);
+    else setCurrentPage(page);
+};
 
   const userMap = useMemo(() => {
     return users.reduce((acc, user) => {
@@ -238,7 +284,7 @@ export default function TableTransactionIn() {
                     <TableCell
                       key={header}
                       isHeader
-                      className={`bg-gradient-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-200 ${
+                      className={`bg-linear-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-[clamp(10px,0.7rem,12px)] font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-200 ${
                         header === "No" ? "w-20 text-center" : "text-left"
                       }`}
                     >
@@ -363,23 +409,22 @@ export default function TableTransactionIn() {
             </Table>
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-between p-4">
-              <div className="text-muted-foreground flex items-center gap-4 text-sm">
-                <span>
-                  Showing {(currentPage - 1) * limit + 1} –{" "}
-                  {Math.min(currentPage * limit, totalItems)} of {totalItems}
-                </span>
-                <span>{limit} rows per page</span>
-              </div>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={(page) => setCurrentPage(page)}
-              />
-            </div>
-          )}
+{displayedTotalPages > 1 && (
+    <div className="flex justify-between p-4">
+        <div className="text-muted-foreground flex items-center gap-4 text-sm">
+            <span>
+                Showing {(displayedPage - 1) * limit + 1} –{" "}
+                {Math.min(displayedPage * limit, displayedTotal)} of {displayedTotal}
+            </span>
+            <span>{limit} rows per page</span>
+        </div>
+        <Pagination
+            currentPage={displayedPage}
+            totalPages={displayedTotalPages}
+            onPageChange={handlePageChange}
+        />
+    </div>
+)}
         </div>
       </div>
     </div>

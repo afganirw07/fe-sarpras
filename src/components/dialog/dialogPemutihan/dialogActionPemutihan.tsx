@@ -1,33 +1,32 @@
 "use client";
 
 import { SquareArrowOutUpRight } from "lucide-react";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { purgingDetail } from "@/lib/purging";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Purging } from "@/lib/purging";
 import Link from "next/link";
 
 export default function ActionButtonsPemutihan({
   detailItem,
   checked,
   onCheckedChange,
+  showCheckbox = true, 
 }: {
-  detailItem: purgingDetail;
+  detailItem: Purging;
   checked?: boolean;
   onCheckedChange?: (id: string, checked: boolean) => void;
+  showCheckbox?: boolean; 
 }) {
   return (
     <div className="flex items-center gap-2">
-      {/* CHECKBOX */}
-      <input
-        type="checkbox"
-        checked={checked ?? false}
-        onChange={(e) => onCheckedChange?.(detailItem.id, e.target.checked)}
-        className="h-4 w-4 cursor-pointer accent-primary"
-      />
+
+      {showCheckbox && (
+        <input
+          type="checkbox"
+          checked={checked ?? false}
+          onChange={(e) => onCheckedChange?.(detailItem.id, e.target.checked)}
+          className="h-4 w-4 cursor-pointer accent-primary"
+        />
+      )}
 
       {/* SHOW */}
       <Tooltip>
@@ -40,6 +39,7 @@ export default function ActionButtonsPemutihan({
         </TooltipTrigger>
         <TooltipContent>Show</TooltipContent>
       </Tooltip>
+
     </div>
   );
 }

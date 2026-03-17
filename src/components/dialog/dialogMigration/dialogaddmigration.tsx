@@ -114,13 +114,11 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
     return () => clearTimeout(timeout);
   }, [searchLeftInput]);
 
-  // ── Fetch detail items (backend pagination) ──
   const fetchLeftItems = useCallback(async () => {
     if (!fromRoomId) return;
     setLoadingItems(true);
     try {
       const res = await getDetailItemsByRoom(fromRoomId, leftPage, 10, searchLeft);
-      // Filter out items yang sudah di staged
       const stagedIds = new Set(stagedItems.map((s) => s.id));
       const filtered = (res.data ?? []).filter((d: DetailItem) => !stagedIds.has(d.id));
       setLeftItems(filtered);
@@ -179,14 +177,16 @@ export default function DialogAddMigration({ onSuccess }: { onSuccess?: () => vo
     const newItems = toMove.filter((item) => !stagedItems.find((s) => s.id === item.id));
     setStagedItems((prev) => [...prev, ...newItems]);
     setSelectedIds([]);
-    // Re-fetch kiri supaya item yang dipindah hilang
-    fetchLeftItems();
-  };
+    setLeftItems((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
+};
 
-  const handleRemoveStaged = (id: string) => {
+ const handleRemoveStaged = (id: string) => {
+    const removedItem = stagedItems.find((i) => i.id === id);
     setStagedItems((prev) => prev.filter((i) => i.id !== id));
-    fetchLeftItems(); // kembalikan item ke kiri
-  };
+    if (removedItem) {
+      setLeftItems((prev) => [...prev, removedItem]);
+    }
+};
 
   const handleSubmit = async () => {
     if (!fromRoomId || !toRoomId) {

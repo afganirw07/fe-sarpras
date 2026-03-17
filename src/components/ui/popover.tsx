@@ -154,7 +154,7 @@ export function PopoverContent({ children, className }: PopoverContentProps) {
           ref={formContainerRef}
           layoutId={`popover-${uniqueId}`}
           className={cn(
-            "absolute h-[200px] w-[364px] overflow-hidden border border-zinc-950/10 bg-white outline-none dark:bg-zinc-700 z-50", // Changed z-90 to z-50
+            "absolute h-50 w-91 overflow-hidden border border-zinc-950/10 bg-white outline-none dark:bg-zinc-700 z-50", // Changed z-90 to z-50
             className
           )}
           style={{

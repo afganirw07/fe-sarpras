@@ -405,7 +405,11 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                       }
                     />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent 
+                   position="popper"
+  side="bottom"
+  avoidCollisions={false}
+                  style={{ maxHeight: "240px", overflowY: "auto" }}>
                     {filteredItems.length === 0 ? (
                       <div className="px-4 py-2 text-sm text-gray-500">
                         Tidak ada item

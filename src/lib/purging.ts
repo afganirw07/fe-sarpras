@@ -93,3 +93,32 @@ export async function restorePurging(id: string): Promise<ApiResponse<Purging>> 
     method: "PUT",
   });
 }
+
+export async function generateSuratPemutihan(purgingId: string): Promise<void> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const token = process.env.NEXT_PUBLIC_API_KEY;
+
+  const res = await fetch(`${baseUrl}/api/letters/generate/${purgingId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Gagal generate surat: ${text}`);
+  }
+
+  // ── Ambil sebagai blob (bukan json) ──
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `berita-acara-${purgingId}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}

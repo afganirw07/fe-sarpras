@@ -206,7 +206,7 @@ export default function ShowPemutihan() {
                     <TableCell
                       key={i}
                       isHeader
-                      className="bg-gradient-to-br from-gray-50 to-gray-100/50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                     >
                       {h}
                     </TableCell>
