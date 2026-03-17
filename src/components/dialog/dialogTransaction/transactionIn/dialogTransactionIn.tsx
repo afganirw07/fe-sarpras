@@ -26,7 +26,12 @@ import {
 } from "@/components/ui/select";
 import Label from "../../../form/Label";
 import { Input } from "../../../ui/input";
-import { getCategories, Category } from "@/lib/category";
+import {
+  getCategories,
+  Category,
+  getSubcategories,
+  Subcategory,
+} from "@/lib/category";
 import { getSuppliers, Supplier } from "@/lib/supplier";
 import { getRooms, Room } from "@/lib/warehouse";
 import { getItems, Item } from "@/lib/items";
@@ -43,7 +48,7 @@ import { toast, Toaster } from "sonner";
 import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { any, z } from "zod";
-import { tansactionInSchema } from "@/schema/transaction_jn.schema"; 
+import { tansactionInSchema } from "@/schema/transaction_jn.schema";
 import { getMyEmployeeId } from "@/lib/roles";
 import { create } from "domain";
 
@@ -66,13 +71,20 @@ interface FormErrors {
   items?: string;
 }
 
-export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => void }) {
+export default function DialogTransactionIn({
+  onSuccess,
+}: {
+  onSuccess?: () => void;
+}) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] =
+    useState<string>("");
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [warehouses, setWarehouses] = useState<Room[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [poNumber, setPoNumber] = useState("");
-  const [detailTransaction, setDetailTransaction] = useState(""); 
+  const [detailTransaction, setDetailTransaction] = useState("");
   const { data: session } = useSession();
   const userId: any = session?.user?.id;
   const [transactionDate, setTransactionDate] = useState(
@@ -89,19 +101,20 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
 
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const filteredItems = selectedCategoryId
-    ? items.filter((item) => item.category_id === selectedCategoryId)
+  const filteredItems = selectedSubcategoryId
+    ? items.filter((item) => item.subcategory_id === selectedSubcategoryId)
     : [];
-
   const fetchAll = async () => {
     try {
-      const [catRes, supRes, roomRes, itemRes] = await Promise.all([
-        getCategories(),
+      const [catRes, subCatRes, supRes, roomRes, itemRes] = await Promise.all([
+        getCategories(1, 1000),
+        getSubcategories(1, 1000),
         getSuppliers(),
         getRooms(),
         getItems(),
       ]);
       setCategories(catRes.data);
+      setSubcategories(subCatRes.data);
       setSuppliers(supRes.data);
       setWarehouses(roomRes.data);
       setItems(itemRes.data);
@@ -115,12 +128,12 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
 
   const handleaddItem = () => {
     if (!selectedItemId || !selectedWarehouseId) return;
-    
+
     const item = items.find((i) => i.id === selectedItemId);
     if (!item) return;
 
-    const isExist = rows.some((r) => r.item_id === item.id);
-    if (isExist) return;
+  const isExist = rows.some((r) => r.item_id === item.id);
+if (isExist) return;
 
     setRows((prev) => [
       ...prev,
@@ -147,16 +160,22 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
 
   const handleSubmit = async () => {
     setErrors({});
-    
+
+    // ✅ Siapkan data untuk validasi Zod
     const employeeId = await getMyEmployeeId(userId);
-    const validationData = {
-      poNumber: poNumber ? Number(poNumber) : 0,
-      warehouse: selectedWarehouseId,
-      supplier: selectedSupplierId,
-      categori: selectedCategoryId,
-      detailTransaction: detailTransaction,
-      items: rows.length > 0 ? "filled" : "", // cek apakah ada item
-    };
+  // Di handleSubmit — validasi pakai selectedSubcategoryId
+const validationData = {
+  poNumber: poNumber ? Number(poNumber) : 0,
+  warehouse: selectedWarehouseId,
+  supplier: selectedSupplierId,
+  categori: selectedSubcategoryId, // ✅ bukan selectedCategoryId
+  detailTransaction: detailTransaction,
+  items: rows.length > 0 ? "filled" : "",
+};
+
+
+setSelectedSubcategoryId(""); 
+setSelectedCategoryId("");    
 
     try {
       tansactionInSchema.parse(validationData);
@@ -194,19 +213,16 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
         procurement_month: new Date().getMonth() + 1,
         procurement_year: row.procurement_year,
       })),
-        detail_items: rows.flatMap((row) => {
-      const now = new Date();
-      const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-        
-      return Array.from({ length: row.qty_receive }).map((_, i) => ({
-        item_id: row.item_id,
-        room_id: selectedWarehouseId,
-        serial_number: `${categoryCode}-${poNumber}-${dateStr}-${i + 1}`,
-        condition: row.condition,
-        status: ItemStatus.AVAILABLE,
-        created_by: userId,
-      }));
-}),
+      detail_items: rows.flatMap((row) =>
+        Array.from({ length: row.qty_receive }).map((_, i) => ({
+          item_id: row.item_id,
+          room_id: selectedWarehouseId,
+          serial_number: `${row.item_id}-${Date.now()}-${i}`,
+          condition: row.condition,
+          status: ItemStatus.AVAILABLE,
+          created_by: userId,
+        })),
+      ),
     };
 
     try {
@@ -232,7 +248,10 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
     <div className="flex justify-end">
       <Dialog onOpenChange={(open) => open && fetchAll()}>
         <DialogTrigger asChild>
-          <Button size="sm" className="bg-blue-800 text-white hover:bg-blue-900">
+          <Button
+            size="sm"
+            className="bg-blue-800 text-white hover:bg-blue-900"
+          >
             + Add Transaction In
           </Button>
         </DialogTrigger>
@@ -276,7 +295,9 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                 <div className="flex items-center gap-2">
                   <Label>Detail Transaction</Label>
                   {errors.detailTransaction && (
-                    <p className="text-xs text-red-500">{errors.detailTransaction}</p>
+                    <p className="text-xs text-red-500">
+                      {errors.detailTransaction}
+                    </p>
                   )}
                 </div>
                 <Input
@@ -305,7 +326,9 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                     clearError("warehouse");
                   }}
                 >
-                  <SelectTrigger className={`h-11 w-full ${errors.warehouse ? "border-red-500" : ""}`}>
+                  <SelectTrigger
+                    className={`h-11 w-full ${errors.warehouse ? "border-red-500" : ""}`}
+                  >
                     <SelectValue placeholder="Pilih Warehouse" />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,7 +356,9 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                     clearError("supplier");
                   }}
                 >
-                  <SelectTrigger className={`h-11 ${errors.supplier ? "border-red-500" : ""}`}>
+                  <SelectTrigger
+                    className={`h-11 ${errors.supplier ? "border-red-500" : ""}`}
+                  >
                     <SelectValue placeholder="Pilih Supplier" />
                   </SelectTrigger>
                   <SelectContent>
@@ -346,7 +371,6 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                 </Select>
               </div>
 
-              {/* Kategori */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <Label>Kategori</Label>
@@ -354,10 +378,11 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                     <p className="text-xs text-red-500">{errors.categori}</p>
                   )}
                 </div>
+
                 <Select
-                  value={selectedCategoryId}
+                  value={selectedSubcategoryId}
                   onValueChange={(v) => {
-                    setSelectedCategoryId(v);
+                    setSelectedSubcategoryId(v);
                     setSelectedItemId("");
                     clearError("categori");
 
@@ -365,19 +390,42 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                     setCategoryCode(category?.code ?? "")
                   }}
                 >
-                  <SelectTrigger className={`h-11 ${errors.categori ? "border-red-500" : ""}`}>
+                  <SelectTrigger
+                    className={`h-11 ${errors.categori ? "border-red-500" : ""}`}
+                  >
                     <SelectValue placeholder="Pilih Kategori" />
                   </SelectTrigger>
+
                   <SelectContent>
-                    {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
+                    {categories.map((cat) => {
+                      const subs = subcategories.filter(
+                        (s) => s.category_id === cat.id,
+                      );
+                      if (subs.length === 0) return null; // skip kategori tanpa subkategori
+
+                      return (
+                        <div key={cat.id}>
+                          {/* Label kategori — tidak bisa diklik */}
+                          <div className="select-none bg-gray-50 px-2 py-1.5 text-xs font-semibold text-gray-400">
+                            {cat.name}
+                          </div>
+
+                          {/* Subkategori — yang benar-benar dipilih */}
+                          {subs.map((sub) => (
+                            <SelectItem
+                              key={sub.id}
+                              value={sub.id}
+                              className="pl-6"
+                            >
+                              {sub.name}
+                            </SelectItem>
+                          ))}
+                        </div>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
-
               {/* Items */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
@@ -388,28 +436,24 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                 </div>
                 <Select
                   value={selectedItemId}
-                  onValueChange={(v) => {
-                    setSelectedItemId(v)
-                    const item = items.find((i) => i.id = v )
-                    setItemCode(item?.code ?? "")
-                    
-                  }}
-                  disabled={!selectedCategoryId}
-
-
+                  onValueChange={setSelectedItemId}
+                  disabled={!selectedSubcategoryId}
                 >
-                  <SelectTrigger className={`h-11 ${errors.items ? "border-red-500" : ""}`}>
+                  <SelectTrigger
+                    className={`h-11 ${errors.items ? "border-red-500" : ""}`}
+                  >
                     <SelectValue
-                      placeholder={
-                        selectedCategoryId ? "Pilih Item" : "Pilih Kategori dulu"
-                      }
+                    placeholder={
+  selectedSubcategoryId ? "Pilih Item" : "Pilih Kategori dulu"
+}
                     />
                   </SelectTrigger>
-                  <SelectContent 
-                   position="popper"
-  side="bottom"
-  avoidCollisions={false}
-                  style={{ maxHeight: "240px", overflowY: "auto" }}>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    avoidCollisions={false}
+                    style={{ maxHeight: "240px", overflowY: "auto" }}
+                  >
                     {filteredItems.length === 0 ? (
                       <div className="px-4 py-2 text-sm text-gray-500">
                         Tidak ada item
@@ -449,55 +493,198 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
                   <Table className="min-w-200 w-full table-auto">
                     <TableHeader className="border border-gray-100 dark:border-white/5">
                       <TableRow>
-                        <TableCell isHeader className="min-w-7.5 rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-xs font-medium text-gray-200">No</TableCell>
-                        <TableCell isHeader className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200">Item ID</TableCell>
-                        <TableCell isHeader className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200">Item Name</TableCell>
-                        <TableCell isHeader className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200">Item Price</TableCell>
-                        <TableCell isHeader className="min-w-55 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200">QTY Request</TableCell>
-                        <TableCell isHeader className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200">QTY Receive</TableCell>
-                        <TableCell isHeader className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200">Item condition</TableCell>
-                        <TableCell isHeader className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200">Tahun Pengadaan</TableCell>
-                        <TableCell isHeader className="min-w-7.5 rounded-r-md border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200">Action</TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-7.5 rounded-l-md border border-r-0 bg-blue-800 px-6 py-3 text-xs font-medium text-gray-200"
+                        >
+                          No
+                        </TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                        >
+                          Item ID
+                        </TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                        >
+                          Item Name
+                        </TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                        >
+                          Item Price
+                        </TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-55 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                        >
+                          QTY Request
+                        </TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                        >
+                          QTY Receive
+                        </TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                        >
+                          Item condition
+                        </TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                        >
+                          Tahun Pengadaan
+                        </TableCell>
+                        <TableCell
+                          isHeader
+                          className="min-w-7.5 rounded-r-md border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
+                        >
+                          Action
+                        </TableCell>
                       </TableRow>
                     </TableHeader>
 
                     <TableBody>
                       {rows.length === 0 ? (
                         <TableRow>
-                          <td colSpan={9} className="border px-6 py-6 text-center text-sm text-gray-500">
+                          <td
+                            colSpan={9}
+                            className="border px-6 py-6 text-center text-sm text-gray-500"
+                          >
                             Belum ada item
                           </td>
                         </TableRow>
                       ) : (
                         rows.map((row, index) => (
                           <TableRow key={row.item_id}>
-                            <TableCell className="border px-4 py-3">{index + 1}</TableCell>
-                            <TableCell className="border px-4 py-3">{row.item_id}</TableCell>
-                            <TableCell className="border px-4 py-3">{row.item_name}</TableCell>
                             <TableCell className="border px-4 py-3">
-                              <Input type="number" value={row.price} onChange={(e) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, price: Number(e.target.value) } : r))} />
+                              {index + 1}
                             </TableCell>
                             <TableCell className="border px-4 py-3">
-                              <Input type="number" min={1} value={row.qty_request} onChange={(e) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, qty_request: Number(e.target.value) } : r))} />
+                              {row.item_id}
                             </TableCell>
                             <TableCell className="border px-4 py-3">
-                              <Input type="number" min={0} value={row.qty_receive} onChange={(e) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, qty_receive: Number(e.target.value) } : r))} />
+                              {row.item_name}
                             </TableCell>
                             <TableCell className="border px-4 py-3">
-                              <Select value={row.condition} onValueChange={(v: ItemConditions) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, condition: v } : r))}>
-                                <SelectTrigger className="h-9"><SelectValue placeholder="Pilih" /></SelectTrigger>
+                              <Input
+                                type="number"
+                                value={row.price}
+                                onChange={(e) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index
+                                        ? {
+                                            ...r,
+                                            price: Number(e.target.value),
+                                          }
+                                        : r,
+                                    ),
+                                  )
+                                }
+                              />
+                            </TableCell>
+                            <TableCell className="border px-4 py-3">
+                              <Input
+                                type="number"
+                                min={1}
+                                value={row.qty_request}
+                                onChange={(e) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index
+                                        ? {
+                                            ...r,
+                                            qty_request: Number(e.target.value),
+                                          }
+                                        : r,
+                                    ),
+                                  )
+                                }
+                              />
+                            </TableCell>
+                            <TableCell className="border px-4 py-3">
+                              <Input
+                                type="number"
+                                min={0}
+                                value={row.qty_receive}
+                                onChange={(e) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index
+                                        ? {
+                                            ...r,
+                                            qty_receive: Number(e.target.value),
+                                          }
+                                        : r,
+                                    ),
+                                  )
+                                }
+                              />
+                            </TableCell>
+                            <TableCell className="border px-4 py-3">
+                              <Select
+                                value={row.condition}
+                                onValueChange={(v: ItemConditions) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index ? { ...r, condition: v } : r,
+                                    ),
+                                  )
+                                }
+                              >
+                                <SelectTrigger className="h-9">
+                                  <SelectValue placeholder="Pilih" />
+                                </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value={ItemConditions.GOOD}>Baik</SelectItem>
-                                  <SelectItem value={ItemConditions.FAIR}>Cukup</SelectItem>
-                                  <SelectItem value={ItemConditions.POOR}>Rusak</SelectItem>
+                                  <SelectItem value={ItemConditions.GOOD}>
+                                    Baik
+                                  </SelectItem>
+                                  <SelectItem value={ItemConditions.FAIR}>
+                                    Cukup
+                                  </SelectItem>
+                                  <SelectItem value={ItemConditions.POOR}>
+                                    Rusak
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                             </TableCell>
                             <TableCell className="border px-4 py-3">
-                              <Input type="number" value={row.procurement_year} onChange={(e) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, procurement_year: Number(e.target.value) } : r))} />
+                              <Input
+                                type="number"
+                                value={row.procurement_year}
+                                onChange={(e) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index
+                                        ? {
+                                            ...r,
+                                            procurement_year: Number(
+                                              e.target.value,
+                                            ),
+                                          }
+                                        : r,
+                                    ),
+                                  )
+                                }
+                              />
                             </TableCell>
                             <TableCell className="border px-4 py-3">
-                              <Button size="icon" variant="destructive" onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}>
+                              <Button
+                                size="icon"
+                                variant="destructive"
+                                onClick={() =>
+                                  setRows((prev) =>
+                                    prev.filter((_, i) => i !== index),
+                                  )
+                                }
+                              >
                                 <Trash2 />
                               </Button>
                             </TableCell>
@@ -514,7 +701,10 @@ export default function DialogTransactionIn({ onSuccess }: { onSuccess?: () => v
               <DialogClose asChild>
                 <Button variant="outline">Close</Button>
               </DialogClose>
-              <Button type="submit" className="bg-blue-800 text-white hover:bg-blue-900">
+              <Button
+                type="submit"
+                className="bg-blue-800 text-white hover:bg-blue-900"
+              >
                 Save
               </Button>
             </DialogFooter>
