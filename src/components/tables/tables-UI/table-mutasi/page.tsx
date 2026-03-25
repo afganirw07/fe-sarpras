@@ -8,17 +8,16 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import { Button } from "../../../ui/button";
 import {
   Search,
-  SquareArrowOutUpRight,
   ArrowRightLeft,
-  Trash2,
   FileX,
+  FileText,
+  Loader2,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import Link from "next/link";
-import { getMigrations, deleteMigration, ItemMigration } from "@/lib/migration";
+import { getMigrations, deleteMigration, generateSuratMutasi, ItemMigration } from "@/lib/migration";
 import { getRooms, Room } from "@/lib/warehouse";
 import { getUsers } from "@/lib/user";
 import Pagination from "../../Pagination";
@@ -35,12 +34,14 @@ export default function TableMutasi({
 }: TableMutasiProps) {
   const [migrations, setMigrations] = useState<ItemMigration[]>([]);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [internalSearch, setInternalSearch] = useState("");
   const [rooms, setRooms] = useState<Room[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const limit = 10;
 
   const search = externalSearch ?? internalSearch;
@@ -122,22 +123,104 @@ export default function TableMutasi({
     }
   };
 
+  // ── Checkbox handler ──
+  const handleChecked = (id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      checked ? next.add(id) : next.delete(id);
+      return next;
+    });
+  };
+
+  // ── Generate Surat Mutasi ──
+  const handleGenerateSurat = async () => {
+    if (selectedIds.size === 0) return;
+    setGenerating(true);
+    const ids = Array.from(selectedIds);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const id of ids) {
+      try {
+        await generateSuratMutasi(id);
+        successCount++;
+
+        // Tandai letter_status = 'done' di local state
+        setMigrations((prev) =>
+          prev.map((m) =>
+            m.id === id ? { ...m, letter_status: "done" } : m
+          )
+        );
+
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      } catch {
+        failCount++;
+        toast.error(`Gagal generate surat untuk ID: ${id}`);
+      }
+    }
+
+    setGenerating(false);
+    if (successCount > 0) toast.success(`${successCount} surat berhasil di-generate`);
+    if (failCount > 0) toast.error(`${failCount} surat gagal di-generate`);
+  };
+
   return (
     <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
       <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
 
+        {/* Search + Generate Surat */}
         <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
-          <div className="relative w-full md:w-80">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              placeholder="Cari ruangan, catatan..."
-              value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-11 pr-4 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
-            />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+            {/* Search */}
+            <div className="relative w-full sm:w-80">
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                placeholder="Cari ruangan, catatan..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-11 pr-4 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+              />
+            </div>
+
+            {/* Tombol Generate Surat Mutasi */}
+            <button
+              type="button"
+              onClick={handleGenerateSurat}
+              disabled={selectedIds.size === 0 || generating}
+              className={`
+                inline-flex items-center gap-2
+                rounded-xl border
+                px-5 py-2.5
+                text-sm font-semibold
+                shadow-md
+                transition-all duration-200
+                focus:outline-none focus:ring-4
+                whitespace-nowrap
+                ${selectedIds.size === 0 || generating
+                  ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed shadow-none"
+                  : "border-blue-500 bg-blue-600 text-white shadow-blue-500/25 hover:shadow-lg hover:shadow-blue-500/30 focus:ring-blue-500/20"
+                }
+              `}
+            >
+              {generating ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <FileText size={16} />
+              )}
+              {generating
+                ? `Generating... (${selectedIds.size})`
+                : selectedIds.size > 0
+                ? `Generate Surat (${selectedIds.size})`
+                : "Generate Surat Mutasi"}
+            </button>
           </div>
         </div>
 
@@ -146,7 +229,7 @@ export default function TableMutasi({
             <Table className="w-full">
               <TableHeader>
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                  {["No", "Tanggal","Nama Item", "Dari WH", "Ke WH", "Dipindahkan Oleh", "Catatan", "Aksi"].map(
+                  {["No", "Tanggal", "Nama Item", "Dari WH", "Ke WH", "Dipindahkan Oleh", "Catatan", "Aksi"].map(
                     (header) => (
                       <TableCell
                         key={header}
@@ -163,7 +246,7 @@ export default function TableMutasi({
               <TableBody>
                 {loading && (
                   <TableRow>
-                    <td colSpan={7} className="py-16">
+                    <td colSpan={8} className="py-16">
                       <div className="flex flex-col items-center justify-center gap-3">
                         <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 dark:border-gray-700 dark:border-t-blue-400" />
                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -176,7 +259,7 @@ export default function TableMutasi({
 
                 {!loading && filtered.length === 0 && (
                   <TableRow>
-                    <td colSpan={7} className="py-16">
+                    <td colSpan={8} className="py-16">
                       <div className="flex flex-col items-center justify-center gap-3">
                         <div className="rounded-full bg-gray-100 p-4 dark:bg-white/5">
                           <FileX className="h-8 w-8 text-gray-400" />
@@ -194,7 +277,6 @@ export default function TableMutasi({
                   </TableRow>
                 )}
 
-                {/* Rows */}
                 {!loading &&
                   filtered.map((m, index) => (
                     <TableRow
@@ -206,6 +288,7 @@ export default function TableMutasi({
                           {(currentPage - 1) * limit + index + 1}
                         </span>
                       </TableCell>
+
                       <TableCell className="px-5 py-4">
                         <span className="text-sm text-gray-700 dark:text-gray-300">
                           {formatDate(m.migrated_at)}
@@ -214,8 +297,7 @@ export default function TableMutasi({
 
                       <TableCell className="px-5 py-4">
                         <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
-                      {m.detail_items?.[0]?.item?.name}
-                        
+                          {m.detail_items?.[0]?.item?.name}
                         </span>
                       </TableCell>
 
@@ -253,8 +335,14 @@ export default function TableMutasi({
                           )}
                         </span>
                       </TableCell>
-                          <TableCell className="max-w-45 px-5 py-4">
-                     <ActionButtonsMigration mutasi={m}/>
+
+                      <TableCell className="max-w-45 px-5 py-4">
+                        <ActionButtonsMigration
+                          mutasi={m}
+                          showCheckbox={m.letter_status !== "done"}
+                          checked={selectedIds.has(m.id)}
+                          onCheckedChange={handleChecked}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
