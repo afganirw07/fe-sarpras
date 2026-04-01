@@ -22,28 +22,8 @@ import {
   Boxes,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import { getLoanRequests } from "@/lib/loan-request";
+import { getLoanRequestById, LoanRequest, LoanDetailItem } from "@/lib/loan-request";
 import { useParams } from "next/navigation";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface LoanRequest {
-  id: string;
-  user_id: string;
-  item_id: string;
-  borrow_date: string;
-  return_date: string | null;
-  status: string;
-  description: string | null;
-  created_at: string;
-  user?: { username: string };
-  item?: {
-    serial_number: string;
-    condition: string;
-    item: { name: string };
-    room: { name: string };
-  };
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,12 +78,9 @@ export default function ShowTransactionOut() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // getLoanRequests fetches all; filter by id client-side
-        // Or replace with a dedicated getLoanRequestById(id) if available
-        const res = await getLoanRequests(1, 100);
-        const all: LoanRequest[] = res.data ?? [];
-        const found = all.find((t) => t.id === id) ?? null;
-        setTransaction(found);
+        // Langsung fetch by ID — tidak perlu fetch semua lalu filter
+        const data = await getLoanRequestById(id as string);
+        setTransaction(data);
       } catch {
         toast.error("Gagal ambil detail transaksi keluar");
       } finally {
@@ -113,19 +90,19 @@ export default function ShowTransactionOut() {
     fetchData();
   }, [id]);
 
-  // Single transaction rendered as a one-row "detail table"
-  // We still apply search to the item name / room / condition
-  const itemRows = useMemo(() => {
-    if (!transaction) return [];
-    const rows = [transaction];
-    if (!search) return rows;
+  // ── Filter item[] array berdasarkan search ──
+  const filteredItems = useMemo<LoanDetailItem[]>(() => {
+    if (!transaction?.item?.length) return [];
+    if (!search) return transaction.item;
     const q = search.toLowerCase();
-    return rows.filter(
-      (t) =>
-        (t.item?.item?.name ?? "").toLowerCase().includes(q) ||
-        (t.item?.room?.name ?? "").toLowerCase().includes(q) ||
-        (t.item?.condition ?? "").toLowerCase().includes(q) ||
-        t.status.toLowerCase().includes(q)
+    return transaction.item.filter(
+      (d) =>
+        d.item.name.toLowerCase().includes(q) ||
+        d.serial_number.toLowerCase().includes(q) ||
+        d.room.name.toLowerCase().includes(q) ||
+        d.condition.toLowerCase().includes(q) ||
+        d.item.category.name.toLowerCase().includes(q) ||
+        d.item.subcategory.name.toLowerCase().includes(q)
     );
   }, [transaction, search]);
 
@@ -206,9 +183,7 @@ export default function ShowTransactionOut() {
               Status
             </label>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-white/10 dark:bg-white/5">
-              <span
-                className={`inline-flex items-center rounded-lg border px-3 py-1 text-xs font-semibold ${statusBadgeClass(transaction.status)}`}
-              >
+              <span className={`inline-flex items-center rounded-lg border px-3 py-1 text-xs font-semibold ${statusBadgeClass(transaction.status)}`}>
                 {transaction.status}
               </span>
             </div>
@@ -270,18 +245,20 @@ export default function ShowTransactionOut() {
             </h2>
             <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 dark:border-blue-900/50 dark:bg-blue-900/20">
               <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-                {itemRows.length} Item
+                {transaction.item?.length ?? 0} Item
+                {search && filteredItems.length !== transaction.item?.length && (
+                  <span className="ml-1 text-blue-400">
+                    ({filteredItems.length} ditampilkan)
+                  </span>
+                )}
               </p>
             </div>
           </div>
 
           <div className="relative mt-4 w-full md:w-80">
-            <Search
-              size={20}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            />
+            <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              placeholder="Cari nama item, ruangan, atau kondisi..."
+              placeholder="Cari nama, SN, ruangan, kondisi..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
@@ -293,18 +270,11 @@ export default function ShowTransactionOut() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                {[
-                  "No",
-                  "Nama Item",
-                  "Serial Number",
-                  "Ruangan",
-                  "Kondisi",
-                  "Status",
-                ].map((col) => (
+                {["No", "Nama Item", "Serial Number", "Kategori", "Subkategori", "Ruangan", "Kondisi", "Status"].map((col) => (
                   <TableCell
                     key={col}
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     {col}
                   </TableCell>
@@ -313,9 +283,9 @@ export default function ShowTransactionOut() {
             </TableHeader>
 
             <TableBody>
-              {itemRows.length === 0 ? (
+              {filteredItems.length === 0 ? (
                 <TableRow>
-                  <td colSpan={6} className="py-16">
+                  <td colSpan={8} className="py-16">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="rounded-full bg-gray-100 p-4 dark:bg-white/5">
                         <Boxes className="h-8 w-8 text-gray-400" />
@@ -324,66 +294,71 @@ export default function ShowTransactionOut() {
                         {search ? "Data tidak ditemukan" : "Tidak ada item"}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {search
-                          ? "Coba kata kunci lain"
-                          : "Belum ada item di transaksi ini"}
+                        {search ? "Coba kata kunci lain" : "Belum ada item di transaksi ini"}
                       </p>
                     </div>
                   </td>
                 </TableRow>
               ) : (
-                itemRows.map((t, index) => (
+                // ← iterate item[] array langsung — bukan LoanRequest array
+                filteredItems.map((d, index) => (
                   <TableRow
-                    key={t.id}
+                    key={d.id}
                     className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                   >
                     {/* No */}
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                    <TableCell className="px-5 py-4">
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                         {index + 1}
                       </span>
                     </TableCell>
 
                     {/* Nama Item */}
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                    <TableCell className="px-5 py-4">
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {t.item?.item?.name ?? "-"}
+                        {d.item.name}
                       </span>
                     </TableCell>
 
                     {/* Serial Number */}
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                    <TableCell className="px-5 py-4">
                       <span className="font-mono text-xs text-gray-600 dark:text-gray-400">
-                        {t.item?.serial_number ?? "-"}
+                        {d.serial_number}
+                      </span>
+                    </TableCell>
+
+                    {/* Kategori */}
+                    <TableCell className="px-5 py-4">
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {d.item.category.name}
+                      </span>
+                    </TableCell>
+
+                    {/* Subkategori */}
+                    <TableCell className="px-5 py-4">
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {d.item.subcategory.name}
                       </span>
                     </TableCell>
 
                     {/* Ruangan */}
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                    <TableCell className="px-5 py-4">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {t.item?.room?.name ?? "-"}
+                        {d.room.name}
                       </span>
                     </TableCell>
 
                     {/* Kondisi */}
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
-                      <span
-                        className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${conditionBadgeClass(
-                          t.item?.condition ?? ""
-                        )}`}
-                      >
-                        {t.item?.condition ?? "-"}
+                    <TableCell className="px-5 py-4">
+                      <span className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${conditionBadgeClass(d.condition)}`}>
+                        {d.condition}
                       </span>
                     </TableCell>
 
-                    {/* Status */}
-                    <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
-                      <span
-                        className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${statusBadgeClass(
-                          t.status
-                        )}`}
-                      >
-                        {t.status}
+                    {/* Status item */}
+                    <TableCell className="px-5 py-4">
+                      <span className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${statusBadgeClass(d.status)}`}>
+                        {d.status}
                       </span>
                     </TableCell>
                   </TableRow>

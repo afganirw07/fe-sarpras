@@ -24,37 +24,33 @@ export default function ActionButtonLoan({ loanRequest, onSuccess }: ActionButto
   const [currentStatus, setCurrentStatus] = useState<string>(loanRequest.status);
 
   const basePayload = {
-    user_id: loanRequest.user_id,
-    item_id: loanRequest.item_id,
-    borrow_date: typeof loanRequest.borrow_date === "string"
-      ? loanRequest.borrow_date
-      : new Date(loanRequest.borrow_date).toISOString(),
-    return_date: loanRequest.return_date
-      ? typeof loanRequest.return_date === "string"
-        ? loanRequest.return_date
-        : new Date(loanRequest.return_date).toISOString()
-      : undefined,
-    description: loanRequest.description ?? undefined,
-  };
+  user_id: loanRequest.user_id,
+  borrow_date: loanRequest.borrow_date,
+  return_date: loanRequest.return_date ?? null,
+  description: loanRequest.description ?? undefined,
+};
 
-  const handleApprove = async () => {
-    if (currentStatus !== LoanStatus.PENDING) return;
-    setLoading(true);
-    try {
-      const updated = await updateLoanRequest(loanRequest.id, {
-        ...basePayload,
-        status: LoanStatus.APPROVED,
-      });
-      setCurrentStatus(updated.status);
-      toast.success("Status berhasil diupdate ke Approved");
-      await onSuccess?.();
-    } catch (error) {
-      console.error(error);
-      toast.error("Gagal mengupdate status");
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleApprove = async () => {
+  if (currentStatus !== LoanStatus.PENDING) return;
+
+  setLoading(true);
+  try {
+    const updated = await updateLoanRequest(loanRequest.id, {
+      ...basePayload,
+      status: LoanStatus.APPROVED,
+      item_ids: loanRequest.item.map((d) => d.id), // ← add this
+    });
+
+    setCurrentStatus(updated.status);
+    toast.success("Status berhasil diupdate ke Approved");
+    await onSuccess?.();
+  } catch (error) {
+    console.error(error);
+    toast.error("Gagal mengupdate status");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex items-center justify-center gap-2">

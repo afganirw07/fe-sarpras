@@ -28,6 +28,20 @@ interface TableMutasiProps {
   onSearchChange?: (value: string) => void;
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getLetterStatusBadge(status: string | undefined) {
+  switch (status) {
+    case "done":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800";
+    case "pending":
+    default:
+      return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800";
+  }
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function TableMutasi({
   search: externalSearch,
   onSearchChange,
@@ -123,7 +137,6 @@ export default function TableMutasi({
     }
   };
 
-  // ── Checkbox handler ──
   const handleChecked = (id: string, checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -132,7 +145,6 @@ export default function TableMutasi({
     });
   };
 
-  // ── Generate Surat Mutasi ──
   const handleGenerateSurat = async () => {
     if (selectedIds.size === 0) return;
     setGenerating(true);
@@ -144,14 +156,11 @@ export default function TableMutasi({
       try {
         await generateSuratMutasi(id);
         successCount++;
-
-        // Tandai letter_status = 'done' di local state
         setMigrations((prev) =>
           prev.map((m) =>
             m.id === id ? { ...m, letter_status: "done" } : m
           )
         );
-
         setSelectedIds((prev) => {
           const next = new Set(prev);
           next.delete(id);
@@ -168,8 +177,20 @@ export default function TableMutasi({
     if (failCount > 0) toast.error(`${failCount} surat gagal di-generate`);
   };
 
+  const tableHeaders = [
+    "No",
+    "Tanggal",
+    "Nama Item",
+    "Dari WH",
+    "Ke WH",
+    "Dipindahkan Oleh",
+    "Catatan",
+    "Status Surat",  // ← kolom baru
+    "Aksi",
+  ];
+
   return (
-    <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
+    <div className="mx-auto w-full max-w-xs md:max-w-2xl lg:max-w-7xl">
       <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
 
         {/* Search + Generate Surat */}
@@ -198,8 +219,8 @@ export default function TableMutasi({
               className={`
                 inline-flex items-center gap-2
                 rounded-xl border
-                px-5 py-2.5
-                text-sm font-semibold
+                px-2 py-2.5
+                text-[clamp(2px,0.85rem,12px)] font-semibold
                 shadow-md
                 transition-all duration-200
                 focus:outline-none focus:ring-4
@@ -229,24 +250,22 @@ export default function TableMutasi({
             <Table className="w-full">
               <TableHeader>
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                  {["No", "Tanggal", "Nama Item", "Dari WH", "Ke WH", "Dipindahkan Oleh", "Catatan", "Aksi"].map(
-                    (header) => (
-                      <TableCell
-                        key={header}
-                        isHeader
-                        className="bg-linear-to-br from-gray-50 to-gray-100/50 px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
-                      >
-                        {header}
-                      </TableCell>
-                    )
-                  )}
+                  {tableHeaders.map((header) => (
+                    <TableCell
+                      key={header}
+                      isHeader
+                      className="bg-linear-to-br from-gray-50 to-gray-100/50  px-2 py-4 text-left  text-[clamp(2px,0.85rem,12px)] font-semibold uppercase tracking-wider text-gray-600 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    >
+                      {header}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {loading && (
                   <TableRow>
-                    <td colSpan={8} className="py-16">
+                    <td colSpan={9} className="py-16">
                       <div className="flex flex-col items-center justify-center gap-3">
                         <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500 dark:border-gray-700 dark:border-t-blue-400" />
                         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -259,7 +278,7 @@ export default function TableMutasi({
 
                 {!loading && filtered.length === 0 && (
                   <TableRow>
-                    <td colSpan={8} className="py-16">
+                    <td colSpan={9} className="py-16">
                       <div className="flex flex-col items-center justify-center gap-3">
                         <div className="rounded-full bg-gray-100 p-4 dark:bg-white/5">
                           <FileX className="h-8 w-8 text-gray-400" />
@@ -283,36 +302,41 @@ export default function TableMutasi({
                       key={m.id}
                       className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                     >
-                      <TableCell className="px-5 py-4">
+                      {/* No */}
+                      <TableCell className="px-2 py-4">
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-xs font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                           {(currentPage - 1) * limit + index + 1}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-5 py-4">
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {/* Tanggal */}
+                      <TableCell className="px-2 py-4">
+                        <span className=" text-[clamp(2px,0.85rem,12px)] text-gray-700 dark:text-gray-300">
                           {formatDate(m.migrated_at)}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
-                          {m.detail_items?.[0]?.item?.name}
+                      {/* Nama Item */}
+                      <TableCell className="px-2 py-4">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 p-2  text-[clamp(2px,0.85rem,12px)] font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                          {m.detail_items?.[0]?.item?.name ?? "—"}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                      {/* Dari WH */}
+                      <TableCell className="px-2 py-4">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1  text-[clamp(2px,0.85rem,12px)] font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
                           {roomMap[m.from_room_id] ?? (
                             <span className="italic text-gray-400">Loading...</span>
                           )}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-5 py-4">
+                      {/* Ke WH */}
+                      <TableCell className="px-2 py-4">
                         <div className="flex items-center gap-2">
                           <ArrowRightLeft className="h-3.5 w-3.5 text-gray-400" />
-                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1  text-[clamp(2px,0.85rem,12px)] font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                             {roomMap[m.to_room_id] ?? (
                               <span className="italic text-gray-400">Loading...</span>
                             )}
@@ -320,23 +344,35 @@ export default function TableMutasi({
                         </div>
                       </TableCell>
 
+                      {/* Dipindahkan Oleh */}
                       <TableCell className="px-5 py-4">
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className=" text-[clamp(2px,0.85rem,12px)] text-gray-700 dark:text-gray-300">
                           {userMap[m.migrated_by] ?? (
                             <span className="italic text-xs text-gray-400">Loading...</span>
                           )}
                         </span>
                       </TableCell>
 
+                      {/* Catatan */}
                       <TableCell className="max-w-45 px-5 py-4">
-                        <span className="block truncate text-sm text-gray-500 dark:text-gray-400">
+                        <span className="block truncate  text-[clamp(2px,0.85rem,12px)] text-gray-500 dark:text-gray-400">
                           {m.notes ?? (
                             <span className="italic text-gray-300 dark:text-gray-600">—</span>
                           )}
                         </span>
                       </TableCell>
 
-                      <TableCell className="max-w-45 px-5 py-4">
+                      {/* Status Surat ← baru */}
+                      <TableCell className="px-2 py-4">
+                        <span
+                          className={`inline-block rounded-lg border px-2.5 py-1 text-xs font-semibold capitalize ${getLetterStatusBadge(m.letter_status)}`}
+                        >
+                          {m.letter_status ?? "pending"}
+                        </span>
+                      </TableCell>
+
+                      {/* Aksi */}
+                      <TableCell className="px-2 py-4">
                         <ActionButtonsMigration
                           mutasi={m}
                           showCheckbox={m.letter_status !== "done"}
@@ -352,7 +388,7 @@ export default function TableMutasi({
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-gray-200/50 p-4 dark:border-white/5">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className=" text-[clamp(2px,0.85rem,12px)] text-gray-500 dark:text-gray-400">
                 Showing {(currentPage - 1) * limit + 1}–{Math.min(currentPage * limit, totalItems)} of {totalItems}
               </span>
               <Pagination

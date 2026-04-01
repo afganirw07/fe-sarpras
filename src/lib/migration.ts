@@ -1,23 +1,18 @@
 import { api } from "./api";
 
-export interface ItemMigration {
-  id: string;
-  from_room_id: string;
-  to_room_id: string;
-  migrated_by: string;
-  notes?: string | null;
-  migrated_at: string;
+// ─── Enums (sesuai Prisma schema) ─────────────────────────────────────────────
 
-  detail_items?: DetailItem[];
-}
+export type ItemConditions = "Good" | "Fair" | "Poor";
+export type ItemStatus = "available" | "borrowed" | "damaged";
 
 export interface DetailItem {
   id: string;
   serial_number: string;
-  condition: string;
-  status: string;
+  condition: ItemConditions;
+  status: ItemStatus;
+  /** FK ke Room — tidak di-include sebagai object di controller */
   room_id: string;
-
+  migration_id: string | null;
   item: {
     id: string;
     name: string;
@@ -25,13 +20,11 @@ export interface DetailItem {
     brand: string | null;
     unit: string;
     type: string;
-
     category?: {
       id: string;
       name: string;
       code: string;
     };
-
     subcategory?: {
       id: string;
       name: string;
@@ -40,15 +33,18 @@ export interface DetailItem {
   };
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  pagination?: {
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    perPage: number;
-  };
+export interface ItemMigration {
+  id: string;
+  from_room_id: string;
+  to_room_id: string;
+  migrated_by: string;
+  letter_status: string;
+  notes: string | null;
+  migrated_at: string;
+  created_at: string;
+  detail_items?: DetailItem[];
 }
+
 
 export interface Pagination {
   total: number;
@@ -64,11 +60,20 @@ export interface PaginatedResponse<T> {
   message: string;
 }
 
+export interface SingleResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+}
+
+
 export interface CreateMigrationPayload {
   from_room_id: string;
   to_room_id: string;
   migrated_by: string;
   detail_item_ids: string[];
+  /** Wajib — sesuai controller & schema */
+  letter_status: string;
   notes?: string;
 }
 
@@ -76,24 +81,28 @@ export interface UpdateMigrationPayload {
   from_room_id: string;
   to_room_id: string;
   migrated_by: string;
-  detail_item_ids: string[];
+  /** Wajib — sesuai controller & schema */
+  letter_status: string;
   notes?: string;
 }
 
+
 export async function getMigrations(
   page: number = 1,
-  limit: number = 100
+  limit: number = 10
 ): Promise<PaginatedResponse<ItemMigration>> {
   return api(`/api/item-migrations?page=${page}&limit=${limit}`);
 }
 
-export async function getMigrationById(id: string): Promise<ItemMigration> {
+export async function getMigrationById(
+  id: string
+): Promise<SingleResponse<ItemMigration>> {
   return api(`/api/item-migrations/${id}`);
 }
 
 export async function createMigration(
   payload: CreateMigrationPayload
-): Promise<ItemMigration> {
+): Promise<SingleResponse<ItemMigration>> {
   return api("/api/item-migrations", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -103,14 +112,16 @@ export async function createMigration(
 export async function updateMigration(
   id: string,
   payload: UpdateMigrationPayload
-): Promise<ItemMigration> {
+): Promise<SingleResponse<ItemMigration>> {
   return api(`/api/item-migrations/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });
 }
 
-export async function deleteMigration(id: string): Promise<ItemMigration> {
+export async function deleteMigration(
+  id: string
+): Promise<SingleResponse<ItemMigration>> {
   return api(`/api/item-migrations/${id}`, {
     method: "DELETE",
   });
@@ -120,13 +131,16 @@ export async function generateSuratMutasi(migrationId: string): Promise<void> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const token = process.env.NEXT_PUBLIC_API_KEY;
 
-  const res = await fetch(`${baseUrl}/api/letters/mutasi/generate/${migrationId}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await fetch(
+    `${baseUrl}/api/letters/mutasi/generate/${migrationId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
   if (!res.ok) {
     const text = await res.text();
@@ -138,10 +152,9 @@ export async function generateSuratMutasi(migrationId: string): Promise<void> {
     }
   }
 
-  // ── Ambil sebagai blob (bukan json) ──
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = `surat-mutasi-${migrationId}.pdf`;
   document.body.appendChild(a);

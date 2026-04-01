@@ -1,118 +1,97 @@
 import { api } from "./api";
-import { ItemConditions } from "./transaction";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-export type BorrowedDetailItem = {
+export type LoanDetailItem = {
   id: string;
   serial_number: string;
   condition: string;
   status: string;
-  room: { name: string };
-  transaction: { po_number: string };
-  item: {      
+  item_id: string;
+  room_id: string;
+  transaction_id: string;
+  room: { id: string; name: string };
+  item: {
+    id: string;
     name: string;
     category: { name: string };
     subcategory: { name: string };
   };
-  userId: { username: string };
 };
 
-export interface ReturnEntry {
-  item: BorrowedDetailItem;
-  kondisi: string;
+export type LoanRequestWithItems = {
+  id: string;
+  user_id: string;
+  status: string;
+  borrow_date: string;
+  return_date: string | null;
+  description: string | null;
+  user?: { username: string };
+  item: LoanDetailItem[]; // many-to-many
+};
+
+// Kondisi baru yang diinput user per item di tabel
+export type ReturnItemEntry = {
+  detail_item: LoanDetailItem;
+  new_condition: string; // "Good" | "Fair" | "Poor"
+};
+
+// ─── GET Loan Requests yang statusnya approved (siap dikembalikan) ─────────────
+
+export async function getApprovedLoanRequests(): Promise<LoanRequestWithItems[]> {
+  const res = await api("/api/loan-requests?limit=100");
+  const all: LoanRequestWithItems[] = res.data ?? [];
+  return all.filter((loan) => loan.status === "approved");
 }
 
+// ─── RETURN semua item dalam 1 LoanRequest sekaligus ─────────────────────────
+// Steps:
+//   1. Update kondisi + status tiap DetailItem → "available"
+//   2. Update LoanRequest → status "returned"
 
-export async function getBorrowedDetailItems(): Promise<BorrowedDetailItem[]> {
-  const res = await api("/api/detail-items?status=borrowed&limit=100");
-  return res.data ?? [];
-}
-
-export async function returnDetailItems(
-  returnList: ReturnEntry[],
-  returned_by: string
+export async function returnLoanRequest(
+  loan: LoanRequestWithItems,
+  entries: ReturnItemEntry[] // harus sama jumlahnya dengan loan.item
 ): Promise<void> {
+  // Validasi: semua item dalam loan harus ada di entries
+  const entryIds = new Set(entries.map((e) => e.detail_item.id));
+  const missingIds = loan.item.filter((d) => !entryIds.has(d.id));
+  if (missingIds.length > 0) {
+    throw new Error(
+      `Semua item harus dikembalikan sekaligus. Item belum diisi kondisi: ${missingIds
+        .map((d) => d.serial_number)
+        .join(", ")}`
+    );
+  }
 
-  const detailedItems = await Promise.all(
-    returnList.map(async (entry) => {
-      const res = await api(`/api/detail-items/${entry.item.id}`);
-      return { detail: res.data, kondisi: entry.kondisi };
-    })
-  );
-
+  // 1. Update tiap DetailItem: status → available, condition → new_condition
   await Promise.all(
-    detailedItems.map(({ detail, kondisi }) =>
-      api(`/api/detail-items/${detail.id}`, {
+    entries.map(({ detail_item, new_condition }) =>
+      api(`/api/detail-items/${detail_item.id}`, {
         method: "PUT",
         body: JSON.stringify({
-          item_id: detail.item_id,          
-          transaction_id: detail.transaction_id,
-          room_id: detail.room_id,
-          serial_number: detail.serial_number,
+          item_id: detail_item.item_id,
+          transaction_id: detail_item.transaction_id,
+          room_id: detail_item.room_id,
+          serial_number: detail_item.serial_number,
           status: "available",
-          condition: kondisi,
+          condition: new_condition,
         }),
       })
     )
   );
 
-
-  const loanRes = await api(`/api/loan-requests?limit=100`);
-  const allLoans: any[] = loanRes.data ?? [];
-  const matchedLoans = allLoans.filter(
-    (loan) =>
-      detailedItems.some((e) => e.detail.id === loan.item_id) &&
-      loan.status === "approved"
-  );
-
-  console.log("matchedLoans:", matchedLoans);
-
-  if (matchedLoans.length > 0) {
-    await Promise.all(
-      matchedLoans.map((loan) =>
-        api(`/api/loan-requests/${loan.id}`, {
-          method: "PUT",
-          body: JSON.stringify({
-            user_id: loan.user_id,
-            item_id: loan.item_id,     
-            borrow_date: loan.borrow_date,
-            return_date: new Date().toISOString(),
-            status: "returned",
-            description: loan.description ?? undefined,
-          }),
-        })
-      )
-    );
-  }
-
-  const uniqueTransactionIds = [
-    ...new Set(detailedItems.map((e) => e.detail.transaction_id)),
-  ];
-
-  await Promise.all(
-    uniqueTransactionIds.map(async (transaction_id) => {
-      const existing = await api(`/api/transactions/${transaction_id}`);
-      const trx = existing.data;
-
-      return api(`/api/transactions/${transaction_id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          user_id: trx.user_id,
-          supplier_id: trx.supplier_id,
-          po_number: trx.po_number,
-          transaction_date: trx.transaction_date,
-          status: trx.status,
-          returned_by,
-        }),
-      });
-    })
-  );
+  // 2. Update LoanRequest → returned
+// 2. Update LoanRequest → returned
+await api(`/api/loan-requests/${loan.id}`, {
+  method: "PUT",
+  body: JSON.stringify({
+    user_id:    loan.user_id,
+    item_ids:   loan.item.map((d) => d.id), // ← tambah ini
+    borrow_date: loan.borrow_date,
+    return_date: new Date().toISOString(),
+    status:      "returned",
+    description: loan.description ?? undefined,
+  }),
+});
 }
-
-export const getDetailItemsByTransaction = async (transactionId: string) => {
-  const res = await api(`/api/detail-items?transaction_id=${transactionId}`);
-  return (res.data ?? []).map((d: any) => ({
-    name: d.item?.name ?? "—",
-    condition: d.condition ?? "—",
-  }));
-};

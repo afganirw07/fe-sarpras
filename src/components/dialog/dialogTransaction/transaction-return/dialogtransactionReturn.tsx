@@ -1,18 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -31,112 +27,137 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import {
-  getBorrowedDetailItems,
-  returnDetailItems,
-  BorrowedDetailItem,
+  getApprovedLoanRequests,
+  returnLoanRequest,
+  LoanDetailItem,
+  ReturnItemEntry,
 } from "@/lib/transaction-return";
-import { getEmployees, Employee } from "@/lib/roles"; // sesuaikan path
+import { getLoanRequestById } from "@/lib/loan-request";
+import { getEmployees, Employee } from "@/lib/roles";
+import { getUsers, User } from "@/lib/user";
 
+const KONDISI_OPTIONS = ["Good", "Fair", "Poor"] as const;
 
-interface ReturnEntry {
-  item: BorrowedDetailItem;
-  kondisi: string;
+interface DialogTransactionReturnProps {
+  onSuccess?: () => void;
 }
-
 
 export default function DialogTransactionReturn({
   onSuccess,
-}: {
-  onSuccess?: () => void;
-}) {
+}: DialogTransactionReturnProps) {
   const router = useRouter();
 
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showTable, setShowTable] = useState(false);
+  const [open, setOpen]                   = useState(false);
+  const [loading, setLoading]             = useState(false);
+  const [loadingLoans, setLoadingLoans]   = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
-  const [borrowedItems, setBorrowedItems] = useState<BorrowedDetailItem[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [approvedLoans, setApprovedLoans]   = useState<any[]>([]);
+  const [employees, setEmployees]           = useState<Employee[]>([]);
+  const [selectedLoanId, setSelectedLoanId] = useState("");
+  const [selectedLoan, setSelectedLoan]     = useState<any | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [kondisiMap, setKondisiMap]         = useState<Record<string, string>>({});
+  const [user, setUsers] = useState<User[]>([]);
+  // Search state khusus untuk employee select
+  const [employeeSearch, setEmployeeSearch] = useState("");
 
-  const [selectedItemId, setSelectedItemId] = useState("");
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
-  const [selectedKondisi, setSelectedKondisi] = useState("");
-  const [returnList, setReturnList] = useState<ReturnEntry[]>([]);
+  useEffect(() => {
+      getUsers().then(setUsers);
+    }, []);
 
-  // ── Fetch saat dialog buka ──
+  // ── Filtered employees berdasarkan search ─────────────────────────────────
+  const filteredEmployees = useMemo(() => {
+    const q = employeeSearch.toLowerCase();
+    if (!q) return employees;
+    return employees.filter((e) => e.full_name.toLowerCase().includes(q));
+  }, [employees, employeeSearch]);
+
+  const userMap = useMemo(() => {
+  if (!Array.isArray(user)) return {};
+  return user.reduce((acc, u) => {
+    acc[u.id] = u.username;
+    return acc;
+  }, {} as Record<string, string>);
+}, [user]);
+
+  // ── Label employee yang terpilih (untuk SelectValue display) ──────────────
+  const selectedEmployeeLabel = useMemo(() => {
+    return employees.find((e) => e.id === selectedUserId)?.full_name ?? "";
+  }, [employees, selectedUserId]);
+
   useEffect(() => {
     if (!open) return;
-    getBorrowedDetailItems()
-      .then(setBorrowedItems)
-      .catch(() => toast.error("Gagal memuat item borrowed."));
-    getEmployees()
-      .then(setEmployees)
-      .catch(() => toast.error("Gagal memuat data employee."));
+    setLoadingLoans(true);
+    Promise.all([getApprovedLoanRequests(), getEmployees()])
+      .then(([loans, employeesRes]) => {
+        setApprovedLoans(loans);
+        setEmployees(employeesRes);
+      })
+      .catch(() => toast.error("Gagal memuat data"))
+      .finally(() => setLoadingLoans(false));
   }, [open]);
 
-  // Item yang belum masuk returnList
-  const availableItems = borrowedItems.filter(
-    (item) => !returnList.find((r) => r.item.id === item.id)
-  );
-
-  const handleAddToList = () => {
-    if (!selectedItemId) {
-      toast.warning("Pilih item terlebih dahulu.");
-      return;
+  const handleSelectLoan = async (loanId: string) => {
+    setSelectedLoanId(loanId);
+    setSelectedLoan(null);
+    setKondisiMap({});
+    try {
+      setLoadingDetail(true);
+      const detail = await getLoanRequestById(loanId);
+      setSelectedLoan(detail);
+      const defaultMap: Record<string, string> = {};
+      detail.item?.forEach((d: LoanDetailItem) => {
+        defaultMap[d.id] = d.condition;
+      });
+      setKondisiMap(defaultMap);
+    } catch {
+      toast.error("Gagal mengambil detail transaksi");
+    } finally {
+      setLoadingDetail(false);
     }
-    if (!selectedKondisi) {
-      toast.warning("Pilih kondisi barang setelah dikembalikan.");
-      return;
-    }
-    const item = borrowedItems.find((i) => i.id === selectedItemId);
-    if (!item) return;
-
-    setReturnList((prev) => [...prev, { item, kondisi: selectedKondisi }]);
-    setSelectedItemId("");
-    setSelectedKondisi("");
   };
 
-  const handleRemoveEntry = (id: string) => {
-    setReturnList((prev) => prev.filter((r) => r.item.id !== id));
+  const handleKondisiChange = (id: string, val: string) => {
+    setKondisiMap((prev) => ({ ...prev, [id]: val }));
   };
+
+  const allKondisiFilled =
+    selectedLoan?.item?.length &&
+    selectedLoan.item.every((d: LoanDetailItem) => kondisiMap[d.id]);
 
   const handleSubmit = async () => {
-    if (!selectedEmployeeId) {
-      toast.error("Pilih user yang mengembalikan.");
-      return;
-    }
-    if (returnList.length === 0) {
-      toast.error("Tambahkan minimal satu item.");
-      return;
-    }
+    if (!selectedLoan)     return toast.error("Pilih transaksi dulu");
+    if (!selectedUserId)   return toast.error("Pilih user");
+    if (!allKondisiFilled) return toast.error("Isi semua kondisi item");
 
-    setLoading(true);
+    const entries: ReturnItemEntry[] = selectedLoan.item.map(
+      (d: LoanDetailItem) => ({ detail_item: d, new_condition: kondisiMap[d.id] })
+    );
+
     try {
-    await returnDetailItems(returnList, selectedEmployeeId);
-      toast.success(`${returnList.length} item berhasil dikembalikan.`);
-      setOpen(false);
+      setLoading(true);
+     await returnLoanRequest(selectedLoan, entries, selectedUserId); // pass it here
+      toast.success(`${entries.length} item berhasil dikembalikan`);
       resetForm();
+      setOpen(false);
       onSuccess?.();
       router.refresh();
-    } catch {
-      toast.error("Gagal memproses pengembalian.");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Gagal return");
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
-    setSelectedItemId("");
-    setSelectedEmployeeId("");
-    setSelectedKondisi("");
-    setReturnList([]);
-    setShowTable(false);
-  };
-
-  const kondisiBadge = (kondisi: string) => {
-    if (kondisi === "Good") return "bg-green-100 text-green-700";
-    if (kondisi === "Fair") return "bg-yellow-100 text-yellow-700";
-    return "bg-red-100 text-red-700";
+    setSelectedLoanId("");
+    setSelectedLoan(null);
+    setSelectedUserId("");
+    setKondisiMap({});
+    setApprovedLoans([]);
+    setEmployees([]);
+    setEmployeeSearch("");
   };
 
   return (
@@ -148,186 +169,190 @@ export default function DialogTransactionReturn({
       }}
     >
       <DialogTrigger asChild>
-        <Button size="sm" className="bg-blue-800 text-white hover:bg-blue-900">
+        <Button className="bg-blue-800 text-white hover:bg-blue-900">
           + Add Transaction Return
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-h-[90vh] w-full max-w-3xl overflow-y-auto p-8">
+      <DialogContent className="w-full max-w-4xl p-8 dark:bg-black">
         <DialogHeader className="mb-6">
-          <DialogTitle className="text-xl font-semibold">
-            Add Transaction Return
-          </DialogTitle>
+          <DialogTitle className="text-xl">Add Transaction Return</DialogTitle>
+          <DialogDescription>
+            Pilih transaksi dan isi kondisi item yang dikembalikan
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-5">
-          {/* ── Row 1: Item + Kondisi ── */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-6">
+
+          {/* SELECT ROW */}
+          <div className="grid md:grid-cols-2 gap-4">
+
+            {/* Loan select */}
             <div className="flex flex-col gap-2">
-              <Label>Not Returned Item</Label>
-              <Select value={selectedItemId} onValueChange={setSelectedItemId}>
+              <Label>Not Returned Transaction</Label>
+              <Select
+                value={selectedLoanId}
+                onValueChange={handleSelectLoan}
+                disabled={loadingLoans}
+              >
                 <SelectTrigger className="h-11 w-full">
-                  <SelectValue placeholder="Pilih Item (Borrowed)" />
+                  <SelectValue placeholder="Pilih transaksi" />
                 </SelectTrigger>
-                <SelectContent>
-                  {availableItems.length === 0 ? (
-                    <SelectItem value="-" disabled>
-                      {borrowedItems.length === 0
-                        ? "Tidak ada item borrowed"
-                        : "Semua item sudah dipilih"}
-                    </SelectItem>
-                  ) : (
-                    availableItems.map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.serial_number} — {item.item.name}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
+              <SelectContent>
+  {approvedLoans.map((loan) => (
+    <SelectItem key={loan.id} value={loan.id}>
+      Return -{" "}
+      {format(new Date(loan.borrow_date), "dd MMM yyyy", { locale: id })} -{" "}
+      {userMap[loan.user_id || "loading"]} -{""}
+      {loan.item?.length ?? 0} item 
+    </SelectItem>
+  ))}
+</SelectContent>
               </Select>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label>Kondisi Barang</Label>
-              <Select value={selectedKondisi} onValueChange={setSelectedKondisi}>
-                <SelectTrigger className="h-11 w-full">
-                  <SelectValue placeholder="Pilih Kondisi" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Good">Good</SelectItem>
-                  <SelectItem value="Fair">Fair</SelectItem>
-                  <SelectItem value="Poor">Poor</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* ── Row 2: Employee + Tombol Tambah ── */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Employee select — dengan search */}
             <div className="flex flex-col gap-2">
               <Label>User Yang Mengembalikan</Label>
               <Select
-                value={selectedEmployeeId}
-                onValueChange={setSelectedEmployeeId}
+                value={selectedUserId}
+                onValueChange={(val) => {
+                  setSelectedUserId(val);
+                  setEmployeeSearch(""); // reset search setelah pilih
+                }}
               >
                 <SelectTrigger className="h-11 w-full">
-                  <SelectValue placeholder="Pilih Employee" />
+                  {/* Tampilkan nama yang terpilih, bukan value (UUID) */}
+                  <SelectValue placeholder="Pilih user">
+                    {selectedEmployeeLabel || "Pilih user"}
+                  </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
-                  {employees.map((emp) => (
-                    <SelectItem key={emp.id} value={emp.id}>
-                      {emp.full_name}
-                    </SelectItem>
-                  ))}
+
+                <SelectContent
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                  className="w-(--radix-select-trigger-width)"
+                >
+                  {/* Search input */}
+                  <div className="sticky top-0 z-10 bg-white dark:bg-black px-2 pb-2 pt-1">
+                    <div className="relative">
+                      <Search
+                        size={14}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+                      <input
+                        placeholder="Cari employee..."
+                        value={employeeSearch}
+                        onChange={(e) => setEmployeeSearch(e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Employee list */}
+                  <div className="max-h-52 overflow-y-auto">
+                    {filteredEmployees.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-gray-400">
+                        Employee tidak ditemukan
+                      </div>
+                    ) : (
+                      filteredEmployees.map((e) => (
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.full_name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </div>
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="flex items-end">
-              <Button
-                type="button"
-                onClick={handleAddToList}
-                disabled={!selectedItemId || !selectedKondisi}
-                className="h-11 w-full bg-blue-700 text-white hover:bg-blue-800 disabled:opacity-50"
-              >
-                + Tambah ke Daftar
-              </Button>
-            </div>
           </div>
 
-          {/* ── Tabel opsional ── */}
-          {returnList.length > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowTable((v) => !v)}
-                className="mb-2 flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline"
-              >
-                {showTable ? (
-                  <><ChevronUp size={15} /> Sembunyikan daftar</>
+          {/* TABLE */}
+          <div className="rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                  {["Item ID", "Name", "SN", "Subcategory", "WH", "Condition"].map((col) => (
+                    <th
+                      key={col}
+                      className="text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400"
+                    >
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loadingDetail ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-gray-400">
+                      <Loader2 className="animate-spin mx-auto" size={18} />
+                    </td>
+                  </tr>
+                ) : !selectedLoan ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-gray-400 text-sm">
+                      Pilih transaksi untuk melihat item
+                    </td>
+                  </tr>
+                ) : selectedLoan.item?.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-gray-400 text-sm">
+                      Tidak ada item
+                    </td>
+                  </tr>
                 ) : (
-                  <><ChevronDown size={15} /> Lihat daftar ({returnList.length} item)</>
+                  selectedLoan.item.map((d: LoanDetailItem) => (
+                    <tr
+                      key={d.id}
+                      className="border-t border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                      <td className="px-4 py-3 text-gray-500">{d.item?.id?.slice(0, 8)}</td>
+                      <td className="px-4 py-3 font-medium">{d.item?.name}</td>
+                      <td className="px-4 py-3 text-gray-500">{d.serial_number}</td>
+                      <td className="px-4 py-3 text-gray-500">{d.item?.subcategory?.name}</td>
+                      <td className="px-4 py-3 text-gray-500">{d.room?.name}</td>
+                      <td className="px-4 py-3">
+                        <Select
+                          value={kondisiMap[d.id]}
+                          onValueChange={(val) => handleKondisiChange(d.id, val)}
+                        >
+                          <SelectTrigger className="h-8 w-28">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {KONDISI_OPTIONS.map((k) => (
+                              <SelectItem key={k} value={k}>{k}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    </tr>
+                  ))
                 )}
-              </button>
+              </tbody>
+            </table>
+          </div>
 
-              {showTable && (
-                <div className="rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/[0.03]">
-                  <div className="overflow-x-auto">
-                    <Table className="w-full min-w-[560px] table-auto">
-                      <TableHeader>
-                        <TableRow>
-                          {["No", "Item Name", "SN Number", "WH Asal", "Kondisi Lama", "Kondisi Baru", "Action"].map(
-                            (col, i, arr) => (
-                              <TableCell
-                                key={col}
-                                isHeader
-                                className={`border bg-blue-800 px-4 py-3 text-xs font-medium text-gray-200 ${i === 0 ? "rounded-l-md" : ""} ${i === arr.length - 1 ? "rounded-r-md" : ""}`}
-                              >
-                                {col}
-                              </TableCell>
-                            )
-                          )}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {returnList.map((entry, index) => (
-                          <TableRow key={entry.item.id}>
-                            <TableCell className="border px-4 py-3 text-sm text-gray-600">
-                              {index + 1}
-                            </TableCell>
-                            <TableCell className="border px-4 py-3 text-sm text-gray-600">
-                              {entry.item.item.name}
-                            </TableCell>
-                            <TableCell className="border px-4 py-3 text-xs font-mono text-gray-500">
-                              {entry.item.serial_number}
-                            </TableCell>
-                            <TableCell className="border px-4 py-3 text-sm text-gray-600">
-                              {entry.item.room.name}
-                            </TableCell>
-                            <TableCell className="border px-4 py-3">
-                              <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${kondisiBadge(entry.item.condition)}`}>
-                                {entry.item.condition}
-                              </span>
-                            </TableCell>
-                            <TableCell className="border px-4 py-3">
-                              <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${kondisiBadge(entry.kondisi)}`}>
-                                {entry.kondisi}
-                              </span>
-                            </TableCell>
-                            <TableCell className="border px-4 py-3">
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                type="button"
-                                onClick={() => handleRemoveEntry(entry.item.id)}
-                              >
-                                <Trash2 size={14} />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          {/* FOOTER */}
+          <DialogFooter className="mt-4">
+            <DialogClose asChild>
+              <Button variant="outline" disabled={loading}>Close</Button>
+            </DialogClose>
+            <Button
+              onClick={handleSubmit}
+              disabled={loading || !selectedLoan || !selectedUserId || !allKondisiFilled}
+              className="bg-blue-800 px-6 text-white hover:bg-blue-900 disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="animate-spin" size={16} /> : "Save"}
+            </Button>
+          </DialogFooter>
         </div>
-
-        <DialogFooter className="mt-8 gap-3">
-          <DialogClose asChild>
-            <Button variant="outline" type="button">Close</Button>
-          </DialogClose>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading || returnList.length === 0 || !selectedEmployeeId}
-            className="bg-blue-800 text-white hover:bg-blue-900 disabled:opacity-50"
-          >
-            {loading ? "Menyimpan..." : "Save"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -100,10 +100,16 @@ export default function DialogTransactionIn({
   const [rows, setRows] = useState<TransactionItemRow[]>([]);
 
   const [errors, setErrors] = useState<FormErrors>({});
+const [itemSearch, setItemSearch] = useState("");
 
-  const filteredItems = selectedSubcategoryId
-    ? items.filter((item) => item.subcategory_id === selectedSubcategoryId)
-    : [];
+// Update filteredItems
+const filteredItems = selectedSubcategoryId
+  ? items.filter(
+      (item) =>
+        item.subcategory_id === selectedSubcategoryId &&
+        item.name.toLowerCase().includes(itemSearch.toLowerCase()),
+    )
+  : [];
   const fetchAll = async () => {
     try {
       const [catRes, subCatRes, supRes, roomRes, itemRes] = await Promise.all([
@@ -357,7 +363,7 @@ setSelectedCategoryId("");
                   }}
                 >
                   <SelectTrigger
-                    className={`h-11 ${errors.supplier ? "border-red-500" : ""}`}
+                    className={`h-11 ${errors.supplier ? "border-red-500" : ""} w-full max-w-xl`}
                   >
                     <SelectValue placeholder="Pilih Supplier" />
                   </SelectTrigger>
@@ -392,12 +398,13 @@ setSelectedCategoryId("");
                   }}
                 >
                   <SelectTrigger
-                    className={`h-11 ${errors.categori ? "border-red-500" : ""}`}
+                    className={`h-11 ${errors.categori ? "border-red-500" : ""} w-full max-w-xl `}
                   >
                     <SelectValue placeholder="Pilih Kategori" />
                   </SelectTrigger>
 
-                  <SelectContent>
+                  <SelectContent >
+                  <div className="max-h-60 overflow-y-auto">
                     {categories.map((cat) => {
                       const subs = subcategories.filter(
                         (s) => s.category_id === cat.id,
@@ -416,7 +423,7 @@ setSelectedCategoryId("");
                             <SelectItem
                               key={sub.id}
                               value={sub.id}
-                              className="w-full max-w-xl p-4"
+                              className="w-full max-w-xl p-2"
                             >
                               {sub.name}
                             </SelectItem>
@@ -424,51 +431,69 @@ setSelectedCategoryId("");
                         </div>
                       );
                     })}
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
               {/* Items */}
               <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <Label>Items</Label>
-                  {errors.items && (
-                    <p className="text-xs text-red-500">{errors.items}</p>
-                  )}
-                </div>
-                <Select
-                  value={selectedItemId}
-                  onValueChange={setSelectedItemId}
-                  disabled={!selectedSubcategoryId}
-                >
-                  <SelectTrigger
-                    className={`h-11 ${errors.items ? "border-red-500" : ""}`}
-                  >
-                    <SelectValue
-                    placeholder={
-  selectedSubcategoryId ? "Pilih Item" : "Pilih Kategori dulu"
-}
-                    />
-                  </SelectTrigger>
-                  <SelectContent
-                    position="popper"
-                    side="bottom"
-                    avoidCollisions={false}
-                    style={{ maxHeight: "240px", overflowY: "auto" }}
-                  >
-                    {filteredItems.length === 0 ? (
-                      <div className="px-4 py-2 text-sm text-gray-500">
-                        Tidak ada item
-                      </div>
-                    ) : (
-                      filteredItems.map((item) => (
-                        <SelectItem key={item.id} value={item.id}>
-                          {item.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+  <div className="flex items-center gap-2">
+    <Label>Items</Label>
+    {errors.items && (
+      <p className="text-xs text-red-500">{errors.items}</p>
+    )}
+  </div>
+  <Select
+    value={selectedItemId}
+    onValueChange={(v) => {
+      setSelectedItemId(v);
+      setItemSearch("");
+    }}
+    disabled={!selectedSubcategoryId}
+  >
+    <SelectTrigger
+      className={`h-11 ${errors.items ? "border-red-500" : ""} w-full max-w-xl`}
+    >
+      <SelectValue
+        placeholder={
+          selectedSubcategoryId ? "Pilih Item" : "Pilih Kategori dulu"
+        }
+      />
+    </SelectTrigger>
+    <SelectContent
+      position="popper"
+      side="bottom"
+      avoidCollisions={false}
+    >
+      {/* Search Input */}
+      <div className="sticky top-0 z-10 bg-white p-2">
+        <input
+          className="w-full rounded-md border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-blue-500"
+          placeholder="Cari item..."
+          value={itemSearch}
+          onChange={(e) => setItemSearch(e.target.value)}
+          onKeyDown={(e) => e.stopPropagation()} // prevent select keyboard hijack
+          onClick={(e) => e.stopPropagation()}   // prevent dropdown close
+        />
+      </div>
+
+      {/* Item List */}
+      <div className="max-h-52 overflow-y-auto">
+        {filteredItems.length === 0 ? (
+          <div className="px-4 py-2 text-sm text-gray-500">
+            Tidak ada item
+          </div>
+        ) : (
+          filteredItems.map((item) => (
+            <SelectItem key={item.id} value={item.id}>
+              {item.name}
+            </SelectItem>
+          ))
+        )}
+      </div>
+    </SelectContent>
+  </Select>
+</div>
 
               <Button
                 type="button"
@@ -480,7 +505,6 @@ setSelectedCategoryId("");
               </Button>
             </div>
 
-            {/* ✅ Error global jika rows kosong */}
             {errors.items && rows.length === 0 && (
               <p className="mt-2 text-sm text-red-500">
                 * Tambahkan minimal satu item ke tabel

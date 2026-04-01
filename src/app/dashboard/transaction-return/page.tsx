@@ -10,81 +10,76 @@ import {
   Search,
 } from "lucide-react";
 import DialogTransactionReturn from "@/components/dialog/dialogTransaction/transaction-return/dialogtransactionReturn";
-import { api } from "@/lib/api";
-
-interface Transaction {
-  id: string;
-  po_number: string;
-  status: string;
-  returned_by: string | null;
-  transaction_date: string;
-  returnedBy?: { full_name: string };
-}
+import { getLoanRequests, LoanRequest } from "@/lib/loan-request";
 
 export default function TransactionReturnPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loanRequests, setLoanRequests] = useState<LoanRequest[]>([]);
   const [search, setSearch] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const fetchTransactions = async () => {
+  const fetchLoanRequests = async () => {
     try {
-      const res = await api("/api/transactions?limit=100");
-      setTransactions(res.data ?? []);
+      const res = await getLoanRequests(1, 9999);
+      setLoanRequests(res.data ?? []);
     } catch (error) {
       console.error(error);
     }
   };
 
   useEffect(() => {
-    fetchTransactions();
+    fetchLoanRequests();
   }, [refreshKey]);
 
   const handleRefresh = () => setRefreshKey((prev) => prev + 1);
 
-  // Stats
-  const totalTransaksi = transactions.length;
-  const totalSudahReturn = transactions.filter((t) => t.returned_by).length;
-  const totalBelumReturn = transactions.filter((t) => !t.returned_by).length;
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  const totalTransaksi    = loanRequests.length;
+  const totalSudahReturn  = loanRequests.filter((r) => r.status === "returned").length;
+  const totalBelumReturn  = loanRequests.filter((r) => r.status === "approved").length;
 
   const filteredCount = useMemo(() => {
     if (!search) return totalSudahReturn;
     const q = search.toLowerCase();
-    return transactions
-      .filter((t) => t.returned_by)
-      .filter(
-        (t) =>
-          t.po_number?.toString().toLowerCase().includes(q) ||
-          (t.returnedBy?.full_name ?? "").toLowerCase().includes(q)
+    return loanRequests
+      .filter((r) => r.status === "returned")
+      .filter((r) =>
+        (r.user?.username ?? "").toLowerCase().includes(q) ||
+        r.item.some(
+          (d) =>
+            d.item?.name.toLowerCase().includes(q) ||
+            d.serial_number.toLowerCase().includes(q) ||
+            d.room?.name.toLowerCase().includes(q)
+        )
       ).length;
-  }, [transactions, search]);
+  }, [loanRequests, search, totalSudahReturn]);
 
   const stats = [
     {
-      label: "Total Transaksi",
-      value: totalTransaksi,
-      icon: Receipt,
-      color: "bg-blue-100 dark:bg-blue-900/30",
+      label:     "Total Transaksi",
+      value:     totalTransaksi,
+      icon:      Receipt,
+      color:     "bg-blue-100 dark:bg-blue-900/30",
       iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
-      label: "Sudah Dikembalikan",
-      value: totalSudahReturn,
-      icon: CheckCircle2,
-      color: "bg-emerald-100 dark:bg-emerald-900/30",
+      label:     "Sudah Dikembalikan",
+      value:     totalSudahReturn,
+      icon:      CheckCircle2,
+      color:     "bg-emerald-100 dark:bg-emerald-900/30",
       iconColor: "text-emerald-600 dark:text-emerald-400",
     },
     {
-      label: "Belum Dikembalikan",
-      value: totalBelumReturn,
-      icon: PackageCheck,
-      color: "bg-amber-100 dark:bg-amber-900/30",
+      label:     "Belum Dikembalikan",
+      value:     totalBelumReturn,
+      icon:      PackageCheck,
+      color:     "bg-amber-100 dark:bg-amber-900/30",
       iconColor: "text-amber-600 dark:text-amber-400",
     },
     {
-      label: "Hasil Cari",
-      value: filteredCount,
-      icon: Search,
-      color: "bg-violet-100 dark:bg-violet-900/30",
+      label:     "Hasil Cari",
+      value:     filteredCount,
+      icon:      Search,
+      color:     "bg-violet-100 dark:bg-violet-900/30",
       iconColor: "text-violet-600 dark:text-violet-400",
     },
   ];
@@ -109,13 +104,6 @@ export default function TransactionReturnPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleRefresh}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
-            >
-              <RotateCcw size={14} />
-              Refresh
-            </button>
             <DialogTransactionReturn onSuccess={handleRefresh} />
           </div>
         </div>
@@ -146,7 +134,7 @@ export default function TransactionReturnPage() {
       </div>
 
       {/* ── Table ── */}
-<TableTransactionReturn refreshKey={refreshKey} />
+      <TableTransactionReturn refreshKey={refreshKey} onSearchChange={setSearch} />
     </div>
   );
 }

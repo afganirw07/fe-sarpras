@@ -224,7 +224,7 @@ const handlePageChange = (page: number) => {
 
             <div className="flex items-center gap-2">
               <PopoverRoot>
-                <PopoverTrigger className={`h-9 rounded-xl border px-3 text-xs gap-1.5 inline-flex items-center
+                <PopoverTrigger className={`h-9 rounded-xl border px-2 text-xs gap-1.5 inline-flex items-center
                   ${filterDate
                     ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
                     : "border-gray-200 text-gray-500 bg-white dark:border-white/10 dark:bg-white/5"
@@ -332,26 +332,26 @@ const handlePageChange = (page: number) => {
                       key={trx.id}
                       className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                     >
-                      <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-center">
+                      <TableCell className="px-2 py-4 text-center">
                         <span className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-xs font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                           {(currentPage - 1) * limit + index + 1}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                      <TableCell className="px-2 py-4">
                         <span className="text-xs font-semibold text-gray-700 dark:text-white">
                           {userMap[trx.user_id] ?? "Loading..."}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                      <TableCell className="px-2 py-4">
                         <span className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold ${typeConfig.class}`}>
                           <ArrowDownToLine className="h-3 w-3" />
                           {typeConfig.label}
                         </span>
                       </TableCell>
 
-                      <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                      <TableCell className="px-2 py-4">
                         <div className="flex items-center gap-2">
                           <Warehouse className="h-4 w-4 text-gray-400" />
                           <span className="text-xs text-gray-700 dark:text-gray-300">
@@ -360,7 +360,7 @@ const handlePageChange = (page: number) => {
                         </div>
                       </TableCell>
 
-                      <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                      <TableCell className="px-2 py-4">
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-400" />
                           <span className="text-xs text-gray-700 dark:text-gray-300">
@@ -373,14 +373,14 @@ const handlePageChange = (page: number) => {
                         </div>
                       </TableCell>
 
-                      <TableCell className="px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)]">
+                      <TableCell className="px-2 py-4">
                         <span className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold ${statusConfig.class}`}>
                           {statusConfig.icon}
                           {trx.status}
                         </span>
                       </TableCell>
 
-                      <TableCell className="flex justify-center gap-2 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] text-center">
+                      <TableCell className="flex justify-center gap-2 px-2 py-4 text-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link href={`/dashboard/transaction-in/show/${trx.id}`}>
