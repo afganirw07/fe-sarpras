@@ -373,6 +373,7 @@ setSelectedSubcategoryId("");
                 </div>
 
                 <Select
+
                   value={selectedSubcategoryId}
                   onValueChange={(v) => {
                     setSelectedSubcategoryId(v);
@@ -408,7 +409,7 @@ setSelectedSubcategoryId("");
                             <SelectItem
                               key={sub.id}
                               value={sub.id}
-                              className="pl-6"
+                              className="w-full max-w-xl p-4"
                             >
                               {sub.name}
                             </SelectItem>

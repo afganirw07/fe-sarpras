@@ -32,13 +32,17 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   getAvailableDetailItems,
-  getCategoriesByWarehouseAll,        
-  getItemsByWarehouseAndCategoryAll,
+  getItemsByWarehouseAndCategory,
 } from "@/lib/detail-items";
 import { getRooms, Room } from "@/lib/warehouse";
-import { Item } from "@/lib/items";
 import { getUsers, User } from "@/lib/user";
-import { Category } from "@/lib/category";
+import {
+  getCategories,
+  getSubcategories,
+  Category,
+  Subcategory,
+} from "@/lib/category";
+import { getItems, Item } from "@/lib/items";
 import { Calendar } from "@/components/ui/calendar";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -46,7 +50,7 @@ import { toast } from "sonner";
 export interface DetailItem {
   id: string;
   item_id: string;
-  room_id: string;     
+  room_id: string;
   serial_number: string;
   condition: string;
   status: string;
@@ -54,6 +58,7 @@ export interface DetailItem {
   item: {
     id: string;
     name: string;
+    subcategory_id: string;
     category: { id: string; name: string };
     subcategory: { id: string; name: string };
   };
@@ -80,12 +85,15 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
 
   const [open, setOpen] = useState(false);
   const [warehouse, setWarehouse] = useState<Room[]>([]);
-  const [category, setCategory] = useState<Category[]>([]);
-  const [items, setItems] = useState<Item[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  // allItems = semua item dari getItems(), difilter client-side by subcategory_id
+  const [allItems, setAllItems] = useState<Item[]>([]);
   const [rows, setRows] = useState<TransactionOutRow[]>([]);
   const [users, setUsers] = useState<User[]>([]);
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  // selectedSubcategoryId = nilai dipilih dari grouped selector (sama seperti Transaction In)
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState("");
   const [selectedItemId, setSelectedItemId] = useState("");
   const [borrowerWarehouseId, setBorrowerWarehouseId] = useState("");
   const [originWarehouseId, setOriginWarehouseId] = useState("");
@@ -96,85 +104,45 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
 
   const [availableDetailItems, setAvailableDetailItems] = useState<DetailItem[]>([]);
   const [selectedDetailItemId, setSelectedDetailItemId] = useState("");
+
   const [loadingDetail, setLoadingDetail] = useState(false);
-  const [loadingCategory, setLoadingCategory] = useState(false);
   const [loadingItems, setLoadingItems] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Item difilter client-side berdasarkan subcategory_id (sama persis Transaction In)
+  const filteredItems = selectedSubcategoryId
+    ? allItems.filter((item) => item.subcategory_id === selectedSubcategoryId)
+    : [];
+
+  // Fetch semua data dasar saat dialog dibuka
   useEffect(() => {
     if (!open) return;
-    const fetchAll = async () => {
+    const fetchBase = async () => {
       try {
-        const [roomRes, usersRes] = await Promise.all([getRooms(), getUsers()]);
+        const [roomRes, usersRes, catRes, subCatRes, itemRes] = await Promise.all([
+          getRooms(),
+          getUsers(),
+          getCategories(1, 1000),
+          getSubcategories(1, 1000),
+          getItems(),
+        ]);
         setWarehouse(roomRes.data);
         setUsers(usersRes);
+        setCategories(catRes.data);
+        setSubcategories(subCatRes.data);
+        setAllItems(itemRes.data);
       } catch (error) {
-        console.error("Fetch dialog data error:", error);
+        console.error("Fetch base data error:", error);
       }
     };
-    fetchAll();
+    fetchBase();
   }, [open]);
 
-  useEffect(() => {
-    if (!originWarehouseId) {
-      setCategory([]);
-      setSelectedCategoryId("");
-      setSelectedItemId("");
-      setItems([]);
-      setAvailableDetailItems([]);
-      return;
-    }
-
-    const fetchCategoriesByWarehouse = async () => {
-      setLoadingCategory(true);
-      try {
-        const res = await getCategoriesByWarehouseAll(originWarehouseId);
-        setCategory(res.data);
-        setSelectedCategoryId("");
-        setSelectedItemId("");
-        setItems([]);
-        setAvailableDetailItems([]);
-        setSelectedDetailItemId("");
-        
-      } catch (error) {
-        console.error("Fetch categories by warehouse error:", error);
-      } finally {
-        setLoadingCategory(false);
-      }
-    };
-
-    fetchCategoriesByWarehouse();
-  }, [originWarehouseId]);
-
-  useEffect(() => {
-    if (!originWarehouseId || !selectedCategoryId) {
-      setItems([]);
-      setSelectedItemId("");
-      setAvailableDetailItems([]);
-      return;
-    }
-
-    const fetchItemsByWarehouseAndCategory = async () => {
-      setLoadingItems(true);
-      try {
-        const res = await getItemsByWarehouseAndCategoryAll(originWarehouseId, selectedCategoryId);
-        setItems(res.data);
-        setSelectedItemId("");
-        setAvailableDetailItems([]);
-        setSelectedDetailItemId("");
-      } catch (error) {
-        console.error("Fetch items by warehouse+category error:", error);
-      } finally {
-        setLoadingItems(false);
-      }
-    };
-
-    fetchItemsByWarehouseAndCategory();
-  }, [originWarehouseId, selectedCategoryId]);
-
+  // Fetch detail item (serial number) saat item dipilih
   useEffect(() => {
     if (!selectedItemId || !originWarehouseId) {
       setAvailableDetailItems([]);
+      setSelectedDetailItemId("");
       return;
     }
 
@@ -185,9 +153,9 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
         const addedIds = new Set(rows.map((r) => r.detail_item_id));
         setAvailableDetailItems((res.data ?? []).filter((d: DetailItem) => !addedIds.has(d.id)));
         setSelectedDetailItemId("");
-        
       } catch (error) {
         console.error("Fetch detail items error:", error);
+        toast.error("Gagal memuat unit tersedia");
       } finally {
         setLoadingDetail(false);
       }
@@ -200,16 +168,14 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
     setRows([]);
     setBorrowDate(undefined);
     setReturnDate(undefined);
+    setSelectedSubcategoryId("");
     setSelectedItemId("");
-    setSelectedCategoryId("");
     setOriginWarehouseId("");
     setBorrowerWarehouseId("");
     setRemarks("");
     setAvailableDetailItems([]);
     setSelectedDetailItemId("");
     setSelectedUsersId("");
-    setCategory([]);
-    setItems([]);
   };
 
   const handleAddItem = () => {
@@ -229,7 +195,10 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
         serial_number: detail.serial_number,
         subcategory: detail.item.subcategory?.name ?? "-",
         condition: detail.condition,
-        warehouse_name: detail.room?.name ?? warehouse.find((w) => w.id === originWarehouseId)?.name ?? "-",
+        warehouse_name:
+          detail.room?.name ??
+          warehouse.find((w) => w.id === originWarehouseId)?.name ??
+          "-",
         remarks: remarks,
       },
     ]);
@@ -286,10 +255,6 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
 
   const addedDetailIds = new Set(rows.map((r) => r.detail_item_id));
 
-  console.log("category state:", category);
-console.log("originWarehouseId:", originWarehouseId);
-console.log("loadingCategory:", loadingCategory);
-
   return (
     <div className="flex justify-end">
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
@@ -308,6 +273,8 @@ console.log("loadingCategory:", loadingCategory);
             </DialogHeader>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+              {/* Warehouse Peminjam */}
               <div className="flex flex-col gap-2">
                 <Label>Warehouse Peminjam</Label>
                 <Select value={borrowerWarehouseId} onValueChange={setBorrowerWarehouseId}>
@@ -324,12 +291,16 @@ console.log("loadingCategory:", loadingCategory);
                 </Select>
               </div>
 
+              {/* Warehouse Asal */}
               <div className="flex flex-col gap-2">
                 <Label>Warehouse Asal Items</Label>
                 <Select
                   value={originWarehouseId}
                   onValueChange={(val) => {
                     setOriginWarehouseId(val);
+                    setSelectedSubcategoryId("");
+                    setSelectedItemId("");
+                    setAvailableDetailItems([]);
                     setSelectedDetailItemId("");
                   }}
                 >
@@ -346,56 +317,48 @@ console.log("loadingCategory:", loadingCategory);
                 </Select>
               </div>
 
-              {/* Step 2: Kategori - disabled until WH Asal selected */}
+              {/* Kategori — grouped persis dari Transaction In */}
               <div className="flex flex-col gap-2">
-                <Label>
-                  Kategori
-                  {loadingCategory && (
-                    <span className="ml-2 text-xs text-gray-400">Loading...</span>
-                  )}
-                  {!originWarehouseId && (
-                    <span className="ml-2 text-xs text-amber-500">Pilih Warehouse Asal dulu</span>
-                  )}
-                </Label>
+                <Label>Kategori</Label>
                 <Select
-                  value={selectedCategoryId}
+                  value={selectedSubcategoryId}
                   onValueChange={(val) => {
-                    setSelectedCategoryId(val);
+                    setSelectedSubcategoryId(val);
                     setSelectedItemId("");
                     setAvailableDetailItems([]);
                     setSelectedDetailItemId("");
                   }}
-                  disabled={!originWarehouseId || loadingCategory}
+                  disabled={!originWarehouseId}
                 >
                   <SelectTrigger className="h-11 w-full">
                     <SelectValue placeholder={!originWarehouseId ? "Pilih Warehouse Asal dulu" : "Pilih Kategori"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {category.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-gray-400">
-                        {loadingCategory ? "Loading..." : "Tidak ada kategori tersedia"}
-                      </div>
-                    ) : (
-                      category
-                        .filter((cat) => cat?.id && cat?.name)
-                        .map((cat, i) => (
-                          <SelectItem key={`cat-${cat.id ?? i}`} value={cat.id}>
+                    {categories.map((cat) => {
+                      const subs = subcategories.filter((s) => s.category_id === cat.id);
+                      if (subs.length === 0) return null;
+                      return (
+                        <div key={cat.id}>
+                          <div className="select-none bg-gray-50 px-2 py-1.5 text-xs font-semibold text-gray-400">
                             {cat.name}
-                          </SelectItem>
-                        ))
-                    )}
+                          </div>
+                          {subs.map((sub) => (
+                            <SelectItem key={sub.id} value={sub.id} className="w-full max-w-xl p-4">
+                              {sub.name}
+                            </SelectItem>
+                          ))}
+                        </div>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Step 3: Item - disabled until Kategori selected */}
+              {/* Item — difilter client-side dari allItems by subcategory_id */}
               <div className="flex flex-col gap-2">
                 <Label>
                   Item
-                  {loadingItems && (
-                    <span className="ml-2 text-xs text-gray-400">Loading...</span>
-                  )}
-                  {originWarehouseId && !selectedCategoryId && (
+                  {!selectedSubcategoryId && originWarehouseId && (
                     <span className="ml-2 text-xs text-amber-500">Pilih Kategori dulu</span>
                   )}
                 </Label>
@@ -405,42 +368,41 @@ console.log("loadingCategory:", loadingCategory);
                     setSelectedItemId(val);
                     setSelectedDetailItemId("");
                   }}
-                  disabled={!selectedCategoryId || loadingItems}
+                  disabled={!selectedSubcategoryId}
                 >
                   <SelectTrigger className="h-11 w-full">
-                    <SelectValue placeholder={!selectedCategoryId ? "Pilih Kategori dulu" : "Pilih Item"} />
+                    <SelectValue placeholder={!selectedSubcategoryId ? "Pilih Kategori dulu" : "Pilih Item"} />
                   </SelectTrigger>
-                  <SelectContent>
-                    {items.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-gray-400">
-                        {loadingItems ? "Loading..." : "Tidak ada item tersedia"}
-                      </div>
+                  <SelectContent
+                    position="popper"
+                    side="bottom"
+                    avoidCollisions={false}
+                    style={{ maxHeight: "240px", overflowY: "auto" }}
+                  >
+                    {filteredItems.length === 0 ? (
+                      <div className="px-4 py-2 text-sm text-gray-500">Tidak ada item</div>
                     ) : (
-                      items
-                        .filter((item) => item?.id && item?.name)
-                        .map((item, i) => (
-                          <SelectItem key={`item-${item.id ?? i}`} value={item.id}>
-                            {item.name}
-                          </SelectItem>
-                        ))
+                      filteredItems.map((item) => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {item.name}
+                        </SelectItem>
+                      ))
                     )}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Step 4: Serial Number - disabled until Item selected */}
+              {/* Serial Number */}
               <div className="flex flex-col gap-2">
                 <Label>
                   Pilih Unit (Serial Number)
-                  {loadingDetail && (
-                    <span className="ml-2 text-xs text-gray-400">Loading...</span>
-                  )}
+                  {loadingDetail && <span className="ml-2 text-xs text-gray-400">Loading...</span>}
                   {!loadingDetail && selectedItemId && originWarehouseId && (
                     <span className="ml-2 text-xs text-gray-400">
                       {availableDetailItems.filter((d) => !addedDetailIds.has(d.id)).length} unit tersedia
                     </span>
                   )}
-                  {selectedCategoryId && !selectedItemId && (
+                  {!selectedItemId && selectedSubcategoryId && (
                     <span className="ml-2 text-xs text-amber-500">Pilih Item dulu</span>
                   )}
                 </Label>
@@ -470,6 +432,7 @@ console.log("loadingCategory:", loadingCategory);
                 </Select>
               </div>
 
+              {/* Remark */}
               <div className="flex flex-col gap-2">
                 <Label>Remark</Label>
                 <Input
@@ -479,6 +442,7 @@ console.log("loadingCategory:", loadingCategory);
                 />
               </div>
 
+              {/* Bertanggung Jawab */}
               <div className="flex flex-col gap-2">
                 <Label>Bertanggung Jawab</Label>
                 <Select value={selectedUsersId} onValueChange={setSelectedUsersId}>
@@ -487,9 +451,7 @@ console.log("loadingCategory:", loadingCategory);
                   </SelectTrigger>
                   <SelectContent>
                     {users.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-gray-400">
-                        Tidak ada user
-                      </div>
+                      <div className="px-3 py-2 text-sm text-gray-400">Tidak ada user</div>
                     ) : (
                       users.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
@@ -501,7 +463,8 @@ console.log("loadingCategory:", loadingCategory);
                 </Select>
               </div>
 
-              <div className="flex flex-row py-4 space-x-6">
+              {/* Tanggal */}
+              <div className="flex flex-row space-x-6 py-4">
                 <div className="flex flex-col gap-2">
                   <Label>Borrow Date</Label>
                   <Calendar
@@ -523,6 +486,7 @@ console.log("loadingCategory:", loadingCategory);
               </div>
             </div>
 
+            {/* Tombol Add Item */}
             <div className="mt-6">
               <Button
                 type="button"
@@ -534,6 +498,7 @@ console.log("loadingCategory:", loadingCategory);
               </Button>
             </div>
 
+            {/* Tabel */}
             <div className="mt-4 rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
               <div className="relative overflow-x-auto">
                 <div className="inline-block min-w-full align-middle">
@@ -605,9 +570,7 @@ console.log("loadingCategory:", loadingCategory);
 
             <DialogFooter className="mt-8 gap-3">
               <DialogClose asChild>
-                <Button variant="outline" type="button">
-                  Close
-                </Button>
+                <Button variant="outline" type="button">Close</Button>
               </DialogClose>
               <Button
                 type="button"
