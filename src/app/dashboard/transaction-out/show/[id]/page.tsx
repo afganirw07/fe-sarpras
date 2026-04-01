@@ -274,7 +274,7 @@ export default function ShowTransactionOut() {
                   <TableCell
                     key={col}
                     isHeader
-                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
+                    className="bg-linear-to-br from-gray-50 to-gray-100/50 px-2 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:from-white/5 dark:to-white/10 dark:text-gray-300"
                   >
                     {col}
                   </TableCell>
@@ -307,56 +307,56 @@ export default function ShowTransactionOut() {
                     className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                   >
                     {/* No */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-2 py-4">
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                         {index + 1}
                       </span>
                     </TableCell>
 
                     {/* Nama Item */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-2 py-4">
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
                         {d.item.name}
                       </span>
                     </TableCell>
 
                     {/* Serial Number */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-2 py-4">
                       <span className="font-mono text-xs text-gray-600 dark:text-gray-400">
                         {d.serial_number}
                       </span>
                     </TableCell>
 
                     {/* Kategori */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-2 py-4">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
                         {d.item.category.name}
                       </span>
                     </TableCell>
 
                     {/* Subkategori */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-2 py-4">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
                         {d.item.subcategory.name}
                       </span>
                     </TableCell>
 
                     {/* Ruangan */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-2 py-4">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
                         {d.room.name}
                       </span>
                     </TableCell>
 
                     {/* Kondisi */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-2 py-4">
                       <span className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${conditionBadgeClass(d.condition)}`}>
                         {d.condition}
                       </span>
                     </TableCell>
 
                     {/* Status item */}
-                    <TableCell className="px-5 py-4">
+                    <TableCell className="px-2 py-4">
                       <span className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-semibold ${statusBadgeClass(d.status)}`}>
                         {d.status}
                       </span>

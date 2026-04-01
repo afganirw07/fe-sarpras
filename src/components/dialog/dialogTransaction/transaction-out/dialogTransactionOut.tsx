@@ -369,7 +369,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="max-h-60 overflow-y-auto">
+                    <div className="max-h-60 overflow-y-auto ">
                       {categories.map((cat) => {
                         const subs = subcategories.filter(
                           (s) => s.category_id === cat.id,
@@ -377,7 +377,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
                         if (subs.length === 0) return null;
                         return (
                           <div key={cat.id}>
-                            <div className="select-none bg-gray-50 px-2 py-1.5 text-xs font-semibold text-gray-400">
+                            <div className="select-none bg-gray-50 dark:bg-black px-2 py-1.5 text-xs font-semibold text-gray-400">
                               {cat.name}
                             </div>
                             {subs.map((sub) => (
@@ -420,7 +420,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
                     />
                   </SelectTrigger>
                   <SelectContent position="popper" side="bottom" avoidCollisions={false}>
-                    <div className="sticky top-0 z-10 bg-white p-2">
+                    <div className="sticky top-0 z-10 bg-white dark:bg-black p-2">
                       <input
                         className="w-full rounded-md border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-blue-500"
                         placeholder="Cari item..."

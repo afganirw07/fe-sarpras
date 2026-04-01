@@ -255,7 +255,7 @@ setSelectedSubcategoryId("");
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="max-h-[90vh] w-full max-w-6xl overflow-y-auto p-8">
+        <DialogContent className="max-h-[90vh] w-full max-w-6xl overflow-y-auto p-8 dark:bg-black">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -407,7 +407,7 @@ setSelectedSubcategoryId("");
                       return (
                         <div key={cat.id}>
                           {/* Label kategori — tidak bisa diklik */}
-                          <div className="select-none bg-gray-50 px-2 py-1.5 text-xs font-semibold text-gray-400">
+                          <div className="select-none bg-gray-50 dark:bg-Black px-2 py-1.5 text-xs font-semibold text-gray-400">
                             {cat.name}
                           </div>
 
@@ -459,7 +459,7 @@ setSelectedSubcategoryId("");
       avoidCollisions={false}
     >
       {/* Search Input */}
-      <div className="sticky top-0 z-10 bg-white p-2">
+      <div className="sticky top-0 z-10 bg-white dark:bg-black p-2">
         <input
           className="w-full rounded-md border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-blue-500"
           placeholder="Cari item..."
