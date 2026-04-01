@@ -24,6 +24,7 @@ import {
 import { toast, Toaster } from "sonner";
 import { getLoanRequestById, LoanRequest, LoanDetailItem } from "@/lib/loan-request";
 import { useParams } from "next/navigation";
+import Pagination from "@/components/tables/Pagination";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -72,6 +73,8 @@ export default function ShowTransactionOut() {
   const [transaction, setTransaction] = useState<LoanRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10;
 
   useEffect(() => {
     if (!id) return;
@@ -105,6 +108,18 @@ export default function ShowTransactionOut() {
         d.item.subcategory.name.toLowerCase().includes(q)
     );
   }, [transaction, search]);
+
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [search]);
+  
+    // ─── Pagination logic ──────────────────────────────────────────────────────
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  
+    const paginatedItems = useMemo(() => {
+      const start = (currentPage - 1) * itemsPerPage;
+      return filteredItems.slice(start, start + itemsPerPage);
+    }, [filteredItems, currentPage, itemsPerPage]);
 
   // ── Loading ────────────────────────────────────────────────────────────────
 
@@ -301,7 +316,7 @@ export default function ShowTransactionOut() {
                 </TableRow>
               ) : (
                 // ← iterate item[] array langsung — bukan LoanRequest array
-                filteredItems.map((d, index) => (
+                paginatedItems.map((d, index) => (
                   <TableRow
                     key={d.id}
                     className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
@@ -367,6 +382,15 @@ export default function ShowTransactionOut() {
             </TableBody>
           </Table>
         </div>
+         {totalPages > 1 && (
+                      <div className="border-t border-gray-200/50 px-6 py-4 dark:border-white/5">
+                        <Pagination
+                          currentPage={currentPage}
+                          totalPages={totalPages}
+                          onPageChange={setCurrentPage}
+                        />
+                      </div>
+                    )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { getPurgingById, Purging } from "@/lib/purging";
@@ -12,6 +12,7 @@ import ButtonBack from "@/components/ui/button/backButton";
 import {
   Table, TableBody, TableCell, TableHeader, TableRow,
 } from "@/components/ui/table/index";
+import Pagination from "@/components/tables/Pagination";
 
 interface FieldConfig {
   label: string;
@@ -49,6 +50,8 @@ export default function ShowPemutihan() {
 
   const [purging, setPurging] = useState<Purging | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10;
 
   useEffect(() => {
     if (!purgingId) return;
@@ -65,6 +68,16 @@ export default function ShowPemutihan() {
     };
     fetch();
   }, [purgingId]);
+
+  
+   // ─── Pagination logic ──────────────────────────────────────────────────────
+const totalPages = Math.ceil((purging?.details?.length ?? 0) / itemsPerPage);
+
+const paginatedItems = useMemo(() => {
+  if (!purging?.details) return [];
+  const start = (currentPage - 1) * itemsPerPage;
+  return purging.details.slice(start, start + itemsPerPage);
+}, [purging?.details, currentPage, itemsPerPage]);
 
   const leftFields: FieldConfig[] = purging ? [
     { label: "Nama Item",    value: purging.item_name ?? "-",  icon: <Box size={15} /> },
@@ -221,7 +234,7 @@ export default function ShowPemutihan() {
                     </td>
                   </TableRow>
                 ) : (
-                  purging.details.map((detail, index) => (
+                  paginatedItems.map((detail, index) => (
                     <TableRow
                       key={detail.id}
                       className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
@@ -259,7 +272,15 @@ export default function ShowPemutihan() {
               </TableBody>
             </Table>
           </div>
-
+          {totalPages > 1 && (
+  <div className="border-t border-gray-200/50 px-6 py-4 dark:border-white/5">
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={setCurrentPage}
+    />
+  </div>
+)}
           {/* Footer */}
           <div className="border-t border-gray-200/50 px-6 py-3 dark:border-white/5">
             <p className="text-xs text-gray-500 dark:text-gray-400">

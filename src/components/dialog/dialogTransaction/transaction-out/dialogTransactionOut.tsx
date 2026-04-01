@@ -164,7 +164,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
         const res = await getAvailableDetailItems(selectedItemId, originWarehouseId);
         const addedIds = new Set(rows.map((r) => r.detail_item_id));
         setAvailableDetailItems(
-          (res.data ?? []).filter((d: DetailItem) => !addedIds.has(d.id)),
+          (res.data ?? []).filter((d: any) => !addedIds.has(d.id)) as any,
         );
         setSelectedDetailItemId("");
       } catch (error) {

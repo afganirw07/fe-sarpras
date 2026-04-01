@@ -27,6 +27,7 @@ import { useParams } from "next/navigation";
 import { getMigrationById, ItemMigration } from "@/lib/migration";
 import { getUsers } from "@/lib/user";
 import { getRooms } from "@/lib/warehouse";
+import Pagination from "@/components/tables/Pagination";
 
 
 interface LoanRequest {
@@ -91,6 +92,8 @@ export default function ShowTransactionOut() {
   const [users, setUsers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10;
 
   useEffect(() => {
     if (!id) return;
@@ -132,6 +135,19 @@ export default function ShowTransactionOut() {
     );
   });
 }, [migration, search, rooms]);
+
+ useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  // ─── Pagination logic ──────────────────────────────────────────────────────
+  const totalPages = Math.ceil(itemRows.length / itemsPerPage);
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return itemRows.slice(start, start + itemsPerPage);
+  }, [itemRows, currentPage, itemsPerPage]);
+
 
   const roomMap = useMemo(() =>
     rooms.reduce((acc, r) => ({ ...acc, [r.id]: r.name }), {} as Record<string, string>)
@@ -298,7 +314,7 @@ export default function ShowTransactionOut() {
             </TableHeader>
 
             <TableBody>
-              {itemRows.length === 0 ? (
+              {paginatedItems.length === 0 ? (
                 <TableRow>
                   <td colSpan={6} className="py-16">
                     <div className="flex flex-col items-center justify-center gap-3">

@@ -107,7 +107,7 @@ export default function DialogTransactionReturn({
       const detail = await getLoanRequestById(loanId);
       setSelectedLoan(detail);
       const defaultMap: Record<string, string> = {};
-      detail.item?.forEach((d: LoanDetailItem) => {
+      detail.item?.forEach((d: any) => {
         defaultMap[d.id] = d.condition;
       });
       setKondisiMap(defaultMap);
@@ -137,7 +137,8 @@ export default function DialogTransactionReturn({
 
     try {
       setLoading(true);
-     await returnLoanRequest(selectedLoan, entries, selectedUserId); // pass it here
+    //  await returnLoanRequest(selectedLoan, entries, selectedUserId); // pass it here
+     await returnLoanRequest(selectedLoan, entries); // pass it here
       toast.success(`${entries.length} item berhasil dikembalikan`);
       resetForm();
       setOpen(false);

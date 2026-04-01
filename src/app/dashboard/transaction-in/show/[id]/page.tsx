@@ -33,6 +33,7 @@ import { getRooms } from "@/lib/warehouse";
 import { getSuppliers } from "@/lib/supplier";
 import { useParams } from "next/navigation";
 import ExportExcel from "@/components/exports/button-excell/buttonExcell";
+import Pagination from "@/components/tables/Pagination";
 
 const MONTH_NAMES = [
   "Januari",
@@ -86,6 +87,9 @@ export default function ShowTransaction() {
   const [rooms, setRooms] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10;
+useEffect(() => { setCurrentPage(1); }, [search]);
 
   useEffect(() => {
     if (!id) return;
@@ -165,8 +169,11 @@ export default function ShowTransaction() {
     [items],
   );
 
+  useEffect(() => {
+      setCurrentPage(1);
+    }, [search]);
   
-
+ 
   const filteredDetails = useMemo(() => {
     const keyword = search.toLowerCase();
     return transactionDetails.filter(
@@ -180,6 +187,15 @@ export default function ShowTransaction() {
         detail.condition.toLowerCase().includes(keyword),
     );
   }, [search, transactionDetails, itemMap, roomMap]);
+
+     // ─── Pagination logic ──────────────────────────────────────────────────────
+    const totalPages = Math.ceil(filteredDetails.length / itemsPerPage);
+  
+    const paginatedItems = useMemo(() => {
+      const start = (currentPage - 1) * itemsPerPage;
+      return filteredDetails.slice(start, start + itemsPerPage);
+    }, [filteredDetails, currentPage, itemsPerPage]);
+
 
   const excelData = filteredDetails.map((detail, index) => ({
   No: index + 1,
@@ -385,7 +401,7 @@ export default function ShowTransaction() {
                   </td>
                 </TableRow>
               ) : (
-                filteredDetails.map((detail, index) => (
+                paginatedItems.map((detail, index) => (
                   <TableRow
                     key={detail.id}
                     className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
@@ -433,6 +449,15 @@ export default function ShowTransaction() {
             </TableBody>
           </Table>
         </div>
+         {totalPages > 1 && (
+                      <div className="border-t border-gray-200/50 px-6 py-4 dark:border-white/5">
+                        <Pagination
+                          currentPage={currentPage}
+                          totalPages={totalPages}
+                          onPageChange={setCurrentPage}
+                        />
+                      </div>
+                    )}
       </div>
     </div>
   );
