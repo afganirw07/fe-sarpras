@@ -90,13 +90,10 @@ export default function DialogTransactionIn({
   const [transactionDate, setTransactionDate] = useState(
     new Date().toISOString().split("T")[0],
   );
-
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [selectedSupplierId, setSelectedSupplierId] = useState<string>("");
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>("");
   const [selectedItemId, setSelectedItemId] = useState<string>("");
-  const [categoryCode, setCategoryCode] = useState<string>("");
-  const [itemCode, setItemCode] = useState<string>("");
+  const [subCategoryCode, setSubCategoryCode] = useState<string>("");
   const [rows, setRows] = useState<TransactionItemRow[]>([]);
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -167,21 +164,18 @@ if (isExist) return;
   const handleSubmit = async () => {
     setErrors({});
 
-    // ✅ Siapkan data untuk validasi Zod
     const employeeId = await getMyEmployeeId(userId);
-  // Di handleSubmit — validasi pakai selectedSubcategoryId
 const validationData = {
   poNumber: poNumber ? Number(poNumber) : 0,
   warehouse: selectedWarehouseId,
   supplier: selectedSupplierId,
-  categori: selectedSubcategoryId, // ✅ bukan selectedCategoryId
+  categori: selectedSubcategoryId,
   detailTransaction: detailTransaction,
   items: rows.length > 0 ? "filled" : "",
 };
 
 
 setSelectedSubcategoryId(""); 
-setSelectedCategoryId("");    
 
     try {
       tansactionInSchema.parse(validationData);
@@ -223,7 +217,7 @@ setSelectedCategoryId("");
         Array.from({ length: row.qty_receive }).map((_, i) => ({
           item_id: row.item_id,
           room_id: selectedWarehouseId,
-          serial_number: `${row.item_id}-${Date.now()}-${i}`,
+          serial_number: `${subCategoryCode}-${poNumber}-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}${String(new Date().getDate()).padStart(2, "0")}-${i + 1}`,
           condition: row.condition,
           status: ItemStatus.AVAILABLE,
           created_by: userId,
@@ -241,7 +235,6 @@ setSelectedCategoryId("");
       setDetailTransaction("");
       setSelectedSupplierId("");
       setSelectedWarehouseId("");
-      setSelectedCategoryId("");
       setSelectedItemId("");
       setErrors({});
     } catch (error) {
@@ -393,8 +386,8 @@ setSelectedCategoryId("");
                     setSelectedItemId("");
                     clearError("categori");
 
-                    const category = categories.find((c) => c.id === v )
-                    setCategoryCode(category?.code ?? "")
+                    const subcategory  = subcategories.find((c) => c.id === v )
+                    setSubCategoryCode(subcategory?.code ?? "")
                   }}
                 >
                   <SelectTrigger
