@@ -161,7 +161,7 @@ export default function TableTransactionOut() {
     const source = isFiltered ? allData : data;
 
     return source.filter((trx) => {
-      const itemNames    = getItemNames(trx.item).toLowerCase();
+      // const itemNames    = getItemNames(trx.item).toLowerCase();
       const serialNums   = getSerialNumbers(trx.item).toLowerCase();
       const roomNames    = getRoomNames(trx.item).toLowerCase();
 
@@ -170,7 +170,7 @@ export default function TableTransactionOut() {
         trx.id.toLowerCase().includes(q) ||
         trx.status.toLowerCase().includes(q) ||
         (trx.user?.username ?? trx.user_id).toLowerCase().includes(q) ||
-        itemNames.includes(q) ||
+        // itemNames.includes(q) ||
         serialNums.includes(q) ||
         roomNames.includes(q);
 
@@ -301,7 +301,7 @@ export default function TableTransactionOut() {
                     { label: "No",          cls: "w-16" },
                     { label: "ID",          cls: "" },
                     { label: "User",        cls: "" },
-                    { label: "Item",        cls: "" },
+                    // { label: "Item",        cls: "" },
                     // { label: "Serial No",   cls: "" },
                     { label: "Warehouse",   cls: "" },
                     { label: "Borrow Date", cls: "" },
@@ -380,12 +380,12 @@ export default function TableTransactionOut() {
                         </div>
                       </TableCell>
 
-                      {/* Item — semua nama join koma */}
+                      {/* Item — semua nama join koma
                       <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
                         <span className="text-[clamp(6px,0.7rem,8px)] font-medium text-gray-800 dark:text-gray-200">
                           {getItemNames(trx.item)}
                         </span>
-                      </TableCell>
+                      </TableCell> */}
 
                       {/* Serial No — semua join koma
                       <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
