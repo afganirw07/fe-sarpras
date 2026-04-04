@@ -34,6 +34,7 @@ import { getSuppliers } from "@/lib/supplier";
 import { useParams } from "next/navigation";
 import ExportExcel from "@/components/exports/button-excell/buttonExcell";
 import Pagination from "@/components/tables/Pagination";
+import ButtonBack from "@/components/ui/button/backButton";
 
 const MONTH_NAMES = [
   "Januari",
@@ -238,7 +239,8 @@ useEffect(() => { setCurrentPage(1); }, [search]);
   return (
     <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
       <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
           <div className="bg-linear-to-br rounded-xl from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
             <FileText className="h-6 w-6 text-white" />
           </div>
@@ -250,6 +252,9 @@ useEffect(() => { setCurrentPage(1); }, [search]);
               Informasi lengkap transaksi dan item terkait
             </p>
           </div>
+          </div>
+          <ButtonBack route="/transaction-in" />
+
         </div>
       </div>
 

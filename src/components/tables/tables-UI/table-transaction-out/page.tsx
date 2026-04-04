@@ -355,21 +355,21 @@ export default function TableTransactionOut() {
                       className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
                     >
                       {/* No */}
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                           {(displayedPage - 1) * perPage + index + 1}
                         </span>
                       </TableCell>
 
                       {/* ID */}
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <span className="rounded-md bg-blue-50 px-2.5 py-1 font-mono text-[clamp(9px,0.65rem,11px)] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                           {trx.id.slice(0, 4)}…
                         </span>
                       </TableCell>
 
                       {/* User */}
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <div className="flex items-center gap-3">
                           <div className="bg-linear-to-br flex h-6 w-6 shrink-0 items-center justify-center rounded-lg from-blue-500 to-blue-600 text-[clamp(8px,0.7rem,8px)] font-semibold text-white shadow-lg shadow-blue-500/20">
                             {(trx.user?.username ?? trx.user_id).charAt(0).toUpperCase()}
@@ -381,28 +381,28 @@ export default function TableTransactionOut() {
                       </TableCell>
 
                       {/* Item — semua nama join koma
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <span className="text-[clamp(6px,0.7rem,8px)] font-medium text-gray-800 dark:text-gray-200">
                           {getItemNames(trx.item)}
                         </span>
                       </TableCell> */}
 
                       {/* Serial No — semua join koma
-                      <TableCell className="border border-gray-200 px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
+                      <TableCell className=" px-[clamp(12px,1vw,20px)] py-[clamp(10px,0.9vw,16px)] dark:border-gray-800">
                         <span className="font-mono text-[clamp(9px,0.65rem,11px)] text-gray-500 dark:text-gray-400">
                           {getSerialNumbers(trx.item)}
                         </span>
                       </TableCell> */}
 
                       {/* Warehouse — unique room names join koma via roomMap */}
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <span className="text-[clamp(8px,0.7rem,10px)] text-gray-600 dark:text-gray-400">
                           {getRoomNames(trx.item)}
                         </span>
                       </TableCell>
 
                       {/* Borrow Date */}
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <span className="text-[clamp(10px,0.7rem,13px)] text-gray-600 dark:text-gray-400">
                           {new Date(trx.borrow_date).toLocaleDateString("id-ID", {
                             day: "2-digit",
@@ -413,7 +413,7 @@ export default function TableTransactionOut() {
                       </TableCell>
 
                       {/* Return Date */}
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <span className="text-[clamp(10px,0.7rem,13px)] text-gray-600 dark:text-gray-400">
                           {trx.return_date ? (
                             new Date(trx.return_date).toLocaleDateString("id-ID", {
@@ -428,12 +428,12 @@ export default function TableTransactionOut() {
                       </TableCell>
 
                       {/* Status */}
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <StatusBadge status={trx.status} />
                       </TableCell>
 
                       {/* Aksi */}
-                      <TableCell className="border border-gray-200 px-2 py-4 dark:border-gray-800">
+                      <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <div className="flex flex-row items-center gap-2">
                           <Tooltip>
                             <TooltipTrigger asChild>

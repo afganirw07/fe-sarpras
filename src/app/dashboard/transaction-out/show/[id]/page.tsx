@@ -25,6 +25,7 @@ import { toast, Toaster } from "sonner";
 import { getLoanRequestById, LoanRequest, LoanDetailItem } from "@/lib/loan-request";
 import { useParams } from "next/navigation";
 import Pagination from "@/components/tables/Pagination";
+import ButtonBack from "@/components/ui/button/backButton";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -157,7 +158,8 @@ const itemsPerPage = 10;
 
       {/* ── Header ── */}
       <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
           <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
             <ArrowUpFromLine className="h-6 w-6 text-white" />
           </div>
@@ -169,6 +171,8 @@ const itemsPerPage = 10;
               Informasi lengkap transaksi peminjaman
             </p>
           </div>
+          </div>
+          <ButtonBack route="/transaction-out" />
         </div>
       </div>
 

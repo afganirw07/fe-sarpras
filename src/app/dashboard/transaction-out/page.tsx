@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { getLoanRequests } from "@/lib/loan-request";
 import DialogTransactionOut from "@/components/dialog/dialogTransaction/transaction-out/dialogTransactionOut";
-
+import ButtonBack from "@/components/ui/button/backButton";
 interface LoanRequest {
   id: string;
   user_id: string;
