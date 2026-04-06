@@ -90,10 +90,10 @@ export default function TableTransactionOut() {
   }, [rooms]);
 
   // ── Helper: ambil semua item names join koma ──────────────────────────────
-  const getItemNames = (items: LoanDetailItem[]): string => {
-    if (!items || items.length === 0) return "-";
-    return items.map((d) => d.item?.name ?? "-").join(", ");
-  };
+  // const getItemNames = (items: LoanDetailItem[]): string => {
+  //   if (!items || items.length === 0) return "-";
+  //   return items.map((d) => d.item?.name ?? "-").join(", ");
+  // };
 
   // ── Helper: ambil semua room names join koma ──────────────────────────────
   const getRoomNames = (items: LoanDetailItem[]): string => {

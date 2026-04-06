@@ -27,7 +27,7 @@ export default function ButtonQrWarehouse({
     const gapY = 10;
 
     warehouses.forEach((w, i) => {
-      const pageIndex = Math.floor(i / 4);
+      // const pageIndex = Math.floor(i / 4);
       const position = i % 4;
 
       if (i !== 0 && position === 0) {

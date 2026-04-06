@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import ActionButtonsWarehouse from "@/components/dialog/dialogWarehouse/dialogActionWarehouse";
 import { getRooms, Room } from "@/lib/warehouse";
 import Pagination from "../../Pagination";
+import { QRCodeCanvas } from "qrcode.react";
 
 type WarehouseStats = {
   totalWarehouse: number;
@@ -27,8 +28,10 @@ type WarehouseStats = {
 
 export default function TableWarehouse({
   onStatsUpdate,
+  onDataUpdate,
 }: {
   onStatsUpdate?: (stats: WarehouseStats) => void;
+  onDataUpdate?: (warehouses: Room[]) => void;
 }) {
   const [warehouses, setWarehouses] = useState<Room[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,6 +57,8 @@ export default function TableWarehouse({
         totalActive: res.data.length,            // jumlah di halaman ini
         totalSearch: res.data.length,            // akan di-update saat search berubah
       });
+
+      onDataUpdate?.(res.data); // Kirim data warehouse ke parent
 
     } catch (error: any) {
       toast.error(error?.message || "Gagal mengambil data warehouse");
@@ -236,6 +241,17 @@ export default function TableWarehouse({
           )}
         </div>
       </div>
+      <div className="hidden">
+  {warehouses.map((w) => (
+    <QRCodeCanvas
+      key={w.id}
+      id={`qr-${w.id}`}
+      value={w.id}
+      size={300}
+    />
+  ))}
+</div>
     </div>
+    
   );
 }
