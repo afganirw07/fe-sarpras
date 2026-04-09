@@ -56,8 +56,9 @@ interface TransactionItemRow {
   item_id: string;
   item_name: string;
   price: number;
-  qty_request: number;
-  qty_receive: number;
+  // qty_request: number;
+  subcategory_code: string;
+  qty: number;
   condition: ItemConditions;
   procurement_year: number;
 }
@@ -143,10 +144,11 @@ if (isExist) return;
       {
         item_id: item.id,
         item_name: item.name,
+        subcategory_code: subCategoryCode,
         itemCode: item.code,
         price: item.price ?? 0,
-        qty_request: 1,
-        qty_receive: 1,
+        // qty_request: 1,
+        qty: 1,
         condition: ItemConditions.GOOD,
         procurement_year: new Date().getFullYear(),
       },
@@ -210,17 +212,17 @@ setSelectedSubcategoryId("");
         created_by: userId,
         item_id: row.item_id,
         room_id: selectedWarehouseId,
-        quantity: row.qty_receive,
+        quantity: row.qty,
         price: inType === InType.DONATION ? null : row.price,
         condition: row.condition,
         procurement_month: new Date().getMonth() + 1,
         procurement_year: row.procurement_year,
       })),
       detail_items: rows.flatMap((row) =>
-        Array.from({ length: row.qty_receive }).map((_, i) => ({
+        Array.from({ length: row.qty }).map((_, i) => ({
           item_id: row.item_id,
           room_id: selectedWarehouseId,
-          serial_number:`${subCategoryCode}-${poNumber}-${dateStr}-${counter++}`,
+     serial_number: `${row.subcategory_code}-${poNumber}-${dateStr}-${counter++}`,
           condition: row.condition,
           status: ItemStatus.AVAILABLE,
           created_by: userId,
@@ -540,15 +542,9 @@ setSelectedSubcategoryId("");
                         </TableCell>
                         <TableCell
                           isHeader
-                          className="min-w-55 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
-                        >
-                          QTY Request
-                        </TableCell>
-                        <TableCell
-                          isHeader
                           className="min-w-7.5 border bg-blue-800 px-5 py-3 text-xs font-medium text-gray-200"
                         >
-                          QTY Receive
+                          QTY
                         </TableCell>
                         <TableCell
                           isHeader
@@ -614,34 +610,15 @@ setSelectedSubcategoryId("");
                             <TableCell className="border px-4 py-3">
                               <Input
                                 type="number"
-                                min={1}
-                                value={row.qty_request}
-                                onChange={(e) =>
-                                  setRows((prev) =>
-                                    prev.map((r, i) =>
-                                      i === index
-                                        ? {
-                                            ...r,
-                                            qty_request: Number(e.target.value),
-                                          }
-                                        : r,
-                                    ),
-                                  )
-                                }
-                              />
-                            </TableCell>
-                            <TableCell className="border px-4 py-3">
-                              <Input
-                                type="number"
                                 min={0}
-                                value={row.qty_receive}
+                                value={row.qty}
                                 onChange={(e) =>
                                   setRows((prev) =>
                                     prev.map((r, i) =>
                                       i === index
                                         ? {
                                             ...r,
-                                            qty_receive: Number(e.target.value),
+                                            qty: Number(e.target.value),
                                           }
                                         : r,
                                     ),
