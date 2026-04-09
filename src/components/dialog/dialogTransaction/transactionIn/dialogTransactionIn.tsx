@@ -195,6 +195,9 @@ setSelectedSubcategoryId("");
       ? InType.DONATION
       : InType.BUY;
 
+           let counter = 1;
+  const dateStr = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}${String(new Date().getDate()).padStart(2, "0")}`;
+
     const payload = {
       user_id: userId,
       supplier_id: selectedSupplierId,
@@ -217,7 +220,7 @@ setSelectedSubcategoryId("");
         Array.from({ length: row.qty_receive }).map((_, i) => ({
           item_id: row.item_id,
           room_id: selectedWarehouseId,
-          serial_number: `${subCategoryCode}-${poNumber}-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}${String(new Date().getDate()).padStart(2, "0")}-${i + 1}`,
+          serial_number:`${subCategoryCode}-${poNumber}-${dateStr}-${counter++}`,
           condition: row.condition,
           status: ItemStatus.AVAILABLE,
           created_by: userId,
