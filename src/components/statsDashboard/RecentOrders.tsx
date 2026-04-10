@@ -17,13 +17,16 @@ import {
   CalendarDays,
   User,
   Hash,
+  RotateCcw,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+type RowSource = "transaction" | "loan" | "return";
+
 type MergedRow = {
   id: string;
-  _source: "transaction" | "loan";
+  _source: RowSource;
   _label: string;
   _sortDate: string;
   po_number?: string;
@@ -54,12 +57,25 @@ function getStatusColor(
   status: string
 ): "success" | "warning" | "error" | "info" {
   switch (status) {
-    case "received": return "success";
-    case "returned": return "success";
-    case "draft":    return "warning";
-    case "borrowed": return "info";
-    default:         return "warning";
+    case "received":  return "success";
+    case "returned":  return "success";
+    case "approved":  return "success";
+    case "draft":     return "warning";
+    case "borrowed":  return "info";
+    default:          return "warning";
   }
+}
+
+// ─── Source icon helper ────────────────────────────────────────────────────────
+
+function SourceIcon({ source }: { source: RowSource }) {
+  if (source === "transaction") {
+    return <ArrowDownCircle className="h-4 w-4 shrink-0 text-indigo-500 dark:text-indigo-400" />;
+  }
+  if (source === "return") {
+    return <RotateCcw className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />;
+  }
+  return <BookOpen className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" />;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -98,17 +114,33 @@ export default function RecentTransactions() {
       status:    t.status,
     }));
 
-    const loanRows: MergedRow[] = loans.map((l) => ({
-      id:        l.id,
-      _source:   "loan" as const,
-      _label:    "Peminjaman",
-      _sortDate: l.created_at,
-      username:  l.user?.username,
-      itemName:  l.item?.item?.name ?? l.item?.serial_number,
-      status:    l.status,
-    }));
+    // Peminjaman: status "approved" (sudah disetujui & sedang dipinjam)
+    const loanRows: MergedRow[] = loans
+      .filter((l) => l.status === "approved")
+      .map((l) => ({
+        id:        l.id,
+        _source:   "loan" as const,
+        _label:    "Peminjaman",
+        _sortDate: l.created_at,
+        username:  l.user?.username,
+        itemName:  l.item?.item?.name ?? l.item?.serial_number,
+        status:    l.status,
+      }));
 
-    return [...txRows, ...loanRows]
+    // Pengembalian: status "returned"
+    const returnRows: MergedRow[] = loans
+      .filter((l) => l.status === "returned")
+      .map((l) => ({
+        id:        l.id,
+        _source:   "return" as const,
+        _label:    "Pengembalian Barang",
+        _sortDate: l.return_date ?? l.created_at,
+        username:  l.user?.username,
+        itemName:  l.item?.item?.name ?? l.item?.serial_number,
+        status:    l.status,
+      }));
+
+    return [...txRows, ...loanRows, ...returnRows]
       .sort(
         (a, b) =>
           new Date(b._sortDate).getTime() - new Date(a._sortDate).getTime()
@@ -126,7 +158,7 @@ export default function RecentTransactions() {
             Recent Transactions
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Gabungan transaksi masuk &amp; peminjaman terbaru
+            Gabungan transaksi masuk, peminjaman &amp; pengembalian terbaru
           </p>
         </div>
         {!loading && (
@@ -176,7 +208,7 @@ export default function RecentTransactions() {
               </TableRow>
             ) : (
               mergedRows.map((row, index) => (
-                <TableRow key={row.id}>
+                <TableRow key={`${row._source}-${row.id}`}>
 
                   {/* No */}
                   <TableCell className="py-3 text-theme-sm text-gray-500 dark:text-gray-400">
@@ -186,11 +218,7 @@ export default function RecentTransactions() {
                   {/* Tipe */}
                   <TableCell className="py-3">
                     <div className="flex items-center gap-1.5">
-                      {row._source === "transaction" ? (
-                        <ArrowDownCircle className="h-4 w-4 shrink-0 text-indigo-500 dark:text-indigo-400" />
-                      ) : (
-                        <BookOpen className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" />
-                      )}
+                      <SourceIcon source={row._source} />
                       <span className="text-theme-sm font-medium text-gray-800 dark:text-white/90">
                         {row._label}
                       </span>
