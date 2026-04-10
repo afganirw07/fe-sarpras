@@ -8,11 +8,13 @@ import {
   Receipt,
   CheckCircle2,
   Clock,
+  Download,
 } from "lucide-react";
 import DialogTransactionIn from "@/components/dialog/dialogTransaction/transactionIn/dialogTransactionIn"
 import { useEffect } from "react";
 import { getTransactions, Transaction } from "@/lib/transaction";
 import { getUsers } from "@/lib/user";
+import Button from "@/components/ui/button/Button";
 
 export default function TransactionIn( {
 })  {
@@ -94,8 +96,19 @@ export default function TransactionIn( {
                         </p>
                       </div>
                     </div>
-                 <DialogTransactionIn onSuccess={handleRefresh}
-/>
+
+
+                    <div className="flex gap-4 items-center ">
+                      <a href="/excelTemplate/Template_Excel.xlsx" download>
+                    <Button
+                    size="sm"
+                    className="bg-green-700
+                    text-white hover:bg-green-900 flex gap-2 items-center">
+                     <Download size={16} /> Unduh template excel
+                      </Button>
+                       </a>
+                  <DialogTransactionIn onSuccess={handleRefresh}/>
+                    </div>
                   </div>
                 </div>
         

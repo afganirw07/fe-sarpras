@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../../ui/table";
-import { Button } from "../../../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +51,7 @@ import { any, z } from "zod";
 import { tansactionInSchema } from "@/schema/transaction_jn.schema";
 import { getMyEmployeeId } from "@/lib/roles";
 import { create } from "domain";
+import ImportExcel, { ParsedImportData } from "@/components/buttonExcel/importExcel";
 
 interface TransactionItemRow {
   item_id: string;
@@ -246,12 +247,24 @@ setSelectedSubcategoryId("");
     }
   };
 
+  const handleImport = (data: ParsedImportData) => {
+  if (data.poNumber) setPoNumber(data.poNumber);
+  if (data.warehouse) setSelectedWarehouseId(data.warehouse);
+  if (data.supplier) setSelectedSupplierId(data.supplier);
+  if (data.subKategori) {
+    setSelectedSubcategoryId(data.subKategori);
+    const sub = subcategories.find((s) => s.id === data.subKategori);
+    setSubCategoryCode(sub?.code ?? "");
+  }
+  setRows(data.rows);
+};
+
   return (
     <div className="flex justify-end">
       <Dialog onOpenChange={(open) => open && fetchAll()}>
         <DialogTrigger asChild>
           <Button
-            size="sm"
+            size="lg"
             className="bg-blue-800 text-white hover:bg-blue-900"
           >
             + Add Transaction In
@@ -490,7 +503,6 @@ setSelectedSubcategoryId("");
     </SelectContent>
   </Select>
 </div>
-
               <Button
                 type="button"
                 onClick={handleaddItem}
@@ -499,6 +511,15 @@ setSelectedSubcategoryId("");
               >
                 Add Item
               </Button>
+              <ImportExcel
+                items={items}
+                subcategories={subcategories}
+                warehouses={warehouses}
+                suppliers={suppliers}
+                onImport={handleImport}
+              />              
+                
+
             </div>
 
             {errors.items && rows.length === 0 && (
