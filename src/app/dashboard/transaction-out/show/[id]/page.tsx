@@ -26,6 +26,8 @@ import { getLoanRequestById, LoanRequest, LoanDetailItem } from "@/lib/loan-requ
 import { useParams } from "next/navigation";
 import Pagination from "@/components/tables/Pagination";
 import ButtonBack from "@/components/ui/button/backButton";
+import { getEmployees, Employee } from "@/lib/roles";
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -70,29 +72,40 @@ function conditionBadgeClass(condition: string) {
 
 export default function ShowTransactionOut() {
   const { id } = useParams();
-
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [transaction, setTransaction] = useState<LoanRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 const itemsPerPage = 10;
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Langsung fetch by ID — tidak perlu fetch semua lalu filter
-        const data = await getLoanRequestById(id as string);
-        setTransaction(data);
-      } catch {
-        toast.error("Gagal ambil detail transaksi keluar");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id]);
+ useEffect(() => {
+  if (!id) return;
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [data, employeesRes] = await Promise.all([
+        getLoanRequestById(id as string),
+        getEmployees(),
+      ]);
+      setTransaction(data);
+      setEmployees(employeesRes);
+    } catch {
+      toast.error("Gagal ambil detail transaksi keluar");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, [id]);
+
+
+const employeeMap = useMemo(() => {
+  return employees.reduce((acc, e) => {
+    acc[e.id] = e.full_name;
+    return acc;
+  }, {} as Record<string, string>);
+}, [employees]);
 
   // ── Filter item[] array berdasarkan search ──
   const filteredItems = useMemo<LoanDetailItem[]>(() => {
@@ -229,6 +242,19 @@ const itemsPerPage = 10;
               {formatDate(transaction.return_date)}
             </div>
           </div>
+
+            <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <RotateCcw className="h-4 w-4 text-blue-500" />
+              dikembalikan oleh
+            </label>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
+               {transaction.returned_by
+    ? employeeMap[transaction.returned_by] ?? transaction.returned_by
+    : "-"}
+            </div>
+          </div>
+
 
           {/* Dibuat Pada */}
           <div className="space-y-2">

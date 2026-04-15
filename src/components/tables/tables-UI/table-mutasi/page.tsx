@@ -375,7 +375,7 @@ export default function TableMutasi({
                       <TableCell className="px-2 py-4">
                         <ActionButtonsMigration
                           mutasi={m}
-                          showCheckbox={m.letter_status !== "done"}
+                          showCheckbox={true}
                           checked={selectedIds.has(m.id)}
                           onCheckedChange={handleChecked}
                         />

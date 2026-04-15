@@ -51,7 +51,8 @@ export async function getApprovedLoanRequests(): Promise<LoanRequestWithItems[]>
 
 export async function returnLoanRequest(
   loan: LoanRequestWithItems,
-  entries: ReturnItemEntry[] // harus sama jumlahnya dengan loan.item
+  entries: ReturnItemEntry[], // harus sama jumlahnya dengan loan.item
+  returned_by: string  //
 ): Promise<void> {
   // Validasi: semua item dalam loan harus ada di entries
   const entryIds = new Set(entries.map((e) => e.detail_item.id));
@@ -92,6 +93,7 @@ await api(`/api/loan-requests/${loan.id}`, {
     return_date: new Date().toISOString(),
     status:      "returned",
     description: loan.description ?? undefined,
+        returned_by,  // ← tambah ini
   }),
 });
 }

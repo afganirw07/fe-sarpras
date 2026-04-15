@@ -51,6 +51,7 @@ import { z } from "zod";
 import { tansactionInSchema } from "@/schema/transaction_jn.schema";
 import { getMyEmployeeId } from "@/lib/roles";
 import ImportExcel, { ParsedImportData } from "@/components/buttonExcel/importExcel";
+import { getFundingSources, FundingSource } from "@/lib/funding-sources";
 
 interface TransactionItemRow {
   item_id: string;
@@ -66,11 +67,11 @@ interface FormErrors {
   poNumber?: string;
   warehouse?: string;
   supplier?: string;
+  fundingSource?: string;  // ← tambah ini
   categori?: string;
   detailTransaction?: string;
   items?: string;
 }
-
 export default function DialogTransactionIn({
   onSuccess,
 }: {
@@ -96,6 +97,8 @@ export default function DialogTransactionIn({
   const [rows, setRows] = useState<TransactionItemRow[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
   const [itemSearch, setItemSearch] = useState("");
+  const [fundingSources, setFundingSources] = useState<FundingSource[]>([]);
+const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("");
 
   // ── Filter items berdasarkan subkategori & search ──────────────────────────
   const filteredItems = selectedSubcategoryId
@@ -107,23 +110,25 @@ export default function DialogTransactionIn({
     : [];
 
   const fetchAll = async () => {
-    try {
-      const [catRes, subCatRes, supRes, roomRes, itemRes] = await Promise.all([
-        getCategories(1, 1000),
-        getSubcategories(1, 1000),
-        getSuppliers(),
-        getRooms(),
-        getItems(),
-      ]);
-      setCategories(catRes.data);
-      setSubcategories(subCatRes.data);
-      setSuppliers(supRes.data);
-      setWarehouses(roomRes.data);
-      setItems(itemRes.data);
-    } catch (error) {
-      console.error("Fetch dialog data error:", error);
-    }
-  };
+  try {
+    const [catRes, subCatRes, supRes, roomRes, itemRes, fsRes] = await Promise.all([
+      getCategories(1, 1000),
+      getSubcategories(1, 1000),
+      getSuppliers(),
+      getRooms(),
+      getItems(),
+      getFundingSources(1, 1000),  // ← tambah ini
+    ]);
+    setCategories(catRes.data);
+    setSubcategories(subCatRes.data);
+    setSuppliers(supRes.data);
+    setWarehouses(roomRes.data);
+    setItems(itemRes.data);
+    setFundingSources(fsRes.data?.fundingSource || []);  // ← tambah ini
+  } catch (error) {
+    console.error("Fetch dialog data error:", error);
+  }
+};
 
   const handleaddItem = () => {
     // ── Kategori wajib hanya saat mau tambah item baru ──
@@ -211,6 +216,7 @@ export default function DialogTransactionIn({
       status: TransactionStatus.DRAFT,
       returned_by: employeeId,
       in_type: inType,
+       fundingSource: selectedFundingSourceId,  
       transaction_details: rows.map((row) => ({
         created_by: userId,
         item_id: row.item_id,
@@ -247,6 +253,7 @@ export default function DialogTransactionIn({
       setSelectedItemId("");
       setSelectedSubcategoryId("");
       setSubCategoryCode("");
+      setSelectedFundingSourceId("");  // ← tambah di bagian reset
       setErrors({});
     } catch (error) {
       console.error("Create transaction error:", error);
@@ -353,6 +360,34 @@ export default function DialogTransactionIn({
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Funding Source */}
+<div className="flex flex-col gap-2">
+  <div className="flex items-center gap-2">
+    <Label>Funding Source</Label>
+    {errors.fundingSource && (
+      <p className="text-xs text-red-500">{errors.fundingSource}</p>
+    )}
+  </div>
+  <Select
+    value={selectedFundingSourceId}
+    onValueChange={(v) => {
+      setSelectedFundingSourceId(v);
+      clearError("fundingSource");
+    }}
+  >
+    <SelectTrigger className={`h-11 w-full max-w-xl ${errors.fundingSource ? "border-red-500" : ""}`}>
+      <SelectValue placeholder="Pilih Funding Source" />
+    </SelectTrigger>
+    <SelectContent>
+      {fundingSources.map((fs) => (
+        <SelectItem key={fs.id} value={fs.id}>
+          {fs.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
 
               {/* Kategori — opsional kalau rows sudah ada */}
               <div className="flex flex-col gap-2">
