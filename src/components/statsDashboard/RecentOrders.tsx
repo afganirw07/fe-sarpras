@@ -10,6 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import Badge from "@/components/ui/badge/Badge";
 import {
   ArrowDownCircle,
@@ -17,13 +25,16 @@ import {
   CalendarDays,
   User,
   Hash,
+  RotateCcw,
+  X,
 } from "lucide-react";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+
+type RowSource = "transaction" | "loan" | "return";
 
 type MergedRow = {
   id: string;
-  _source: "transaction" | "loan";
+  _source: RowSource;
   _label: string;
   _sortDate: string;
   po_number?: string;
@@ -33,7 +44,6 @@ type MergedRow = {
   status: string;
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatDate(iso: string) {
   const date = new Date(iso);
@@ -50,34 +60,62 @@ function formatDate(iso: string) {
   return { dateStr, timeStr };
 }
 
-function getStatusColor(
-  status: string
-): "success" | "warning" | "error" | "info" {
+function getStatusStyle(status: string) {
   switch (status) {
-    case "received": return "success";
-    case "returned": return "success";
-    case "draft":    return "warning";
-    case "borrowed": return "info";
-    default:         return "warning";
+    case "received":
+      return "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400";
+
+    case "approved":
+      return "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400";
+
+    case "returned":
+      return "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400";
+
+    case "draft":
+      return "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400";
+
+    default:
+      return "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-400";
   }
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+function SourceIcon({ source }: { source: RowSource }) {
+  if (source === "transaction")
+    return <ArrowDownCircle className="h-4 w-4 shrink-0 text-indigo-500 dark:text-indigo-400" />;
+  if (source === "return")
+    return <RotateCcw className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />;
+  return <BookOpen className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" />;
+}
+
 
 export default function RecentTransactions() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loans, setLoans]               = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
 
+  const [filterJenis,  setFilterJenis]  = useState<string>("all"); // all | transaction | loan | return
+  const [filterStatus, setFilterStatus] = useState<string>("all"); // all | received | approved | returned | draft | borrowed
+
+  const activeFilterCount = [
+    filterJenis  !== "all",
+    filterStatus !== "all",
+  ].filter(Boolean).length;
+
+  const clearFilters = () => {
+    setFilterJenis("all");
+    setFilterStatus("all");
+  };
+
+  // ── Fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchAll = async () => {
       try {
         const [txRes, loanRes] = await Promise.all([
-          getTransactions(1, 10),
-          getLoanRequests(1, 10),
+          getTransactions(1, 50),
+          getLoanRequests(1, 50),
         ]);
-        setTransactions(txRes?.data  ?? (Array.isArray(txRes)   ? txRes   : []));
-        setLoans(loanRes?.data       ?? (Array.isArray(loanRes) ? loanRes : []));
+        setTransactions(txRes?.data ?? (Array.isArray(txRes)   ? txRes   : []));
+        setLoans(loanRes?.data      ?? (Array.isArray(loanRes) ? loanRes : []));
       } catch (err) {
         console.error("RecentTransactions fetch error:", err);
       } finally {
@@ -87,7 +125,13 @@ export default function RecentTransactions() {
     fetchAll();
   }, []);
 
-  const mergedRows = useMemo<MergedRow[]>(() => {
+  function capitalizeFirst(text: string) {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+  // ── Merge + filter ─────────────────────────────────────────────────────────
+  const allRows = useMemo<MergedRow[]>(() => {
     const txRows: MergedRow[] = transactions.map((t) => ({
       id:        t.id,
       _source:   "transaction" as const,
@@ -98,42 +142,109 @@ export default function RecentTransactions() {
       status:    t.status,
     }));
 
-    const loanRows: MergedRow[] = loans.map((l) => ({
-      id:        l.id,
-      _source:   "loan" as const,
-      _label:    "Peminjaman",
-      _sortDate: l.created_at,
-      username:  l.user?.username,
-      itemName:  l.item?.item?.name ?? l.item?.serial_number,
-      status:    l.status,
-    }));
+    const loanRows: MergedRow[] = loans
+      .filter((l) => l.status === "approved")
+      .map((l) => ({
+        id:        l.id,
+        _source:   "loan" as const,
+        _label:    "Peminjaman",
+        _sortDate: l.created_at,
+        username:  l.user?.username,
+        itemName:  l.item?.item?.name ?? l.item?.serial_number,
+        status:    l.status,
+      }));
 
-    return [...txRows, ...loanRows]
-      .sort(
-        (a, b) =>
-          new Date(b._sortDate).getTime() - new Date(a._sortDate).getTime()
-      )
-      .slice(0, 10);
+    const returnRows: MergedRow[] = loans
+      .filter((l) => l.status === "returned")
+      .map((l) => ({
+        id:        l.id,
+        _source:   "return" as const,
+        _label:    "Pengembalian Barang",
+        _sortDate: l.return_date ?? l.created_at,
+        username:  l.user?.username,
+        itemName:  l.item?.item?.name ?? l.item?.serial_number,
+        status:    l.status,
+      }));
+
+    return [...txRows, ...loanRows, ...returnRows].sort(
+      (a, b) => new Date(b._sortDate).getTime() - new Date(a._sortDate).getTime()
+    );
   }, [transactions, loans]);
+
+  const filteredRows = useMemo<MergedRow[]>(() => {
+    return allRows
+      .filter((row) => filterJenis  === "all" || row._source === filterJenis)
+      .filter((row) => filterStatus === "all" || row.status  === filterStatus)
+      .slice(0, 10);
+  }, [allRows, filterJenis, filterStatus]);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6">
 
       {/* Header */}
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
             Recent Transactions
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Gabungan transaksi masuk &amp; peminjaman terbaru
+            Gabungan transaksi masuk, peminjaman &amp; pengembalian terbaru
           </p>
         </div>
-        {!loading && (
-          <span className="inline-flex h-7 w-fit items-center rounded-full border border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
-            {mergedRows.length} entri
-          </span>
-        )}
+
+        {/* ── Filter bar ── */}
+        <div className="flex flex-wrap items-center gap-2">
+
+          {/* Filter Jenis Transaksi */}
+          <Select value={filterJenis} onValueChange={setFilterJenis}>
+            <SelectTrigger className="h-8 w-44 rounded-xl border-gray-200 text-xs dark:border-white/10">
+              <SelectValue placeholder="Jenis Transaksi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Jenis</SelectItem>
+              <SelectItem value="transaction">Barang Masuk</SelectItem>
+              <SelectItem value="loan">Peminjaman</SelectItem>
+              <SelectItem value="return">Pengembalian</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Filter Status */}
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="h-8 w-36 rounded-xl border-gray-200 text-xs dark:border-white/10">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="received">Received</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="returned">Returned</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Reset filter */}
+          {activeFilterCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="h-8 rounded-xl text-xs text-gray-500 hover:text-red-500"
+            >
+              <X className="mr-1 h-3.5 w-3.5" />
+              Reset
+              <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                {activeFilterCount}
+              </span>
+            </Button>
+          )}
+
+          {/* Counter entri */}
+          {!loading && (
+            <span className="inline-flex h-8 w-fit items-center rounded-full border border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
+              {filteredRows.length} entri
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -155,7 +266,6 @@ export default function RecentTransactions() {
 
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
             {loading ? (
-              // Skeleton rows
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
                   {Array.from({ length: 6 }).map((_, j) => (
@@ -165,18 +275,18 @@ export default function RecentTransactions() {
                   ))}
                 </TableRow>
               ))
-            ) : mergedRows.length === 0 ? (
+            ) : filteredRows.length === 0 ? (
               <TableRow>
                 <td
                   colSpan={6}
                   className="py-12 text-center text-sm text-gray-400 dark:text-gray-600"
                 >
-                  Belum ada transaksi
+                  {activeFilterCount > 0 ? "Tidak ada data untuk filter ini" : "Belum ada transaksi"}
                 </td>
               </TableRow>
             ) : (
-              mergedRows.map((row, index) => (
-                <TableRow key={row.id}>
+              filteredRows.map((row, index) => (
+                <TableRow key={`${row._source}-${row.id}`}>
 
                   {/* No */}
                   <TableCell className="py-3 text-theme-sm text-gray-500 dark:text-gray-400">
@@ -186,11 +296,7 @@ export default function RecentTransactions() {
                   {/* Tipe */}
                   <TableCell className="py-3">
                     <div className="flex items-center gap-1.5">
-                      {row._source === "transaction" ? (
-                        <ArrowDownCircle className="h-4 w-4 shrink-0 text-indigo-500 dark:text-indigo-400" />
-                      ) : (
-                        <BookOpen className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" />
-                      )}
+                      <SourceIcon source={row._source} />
                       <span className="text-theme-sm font-medium text-gray-800 dark:text-white/90">
                         {row._label}
                       </span>
@@ -228,11 +334,14 @@ export default function RecentTransactions() {
                   </TableCell>
 
                   {/* Status */}
-                  <TableCell className="py-3">
-                    <Badge size="sm" color={getStatusColor(row.status)}>
-                      {row.status}
-                    </Badge>
-                  </TableCell>
+                 {/* Status */}
+<TableCell className="py-3">
+  <div
+    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getStatusStyle(row.status)}`}
+  >
+    {capitalizeFirst(row.status)}
+  </div>
+</TableCell>
 
                   {/* Tanggal */}
                   <TableCell className="py-3">

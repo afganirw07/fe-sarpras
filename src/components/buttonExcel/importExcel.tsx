@@ -9,17 +9,17 @@ interface TransactionItemRow {
   item_id: string;
   item_name: string;
   price: number;
-  qty_request: number;
-  qty_receive: number;
+  qty: number;
   condition: ItemConditions;
   procurement_year: number;
 }
 
 interface ImportedExcelRow {
   No?: number;
-  Po_Number?: string | number;
+  // Po_Number?: string | number;
   Warehouse?: string;
   supplier?: string;
+  price?: string | number;
   Kategori?: string;
   sub_kategori?: string;
   nama_item?: string;
@@ -39,6 +39,7 @@ interface ImportExcelProps {
   subcategories: { id: string; name: string; code?: string; category_id: string }[];
   warehouses: { id: string; name: string }[];
   suppliers: { id: string; name: string }[];
+  price: { [itemId: string]: number };
   onImport: (data: ParsedImportData) => void;
 }
 
@@ -47,12 +48,30 @@ export default function ImportExcel({
   subcategories,
   warehouses,
   suppliers,
+  price,
   onImport,
 }: ImportExcelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const normalizeStr = (str: string) =>
-    str?.toString().trim().toLowerCase() ?? "";
+  const normalize = (val: any) =>
+    val?.toString().trim().toLowerCase() ?? "";
+
+  // 🔥 OPTIMIZATION: bikin map biar gak find terus (O(n²) → O(n))
+  const itemMap = new Map(
+    items.map((i) => [normalize(i.name), i])
+  );
+
+  const findMatch = <T extends { name: string }>(
+    list: T[],
+    keyword?: string
+  ) => {
+    const key = normalize(keyword);
+    return list.find(
+      (i) =>
+        normalize(i.name).includes(key) ||
+        key.includes(normalize(i.name))
+    );
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,24 +83,23 @@ export default function ImportExcel({
         const data = new Uint8Array(event.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
 
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        // Parse with header row at row index 1 (0-based), skip title row
         const jsonData: ImportedExcelRow[] = XLSX.utils.sheet_to_json(
           worksheet,
           {
             header: [
               "No",
-              "Po_Number",
+              // "Po_Number",
               "Warehouse",
               "supplier",
               "Kategori",
               "sub_kategori",
               "nama_item",
+              "price",
               "Qty",
             ],
-            range: 1, 
+            range: 1,
             defval: "",
           }
         );
@@ -94,45 +112,29 @@ export default function ImportExcel({
             !isNaN(Number(row.No))
         );
 
-        if (dataRows.length === 0) {
+        if (!dataRows.length) {
           toast.error("Tidak ada data ditemukan di file Excel");
           return;
         }
 
-        // Use data from first row for form-level fields
         const firstRow = dataRows[0];
 
-        // Match warehouse by name (case-insensitive)
-        const matchedWarehouse = warehouses.find((w) =>
-          normalizeStr(w.name).includes(normalizeStr(firstRow.Warehouse ?? ""))
-          || normalizeStr(firstRow.Warehouse ?? "").includes(normalizeStr(w.name))
-        );
+        // 🔹 MATCH MASTER
+        const matchedWarehouse = findMatch(warehouses, firstRow.Warehouse);
+        const matchedSupplier = findMatch(suppliers, firstRow.supplier);
+        const matchedSubcategory = findMatch(subcategories, firstRow.sub_kategori);
 
-        // Match supplier by name (case-insensitive)
-        const matchedSupplier = suppliers.find((s) =>
-          normalizeStr(s.name).includes(normalizeStr(firstRow.supplier ?? ""))
-          || normalizeStr(firstRow.supplier ?? "").includes(normalizeStr(s.name))
-        );
-
-        // Match subcategory by name (case-insensitive)  
-        const matchedSubcategory = subcategories.find((s) =>
-          normalizeStr(s.name).includes(normalizeStr(firstRow.sub_kategori ?? ""))
-          || normalizeStr(firstRow.sub_kategori ?? "").includes(normalizeStr(s.name))
-        );
-
-        // Build item rows from all Excel rows
         const importedRows: TransactionItemRow[] = [];
         const unmatchedItems: string[] = [];
 
-        for (const excelRow of dataRows) {
-          const itemName = excelRow.nama_item?.toString().trim() ?? "";
+        for (const row of dataRows) {
+          const itemName = row.nama_item?.toString().trim();
           if (!itemName) continue;
 
-          // Match item by name (case-insensitive)
           const matchedItem = items.find(
             (i) =>
-              normalizeStr(i.name).includes(normalizeStr(itemName)) ||
-              normalizeStr(itemName).includes(normalizeStr(i.name))
+              normalize(i.name).includes(normalize(itemName)) ||
+              normalize(itemName).includes(normalize(i.name))
           );
 
           if (!matchedItem) {
@@ -140,55 +142,77 @@ export default function ImportExcel({
             continue;
           }
 
-          // Prevent duplicate items
-          const alreadyAdded = importedRows.some(
-            (r) => r.item_id === matchedItem.id
-          );
-          if (alreadyAdded) continue;
+          if (importedRows.some((r) => r.item_id === matchedItem.id)) continue;
 
-          const qty = Number(excelRow.Qty) || 1;
+          const qty = Number(row.Qty) || 1;
+          const priceExcel = Number(row.price);
+
+          const finalPrice = !isNaN(priceExcel)
+            ? priceExcel
+            : price[matchedItem.id] ?? matchedItem.price ?? 0;
 
           importedRows.push({
             item_id: matchedItem.id,
             item_name: matchedItem.name,
-            price: matchedItem.price ?? 0,
-            qty_request: qty,
-            qty_receive: qty,
+            price: finalPrice,
+            qty,
             condition: ItemConditions.GOOD,
             procurement_year: new Date().getFullYear(),
           });
         }
 
-        if (unmatchedItems.length > 0) {
-          toast.warning(
-            `Item tidak ditemukan di sistem: ${unmatchedItems.join(", ")}`
-          );
+        // 🔹 VALIDATION
+        if (unmatchedItems.length) {
+          toast.warning(`Item tidak ditemukan: ${unmatchedItems.join(", ")}`);
         }
 
-        if (importedRows.length === 0) {
-          toast.error("Tidak ada item yang berhasil dicocokkan dengan data sistem");
+        if (!importedRows.length) {
+          toast.error("Tidak ada item valid untuk diimport");
           return;
         }
 
+        if (importedRows.some((r) => r.price < 0)) {
+          toast.error("Price tidak boleh negatif");
+          return;
+        }
+
+        const hasZero = importedRows.some((r) => r.price === 0);
+        const hasNonZero = importedRows.some((r) => r.price > 0);
+
+        if (hasZero && hasNonZero) {
+          toast.error("Tidak boleh mix donation & pembelian");
+          return;
+        }
+
+        if (hasZero) {
+          toast.info("Semua item dianggap DONATION");
+        }
+
+        // 🔹 FINAL
         const parsedData: ParsedImportData = {
-          poNumber: firstRow.Po_Number?.toString() ?? "",
+          // poNumber: firstRow.Po_Number?.toString() ?? "",
           warehouse: matchedWarehouse?.id ?? "",
           supplier: matchedSupplier?.id ?? "",
           subKategori: matchedSubcategory?.id ?? "",
           rows: importedRows,
         };
 
-        if (!matchedWarehouse) toast.warning(`Warehouse "${firstRow.Warehouse}" tidak ditemukan`);
-        if (!matchedSupplier) toast.warning(`Supplier "${firstRow.supplier}" tidak ditemukan`);
-        if (!matchedSubcategory) toast.warning(`Sub-kategori "${firstRow.sub_kategori}" tidak ditemukan`);
+        if (!matchedWarehouse)
+          toast.warning(`Warehouse "${firstRow.Warehouse}" tidak ditemukan`);
+
+        if (!matchedSupplier)
+          toast.warning(`Supplier "${firstRow.supplier}" tidak ditemukan`);
+
+        if (!matchedSubcategory)
+          toast.warning(`Sub-kategori "${firstRow.sub_kategori}" tidak ditemukan`);
 
         onImport(parsedData);
-        toast.success(`Berhasil import ${importedRows.length} item dari Excel`);
+
+        toast.success(`Import ${importedRows.length} item berhasil`);
       } catch (err) {
-        console.error("Import Excel error:", err);
-        toast.error("Gagal membaca file Excel. Pastikan format file sesuai template.");
+        console.error(err);
+        toast.error("Format Excel tidak valid");
       } finally {
-        // Reset input so the same file can be re-imported if needed
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     };
@@ -208,7 +232,7 @@ export default function ImportExcel({
       <Button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        className="h-11 bg-green-800 text-white hover:bg-green-900"
+        className="h-11 bg-green-800 text-white hover:bg-green-900 max-w-xs"
       >
         Import Template Excel
       </Button>

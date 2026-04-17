@@ -47,10 +47,10 @@ export default function ActionButtonsDetailItems({
   };
 
   return (
-    <div className="flex items-center justify-center gap-3">
+    <div className="flex items-center justify-center gap-3" >
 
      
-      {/* DELETE */}
+      {/* DELETE
       <AlertDialog>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -97,7 +97,7 @@ export default function ActionButtonsDetailItems({
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
 
        {/* SHOW */}
       <Tooltip>

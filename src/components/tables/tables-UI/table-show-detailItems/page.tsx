@@ -6,14 +6,15 @@ import {
   Table, TableBody, TableCell, TableHeader, TableRow,
 } from "../../../ui/table";
 import { Button } from "../../../ui/button";
-import { Search, QrCode, Focus } from "lucide-react";
+import { Search, Focus } from "lucide-react";
 import { Label } from "../../../ui/label";
 import { Input } from "../../../ui/input";
 import { getDetailItemsByItemId, DetailItem } from "@/lib/items";
 import ActionButtonsDetailItems from "@/components/dialog/dialogItems/Detail/dialogActionButtonDetails";
 import ButtonBack from "@/components/ui/button/backButton";
-import Pagination from "../../Pagination"; 
-
+import Pagination from "../../Pagination";
+import ButtonQrShowItem from "@/components/button-qr/buttonQrShowItem";
+import ButtonQrSmallItem from "@/components/button-qr/buttonQrSmallItem";
 
 const PER_PAGE = 10;
 
@@ -21,14 +22,51 @@ export default function TableShow() {
   const params = useParams();
   const itemId = params?.id as string;
 
-  const [detailItems, setDetailItems] = useState<DetailItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [detailItems, setDetailItems]   = useState<DetailItem[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [search, setSearch]             = useState("");
+  const [currentPage, setCurrentPage]   = useState(1);
+  const [totalPages, setTotalPages]     = useState(1);
+  const [totalItems, setTotalItems]     = useState(0);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  // ── Selection state ──────────────────────────────────────────────────────────
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+  const isAllSelected =
+    detailItems.length > 0 && detailItems.every((d) => selectedIds.has(d.id));
+  const isIndeterminate =
+    detailItems.some((d) => selectedIds.has(d.id)) && !isAllSelected;
+
+  const toggleAll = () => {
+    if (isAllSelected) {
+      // Uncheck semua item di halaman ini
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        detailItems.forEach((d) => next.delete(d.id));
+        return next;
+      });
+    } else {
+      // Check semua item di halaman ini
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        detailItems.forEach((d) => next.add(d.id));
+        return next;
+      });
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  // Item yang terpilih untuk dikirim ke ButtonQrShowItem
+  const selectedItems = detailItems.filter((d) => selectedIds.has(d.id));
+
+  // ── Fetch ────────────────────────────────────────────────────────────────────
   const fetchData = useCallback(async (page: number = 1, keyword: string = "") => {
     if (!itemId) return;
     try {
@@ -46,12 +84,10 @@ export default function TableShow() {
     }
   }, [itemId]);
 
-  // Fetch saat page berubah
   useEffect(() => {
     fetchData(currentPage, search);
   }, [currentPage, itemId]);
 
-  // Debounce search — reset ke page 1 saat keyword berubah
   useEffect(() => {
     const timer = setTimeout(() => {
       setCurrentPage(1);
@@ -64,7 +100,7 @@ export default function TableShow() {
     setCurrentPage(page);
   };
 
-  const firstItem = detailItems[0];
+  const firstItem    = detailItems[0];
   const itemName     = firstItem?.item?.name ?? "-";
   const categoryName = firstItem?.item?.category?.name ?? "-";
   const subCategory  = firstItem?.item?.subcategory?.name ?? "-";
@@ -112,6 +148,7 @@ export default function TableShow() {
           </div>
 
           <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
+
             {/* Search & Buttons */}
             <div className="border-b border-gray-200/50 p-6 dark:border-white/5">
               <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
@@ -124,13 +161,22 @@ export default function TableShow() {
                     className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
                   />
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                    <QrCode className="mr-2 h-4 w-4" /> Generate Label
-                  </Button>
-                  <Button variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400">
-                    <Focus className="mr-2 h-4 w-4" /> Small Label
-                  </Button>
+                <div className="flex gap-2 flex-wrap items-center">
+                  {/* Badge jumlah terpilih */}
+                  {selectedIds.size > 0 && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {selectedIds.size} item dipilih
+                    </span>
+                  )}
+                  <ButtonQrShowItem
+                    items={selectedItems.length > 0 ? selectedItems : detailItems}
+                    itemName={itemName}
+                  />
+                   <ButtonQrSmallItem
+                    items={selectedItems.length > 0 ? selectedItems : detailItems}
+                    itemName={itemName}
+                  />
+            
                 </div>
               </div>
             </div>
@@ -141,6 +187,23 @@ export default function TableShow() {
                 <Table className="w-full">
                   <TableHeader>
                     <TableRow className="border-b border-gray-200/50 dark:border-white/5">
+
+                      {/* Checkbox select all */}
+                      <TableCell
+                        isHeader
+                        className="w-10 bg-linear-to-br from-gray-50 to-gray-100/50 px-2 py-4 dark:from-white/5 dark:to-white/10"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isAllSelected}
+                          ref={(el) => {
+                            if (el) el.indeterminate = isIndeterminate;
+                          }}
+                          onChange={toggleAll}
+                          className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-indigo-600"
+                        />
+                      </TableCell>
+
                       {["No", "SN Number", "Warehouse", "PO Number", "Kondisi", "Status", "Action"].map((h, i) => (
                         <TableCell
                           key={i}
@@ -156,13 +219,13 @@ export default function TableShow() {
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <td colSpan={7} className="py-12 text-center text-sm text-gray-500">
+                        <td colSpan={8} className="py-12 text-center text-sm text-gray-500">
                           Memuat data...
                         </td>
                       </TableRow>
                     ) : detailItems.length === 0 ? (
                       <TableRow>
-                        <td colSpan={7} className="py-12 text-center text-sm text-gray-500">
+                        <td colSpan={8} className="py-12 text-center text-sm text-gray-500">
                           Tidak ada data item
                         </td>
                       </TableRow>
@@ -170,8 +233,22 @@ export default function TableShow() {
                       detailItems.map((d, index) => (
                         <TableRow
                           key={d.id}
-                          className="border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5"
+                          className={`border-b border-gray-200/50 transition-colors hover:bg-gray-50/50 dark:border-white/5 dark:hover:bg-white/5 ${
+                            selectedIds.has(d.id)
+                              ? "bg-indigo-50/60 dark:bg-indigo-900/10"
+                              : ""
+                          }`}
                         >
+                          {/* Checkbox per row */}
+                          <TableCell className="px-2 py-4">
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(d.id)}
+                              onChange={() => toggleOne(d.id)}
+                              className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-indigo-600"
+                            />
+                          </TableCell>
+
                           <TableCell className="px-2 py-4">
                             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-sm font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-300">
                               {(currentPage - 1) * PER_PAGE + index + 1}

@@ -420,7 +420,7 @@ function getConditionBadge(condition: string) {
                     <TableCell className="px-2 py-4 text-center">
                       <ActionButtonsPemutihan
                         detailItem={item}
-                        showCheckbox={item.letter_status !== 'done'}
+                        showCheckbox={item.letter_status != null}
                         checked={selectedIds.has(item.id)}
                         onCheckedChange={handleChecked}
                       />

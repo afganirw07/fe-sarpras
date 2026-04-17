@@ -203,7 +203,7 @@ export default function TableKategori({
                           </div>
                           <div>
                             <p className="max-w-40 truncate whitespace-nowrap text-[clamp(10px,0.7rem,10px)]">{category.name}</p>
-                            <p className="max-w-40 truncate whitespace-nowrap text-[clamp(10px,0.7rem,10px)]">ID: {category.id.slice(0, 8)}...</p>
+                            {/* <p className="max-w-40 truncate whitespace-nowrap text-[clamp(10px,0.7rem,10px)]">ID: {category.id.slice(0, 8)}...</p> */}
                           </div>
                         </div>
                       </TableCell>

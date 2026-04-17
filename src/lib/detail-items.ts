@@ -164,3 +164,4 @@ export function getItemsByWarehouseAndSubcategory(
 ): Promise<{ data: ItemOption[] }> {
   return api(`/api/detail-items/items/by-warehouse-subcategory/${roomId}/${subcategoryId}`);
 }
+

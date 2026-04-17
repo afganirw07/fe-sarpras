@@ -8,13 +8,13 @@ import {
   Receipt,
   CheckCircle2,
   Clock,
-  Download,
+  Download
 } from "lucide-react";
 import DialogTransactionIn from "@/components/dialog/dialogTransaction/transactionIn/dialogTransactionIn"
 import { useEffect } from "react";
 import { getTransactions, Transaction } from "@/lib/transaction";
 import { getUsers } from "@/lib/user";
-import Button from "@/components/ui/button/Button";
+import { Button } from "@/components/ui/button";
 
 export default function TransactionIn( {
 })  {
@@ -96,9 +96,7 @@ export default function TransactionIn( {
                         </p>
                       </div>
                     </div>
-
-
-                    <div className="flex gap-4 items-center ">
+             <div className="flex gap-4 items-center ">
                       <a href="/excelTemplate/Template_Excel.xlsx" download>
                     <Button
                     size="sm"
