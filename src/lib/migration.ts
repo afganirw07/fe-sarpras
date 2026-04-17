@@ -84,6 +84,7 @@ export interface UpdateMigrationPayload {
   /** Wajib — sesuai controller & schema */
   letter_status: string;
   notes?: string;
+  detail_item_ids: string[];  // ← tambah ini
 }
 
 

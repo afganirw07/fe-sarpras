@@ -15,6 +15,7 @@ export interface LoanDetailItem {
   serial_number: string;
   condition: string;
   status: string;
+  returned_by: string
   /** FK ke Room */
   room_id: string;
   item_id: string;
@@ -42,6 +43,8 @@ export interface LoanRequest {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  returned_by: string | null;
+
   /** Many-to-many: array DetailItem yang dipinjam */
   item: LoanDetailItem[];
   user?: { username: string };
@@ -83,6 +86,7 @@ export interface UpdateLoanRequestPayload {
   return_date?: string | null;
   status: LoanStatus;
   description?: string;
+  returned_by?: string; // ← tambah ini (Employee.id)
 }
 
 // ─── API functions ────────────────────────────────────────────────────────────

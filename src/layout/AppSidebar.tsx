@@ -14,7 +14,8 @@ import {
   Archive,
    Ellipsis,
    ArrowDownUp,
-   Layers
+   Layers,
+   Coins
 } from "lucide-react";
 
 
@@ -59,6 +60,11 @@ const navItems: NavItem[] = [
     icon: <ArrowLeftRight />,
     name: "Mutasi",
     path: "/dashboard/mutasi",
+  },
+   {
+    icon: <Coins />,
+    name: "Sumber Dana",
+    path: "/dashboard/funding-sources",
   },
    {
     icon: <ArrowDownUp />,

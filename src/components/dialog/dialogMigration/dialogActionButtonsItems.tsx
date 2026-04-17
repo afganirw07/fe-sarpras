@@ -9,17 +9,20 @@ import {
 } from "@/components/ui/tooltip";
 import Link from "next/link";
 import { ItemMigration } from "@/lib/migration";
+import DialogEditMigration from "./dialogeditMigration";
 
 export default function ActionButtonsMigration({
   mutasi,
   showCheckbox,
   checked,
   onCheckedChange,
+  onSuccess, 
 }: {
   mutasi: ItemMigration;
   showCheckbox?: boolean;
   checked?: boolean;
   onCheckedChange?: (id: string, checked: boolean) => void;
+  onSuccess?: () => void;
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -32,7 +35,7 @@ export default function ActionButtonsMigration({
           className="h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 accent-blue-600 focus:ring-blue-500"
         />
       )}
-
+  <DialogEditMigration migrationId={mutasi.id} onSuccess={onSuccess} />
       {/* Tombol Detail */}
       <Tooltip>
         <TooltipTrigger asChild>
