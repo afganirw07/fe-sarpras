@@ -38,6 +38,7 @@ interface ItemFormData {
   brand: string;
   unit: string;
   stock: number;
+  spesification: string;
   created_by: string
 }
 
@@ -73,6 +74,7 @@ export default function DialogAddItems({
     subcategory_id: "",
     brand: "",
     unit: "",
+    spesification: "",
     stock: 0,
     created_by: userId
   });
@@ -142,6 +144,7 @@ export default function DialogAddItems({
         subcategory_id: "",
         brand: "",
         unit: "",
+        spesification: "",
         stock: 0,
         created_by: userId
       });
@@ -219,6 +222,7 @@ export default function DialogAddItems({
         subcategory_id: "",
         brand: "",
         unit: "",
+        spesification: "",
         stock: 0,
         created_by: userId
 

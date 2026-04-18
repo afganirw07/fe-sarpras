@@ -363,7 +363,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
               {/* Funding Source */}
 <div className="flex flex-col gap-2">
   <div className="flex items-center gap-2">
-    <Label>Funding Source</Label>
+    <Label>Sumber dana</Label>
     {errors.fundingSource && (
       <p className="text-xs text-red-500">{errors.fundingSource}</p>
     )}
@@ -448,6 +448,42 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
                 >
                   <SelectTrigger className={`h-11 w-full max-w-xl ${errors.items ? "border-red-500" : ""}`}>
                     <SelectValue placeholder={selectedSubcategoryId ? "Pilih Item" : "Pilih Kategori dulu"} />
+                  </SelectTrigger>
+                  <SelectContent position="popper" side="bottom" avoidCollisions={false}>
+                    <div className="sticky top-0 z-10 bg-white dark:bg-black p-2">
+                      <input
+                        className="w-full rounded-md border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-blue-500"
+                        placeholder="Cari item..."
+                        value={itemSearch}
+                        onChange={(e) => setItemSearch(e.target.value)}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="max-h-52 overflow-y-auto">
+                      {filteredItems.length === 0 ? (
+                        <div className="px-4 py-2 text-sm text-gray-500">Tidak ada item</div>
+                      ) : (
+                        filteredItems.map((item) => (
+                          <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                        ))
+                      )}
+                    </div>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Label>Nomor Serial</Label>
+                  {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
+                </div>
+                <Select
+                  value={selectedItemId}
+                  onValueChange={(v) => { setSelectedItemId(v); setItemSearch(""); }}
+                  disabled={!selectedSubcategoryId}
+                >
+                  <SelectTrigger className={`h-11 w-full max-w-xl ${errors.items ? "border-red-500" : ""}`}>
+                    <SelectValue placeholder={selectedSubcategoryId ? "Pilih Item" : "Ini masih dummy"} />
                   </SelectTrigger>
                   <SelectContent position="popper" side="bottom" avoidCollisions={false}>
                     <div className="sticky top-0 z-10 bg-white dark:bg-black p-2">
