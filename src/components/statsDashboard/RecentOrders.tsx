@@ -27,10 +27,12 @@ import {
   Hash,
   RotateCcw,
   X,
+  ShoppingCart,
 } from "lucide-react";
+import { getConsumableRequests, ConsumableRequest } from "@/lib/consumable-request";
 
 
-type RowSource = "transaction" | "loan" | "return";
+type RowSource = "transaction" | "loan" | "return" | "consumable";
 
 type MergedRow = {
   id: string;
@@ -42,6 +44,7 @@ type MergedRow = {
   username?: string;
   itemName?: string;
   status: string;
+  
 };
 
 
@@ -85,12 +88,15 @@ function SourceIcon({ source }: { source: RowSource }) {
   if (source === "return")
     return <RotateCcw className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />;
   return <BookOpen className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" />;
+  if (source === "consumable")
+  return <ShoppingCart className="h-4 w-4 shrink-0 text-orange-500 dark:text-orange-400" />;
 }
 
 
 export default function RecentTransactions() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loans, setLoans]               = useState<any[]>([]);
+  const [consumables, setConsumables] = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
 
   const [filterJenis,  setFilterJenis]  = useState<string>("all"); // all | transaction | loan | return
@@ -110,12 +116,14 @@ export default function RecentTransactions() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const [txRes, loanRes] = await Promise.all([
+        const [txRes, loanRes, consumableRes] = await Promise.all([
           getTransactions(1, 50),
           getLoanRequests(1, 50),
+          getConsumableRequests(1, 50),
         ]);
         setTransactions(txRes?.data ?? (Array.isArray(txRes)   ? txRes   : []));
         setLoans(loanRes?.data      ?? (Array.isArray(loanRes) ? loanRes : []));
+        setConsumables(consumableRes?.data ?? (Array.isArray(consumableRes) ? consumableRes : []));
       } catch (err) {
         console.error("RecentTransactions fetch error:", err);
       } finally {
@@ -166,10 +174,20 @@ export default function RecentTransactions() {
         status:    l.status,
       }));
 
-    return [...txRows, ...loanRows, ...returnRows].sort(
+      const consumableRows: MergedRow[] = consumables.map((c) => ({
+  id:        c.id,
+  _source:   "consumable" as const,
+  _label:    "Permintaan Barang",
+  _sortDate: c.created_at,
+  username:  c.requestBy?.full_name ?? c.createdBy?.username,
+  itemName:  c.item?.[0]?.name ?? "-",
+  status:    c.request_status,
+}));
+
+    return [...txRows, ...loanRows, ...returnRows, ...consumableRows].sort(
       (a, b) => new Date(b._sortDate).getTime() - new Date(a._sortDate).getTime()
     );
-  }, [transactions, loans]);
+  }, [transactions, loans, consumables]);
 
   const filteredRows = useMemo<MergedRow[]>(() => {
     return allRows
@@ -205,6 +223,7 @@ export default function RecentTransactions() {
               <SelectItem value="transaction">Barang Masuk</SelectItem>
               <SelectItem value="loan">Peminjaman</SelectItem>
               <SelectItem value="return">Pengembalian</SelectItem>
+              <SelectItem value="consumable">Permintaan Barang</SelectItem>
             </SelectContent>
           </Select>
 
@@ -216,6 +235,7 @@ export default function RecentTransactions() {
             <SelectContent>
               <SelectItem value="all">Semua Status</SelectItem>
               <SelectItem value="received">Received</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="returned">Returned</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>

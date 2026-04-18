@@ -19,6 +19,7 @@ import {
   Hash,
   Info,
   ArrowDownCircle,
+  NotebookPen,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { getUsers } from "@/lib/user";
@@ -322,6 +323,15 @@ useEffect(() => { setCurrentPage(1); }, [search]);
             </label>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
               {formatDate(transaction.transaction_date)}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <NotebookPen className="h-4 w-4 text-blue-500" />
+              detail transaksi
+            </label>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
+              {transaction.notes || "-"}
             </div>
           </div>
         </div>

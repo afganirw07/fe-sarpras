@@ -123,7 +123,7 @@ export default function DialogAddFundingSource({
       <Dialog open={isOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
           <Button className="font-quicksand text-md bg-blue-800 text-white hover:bg-blue-900">
-            + Add Funding Source
+            + Add Sumber Dana
           </Button>
         </DialogTrigger>
 

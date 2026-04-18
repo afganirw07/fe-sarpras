@@ -215,6 +215,11 @@ export default function TableTransactionOut() {
     setFilterDate(undefined);
   };
 
+  const hasDamagedItem = (items: LoanDetailItem[]): boolean => {
+  if (!items || items.length === 0) return false;
+  return items.some((d) => d.condition === "Poor");
+};
+
   return (
     <div className="w-full lg:max-w-7xl md:max-w-4xl max-w-xs">
       <div className="rounded-2xl border border-gray-200/50 bg-white/80 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
@@ -428,9 +433,22 @@ export default function TableTransactionOut() {
                       </TableCell>
 
                       {/* Status */}
-                      <TableCell className=" px-2 py-4 dark:border-gray-800">
-                        <StatusBadge status={trx.status} />
-                      </TableCell>
+                   {/* Status */}
+<TableCell className="px-2 py-4 dark:border-gray-800">
+  <div className="flex items-center gap-2">
+    <StatusBadge status={trx.status} />
+    {trx.status === "returned" && hasDamagedItem(trx.item) && (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="flex h-2.5 w-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50 animate-pulse" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-xs">Ada barang rusak saat dikembalikan</p>
+        </TooltipContent>
+      </Tooltip>
+    )}
+  </div>
+</TableCell>
 
                       {/* Aksi */}
                       <TableCell className=" px-2 py-4 dark:border-gray-800">

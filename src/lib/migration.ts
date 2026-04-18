@@ -43,6 +43,8 @@ export interface ItemMigration {
   migrated_at: string;
   created_at: string;
   detail_items?: DetailItem[];
+  knowing: string;
+  submission: string;
 }
 
 
@@ -75,6 +77,8 @@ export interface CreateMigrationPayload {
   /** Wajib — sesuai controller & schema */
   letter_status: string;
   notes?: string;
+  knowing: string;  // ← tambah ini
+  submission: string
 }
 
 export interface UpdateMigrationPayload {
@@ -85,6 +89,8 @@ export interface UpdateMigrationPayload {
   letter_status: string;
   notes?: string;
   detail_item_ids: string[];  // ← tambah ini
+  knowing: string;  // ← tambah ini
+  submission: string;
 }
 
 

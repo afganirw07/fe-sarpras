@@ -85,6 +85,9 @@ export default function DialogAddMigration({
   // ── Checkbox selection (left table, current page only) ──
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  const [knowing, setKnowing] = useState("");
+  const [submission, setSubmission] = useState("");
+
   // ── Fetch rooms on mount ──
   useEffect(() => {
     getRooms()
@@ -225,6 +228,14 @@ export default function DialogAddMigration({
       toast.error("Sesi tidak valid. Silakan login ulang.");
       return;
     }
+    if (!knowing) {
+  toast.error("Yang Mengetahui wajib diisi.");
+  return;
+}
+ if (!submission) {
+  toast.error("Yang Menyerahkan wajib diisi.");
+  return;
+}
 
     setLoading(true);
     try {
@@ -235,6 +246,8 @@ export default function DialogAddMigration({
         detail_item_ids: stagedItems.map((i) => i.id),
         letter_status: DEFAULT_LETTER_STATUS,
         notes,
+        knowing,
+        submission,
       });
       toast.success("Mutasi berhasil disimpan.");
       setOpen(false);
@@ -253,6 +266,8 @@ export default function DialogAddMigration({
     setFromRoomId("");
     setToRoomId("");
     setNotes("");
+    setKnowing("");
+    setSubmission("");
     setLeftItems([]);
     setStagedItems([]);
     setStagedIds(new Set());
@@ -289,55 +304,64 @@ export default function DialogAddMigration({
         </DialogHeader>
 
         {/* ── WH Select ── */}
-        <div className="mb-6 grid grid-cols-2 gap-6">
-          <div className="grid w-full gap-2">
-            <Label>WH Awal</Label>
-            <Select
-              value={fromRoomId}
-              onValueChange={(val) => {
-                setFromRoomId(val);
-                setStagedItems([]);
-                setStagedIds(new Set());
-                setLeftPage(1);
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih WH Awal" />
-              </SelectTrigger>
-              <SelectContent>
-                {rooms.map((room) => (
-                  <SelectItem
-                    key={room.id}
-                    value={room.id}
-                    disabled={room.id === toRoomId}
-                  >
-                    {room.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {/* ── WH Select ── */}
+<div className="mb-4 grid grid-cols-2 gap-6">
+  <div className="grid gap-2">
+    <Label>WH Awal</Label>
+    <Select value={fromRoomId} onValueChange={(val) => {
+      setFromRoomId(val);
+      setStagedItems([]);
+      setStagedIds(new Set());
+      setLeftPage(1);
+    }}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Pilih WH Awal" />
+      </SelectTrigger>
+      <SelectContent>
+        {rooms.map((room) => (
+          <SelectItem key={room.id} value={room.id} disabled={room.id === toRoomId}>
+            {room.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
 
-          <div className="grid gap-2">
-            <Label>WH Tujuan</Label>
-            <Select value={toRoomId} onValueChange={setToRoomId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih WH Tujuan" />
-              </SelectTrigger>
-              <SelectContent>
-                {rooms.map((room) => (
-                  <SelectItem
-                    key={room.id}
-                    value={room.id}
-                    disabled={room.id === fromRoomId}
-                  >
-                    {room.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+  <div className="grid gap-2">
+    <Label>WH Tujuan</Label>
+    <Select value={toRoomId} onValueChange={setToRoomId}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Pilih WH Tujuan" />
+      </SelectTrigger>
+      <SelectContent>
+        {rooms.map((room) => (
+          <SelectItem key={room.id} value={room.id} disabled={room.id === fromRoomId}>
+            {room.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* Mengetahui & Yang Menyerahkan sejajar di bawah WH */}
+  <div className="grid gap-2">
+    <Label>Mengetahui</Label>
+    <Input
+      placeholder="Nama yang mengetahui..."
+      value={knowing}
+      onChange={(e) => setKnowing(e.target.value)}
+    />
+  </div>
+
+  <div className="grid gap-2">
+    <Label>Yang Menyerahkan</Label>
+    <Input
+      placeholder="Nama yang menyerahkan..."
+      value={submission}
+      onChange={(e) => setSubmission(e.target.value)}
+    />
+  </div>
+</div>
 
         <div className="grid grid-cols-2 gap-6">
           {/* ── Tabel Kiri: Available Items ── */}

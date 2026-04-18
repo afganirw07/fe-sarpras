@@ -74,6 +74,7 @@ export interface Transaction {
   created_by?: string;
   transaction_details: TransactionDetail[];
   detail_items: DetailItem[];
+  notes?: string;
 }
 
 export interface TransactionPaginationResponse {
