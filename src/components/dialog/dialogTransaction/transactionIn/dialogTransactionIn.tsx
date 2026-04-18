@@ -68,8 +68,9 @@ interface FormErrors {
   supplier?: string;
   fundingSource?: string;  // ← tambah ini
   categori?: string;
-  detailTransaction?: string;
+  notes?: string;
   items?: string;
+
 }
 export default function DialogTransactionIn({
   onSuccess,
@@ -83,7 +84,7 @@ export default function DialogTransactionIn({
   const [warehouses, setWarehouses] = useState<Room[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [poNumber, setPoNumber] = useState("");
-  const [detailTransaction, setDetailTransaction] = useState("");
+  const [notes, setNotes] = useState("");
   const { data: session } = useSession();
   const userId: any = session?.user?.id;
   const [transactionDate, setTransactionDate] = useState(
@@ -180,7 +181,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
     if (!poNumber) newErrors.poNumber = "PO Number wajib diisi";
     if (!selectedWarehouseId) newErrors.warehouse = "Warehouse wajib dipilih";
     if (!selectedSupplierId) newErrors.supplier = "Supplier wajib dipilih";
-    if (!detailTransaction) newErrors.detailTransaction = "Detail transaksi wajib diisi";
+    if (!notes) newErrors.notes = "Catatan wajib diisi";
 
     // Kategori hanya wajib kalau rows KOSONG
     // Kalau rows sudah ada item → kategori boleh tidak dipilih
@@ -215,6 +216,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
       status: TransactionStatus.DRAFT,
       returned_by: employeeId,
       in_type: inType,
+      notes: notes,  // ← tambah ini
        fundingSource: selectedFundingSourceId,  
       transaction_details: rows.map((row) => ({
         created_by: userId,
@@ -246,7 +248,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
       await onSuccess?.();
       setRows([]);
       setPoNumber("");
-      setDetailTransaction("");
+      setNotes("");
       setSelectedSupplierId("");
       setSelectedWarehouseId("");
       setSelectedItemId("");
@@ -308,13 +310,13 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <Label>Detail Transaction</Label>
-                  {errors.detailTransaction && <p className="text-xs text-red-500">{errors.detailTransaction}</p>}
+                  {errors.notes && <p className="text-xs text-red-500">{errors.notes}</p>}
                 </div>
                 <Input
                   placeholder="Detail Transaction"
-                  value={detailTransaction}
-                  onChange={(e) => { setDetailTransaction(e.target.value); clearError("detailTransaction"); }}
-                  className={errors.detailTransaction ? "border-red-500" : ""}
+                  value={notes}
+                  onChange={(e) => { setNotes(e.target.value); clearError("notes"); }}
+                  className={errors.notes ? "border-red-500" : ""}
                 />
               </div>
 

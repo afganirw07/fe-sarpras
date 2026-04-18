@@ -115,13 +115,14 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
 
   const addedDetailIds = new Set(rows.map((r) => r.detail_item_id));
 
-  const filteredItems: Item[] = selectedSubcategoryId
-    ? allItems.filter(
-        (item) =>
-          item.subcategory_id === selectedSubcategoryId &&
-          item.name.toLowerCase().includes(itemSearch.toLowerCase()),
-      )
-    : [];
+const filteredItems: Item[] = selectedSubcategoryId
+  ? allItems.filter(
+      (item) =>
+        item.type === "Loanable" && // ← tambah ini
+        item.subcategory_id === selectedSubcategoryId &&
+        item.name.toLowerCase().includes(itemSearch.toLowerCase()),
+    )
+  : [];
 
   const availableUnits: DetailItem[] = availableDetailItems.filter(
     (d) => !addedDetailIds.has(d.id),

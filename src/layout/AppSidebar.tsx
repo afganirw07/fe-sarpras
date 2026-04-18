@@ -15,7 +15,8 @@ import {
    Ellipsis,
    ArrowDownUp,
    Layers,
-   Coins
+   Coins,
+   ScreenShareOff
 } from "lucide-react";
 
 
@@ -54,6 +55,7 @@ const navItems: NavItem[] = [
       { name: "Barang Masuk", path: "/dashboard/transaction-in", pro: false },
       { name: "Peminjaman Barang", path: "/dashboard/transaction-out", pro: false },
       { name: "Pengembalian Barang", path: "/dashboard/transaction-return", pro: false },
+      { name: "Barang Sekali Pakai", path: "/dashboard/consumable-request", pro: false },
     ],
   },
    {

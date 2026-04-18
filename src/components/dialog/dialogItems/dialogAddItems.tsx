@@ -40,6 +40,7 @@ interface ItemFormData {
   stock: number;
   spesification: string;
   created_by: string
+  type?: "Consumable" | "Loanable";
 }
 
 interface FormErrors {
@@ -50,6 +51,7 @@ interface FormErrors {
   brand?: string;
   unit?: string;
   stock?: string;
+  type?:string;
 }
 
 export default function DialogAddItems({
@@ -76,7 +78,8 @@ export default function DialogAddItems({
     unit: "",
     spesification: "",
     stock: 0,
-    created_by: userId
+    created_by: userId,
+    type: "Loanable"
   });
   
 
@@ -146,7 +149,8 @@ export default function DialogAddItems({
         unit: "",
         spesification: "",
         stock: 0,
-        created_by: userId
+        created_by: userId,
+        type: "Loanable"
       });
       setSelectedCategorySubcategories([]);
       setErrors({});
@@ -205,7 +209,7 @@ export default function DialogAddItems({
         brand: formData.brand?.trim() || null,
         unit: formData.unit.trim(),
         stock: formData.stock,
-        type: "Loanable",
+        type: formData.type,
         created_by: userId
       };
 
@@ -409,6 +413,28 @@ export default function DialogAddItems({
                 </div>
                 
               </div>
+
+<div className="grid gap-2">
+  <div className="flex gap-2 items-center">
+    <Label>Tipe Item *</Label>
+    {errors.type && (
+      <p className="text-xs text-red-500 mt-1">{errors.type}</p>
+    )}
+  </div>
+  <Select
+    value={formData.type}
+    onValueChange={(value) => handleInputChange("type", value)}
+    disabled={loading}
+  >
+    <SelectTrigger className={errors.type ? "border-red-500" : ""}>
+      <SelectValue placeholder="Pilih Tipe Item" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="Loanable">Loanable</SelectItem>
+      <SelectItem value="Consumable">Consumable</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
 
               {/* Stok */}
               {/* <div className="grid gap-2">
