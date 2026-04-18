@@ -169,3 +169,99 @@ export async function getDeletedDetailItemById(
     method: "GET",
   });
 }
+
+
+//filter detail item di page master item
+//--------------------------------------------------
+
+export interface ApiResponse<T> {
+  data: T;
+  pagination?: {
+    total: number;
+    totalPages: number;
+    currentPage: number;
+    perPage: number;
+  };
+}
+
+/**
+ * Ambil semua detail item dengan filter kondisi dan/atau periode.
+ * Filter periode menggunakan updated_at (N bulan terakhir).
+ * Fetch semua halaman sekaligus (untuk keperluan export).
+ */
+export async function getDetailItemsFiltered(params: {
+  condition?: string;
+  periodMonths?: number | null;
+  page?: number;
+  limit?: number;
+}): Promise<ApiResponse<DetailItem[]>> {
+  const { condition, periodMonths, page = 1, limit = 10 } = params;
+
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (condition) query.set("condition", condition);
+
+  if (periodMonths) {
+    const from = new Date();
+    from.setMonth(from.getMonth() - periodMonths);
+    query.set("updated_from", from.toISOString());
+  }
+
+  return await api(`/api/detail-items?${query.toString()}`, {
+    method: "GET",
+  });
+}
+
+/**
+ * Fetch semua halaman sekaligus untuk export Excel.
+ */
+export async function getAllDetailItemsFiltered(params: {
+  condition?: string;
+  periodMonths?: number | null;
+}): Promise<DetailItem[]> {
+  const { condition, periodMonths } = params;
+
+  let allItems: DetailItem[] = [];
+  let page = 1;
+
+  while (true) {
+    const res = await getDetailItemsFiltered({
+      condition,
+      periodMonths,
+      page,
+      limit: 100,
+    });
+
+    allItems = [...allItems, ...(res.data ?? [])];
+
+    const totalPages = res.pagination?.totalPages ?? 1;
+    if (page >= totalPages) break;
+    page++;
+  }
+
+  return allItems;
+}
+
+/**
+ * Mengembalikan map: item_id → jumlah detail item kondisi Poor.
+ */
+export async function getPoorStockByItemId(
+  itemId: string
+): Promise<number> {
+  const query = new URLSearchParams({
+    item_id: itemId,
+    condition: "Poor",
+    limit: "1",
+    page: "1",
+  });
+
+  const res = await api<ApiResponse<DetailItem[]>>(
+    `/api/detail-items?${query.toString()}`,
+    { method: "GET" }
+  );
+
+  return res.pagination?.total ?? res.data?.length ?? 0;
+}

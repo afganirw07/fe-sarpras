@@ -57,7 +57,6 @@ interface TransactionItemRow {
   item_id: string;
   item_name: string;
   price: number;
-  // qty_request: number;
   qty: number;
   condition: ItemConditions;
   procurement_year: number;
@@ -484,7 +483,6 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
               >
                 Add Item
               </Button>
-
               <ImportExcel
                 items={items}
                 subcategories={subcategories}

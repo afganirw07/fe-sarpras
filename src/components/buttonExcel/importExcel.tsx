@@ -27,7 +27,7 @@ interface ImportedExcelRow {
 }
 
 export interface ParsedImportData {
-  // poNumber: string;
+  poNumber: string;
   warehouse: string;
   supplier: string;
   subKategori: string;
@@ -78,7 +78,6 @@ export default function ImportExcel({
     if (!file) return;
 
     const reader = new FileReader();
-
     reader.onload = (event) => {
       try {
         const data = new Uint8Array(event.target?.result as ArrayBuffer);
