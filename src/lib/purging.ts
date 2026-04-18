@@ -18,6 +18,7 @@ export interface Purging {
   condition: string;
   letter_status: string;
   item_status: string;
+  notes: string;
   created_by: string;
   createdBy?: {          
     id: string;
@@ -32,6 +33,7 @@ export interface Purging {
 export interface purgingDetail {
   id: string;
   purging_id: string;
+  detail_item_id?: string;
   item_name: string;
   category: string;
   subcategory: string;

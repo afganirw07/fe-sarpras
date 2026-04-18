@@ -15,6 +15,7 @@ export interface Item {
   subCategory?: string;
   code: string;
   name: string;
+  spesification: string;
   brand?: string;
   stock: number;
   unit: string;
@@ -44,6 +45,7 @@ export interface DetailItem {
   transaction_id: string;
   room_id: string;
   migration_id: string | null;
+  spesification: string;
   serial_number: string;
   condition: string;
   status: string;
@@ -193,10 +195,11 @@ export interface ApiResponse<T> {
 export async function getDetailItemsFiltered(params: {
   condition?: string;
   periodMonths?: number | null;
+  subCategoryId: string
   page?: number;
   limit?: number;
 }): Promise<ApiResponse<DetailItem[]>> {
-  const { condition, periodMonths, page = 1, limit = 10 } = params;
+  const { condition, periodMonths,subCategoryId, page = 1, limit = 10 } = params;
 
   const query = new URLSearchParams({
     page: String(page),
@@ -204,6 +207,7 @@ export async function getDetailItemsFiltered(params: {
   });
 
   if (condition) query.set("condition", condition);
+  if (subCategoryId) query.set("subcategory_id", subCategoryId);
 
   if (periodMonths) {
     const from = new Date();
@@ -222,8 +226,9 @@ export async function getDetailItemsFiltered(params: {
 export async function getAllDetailItemsFiltered(params: {
   condition?: string;
   periodMonths?: number | null;
+  subCategoryId?: string | null; 
 }): Promise<DetailItem[]> {
-  const { condition, periodMonths } = params;
+  const { condition, periodMonths, subCategoryId } = params;
 
   let allItems: DetailItem[] = [];
   let page = 1;
@@ -232,6 +237,7 @@ export async function getAllDetailItemsFiltered(params: {
     const res = await getDetailItemsFiltered({
       condition,
       periodMonths,
+      subCategoryId,
       page,
       limit: 100,
     });

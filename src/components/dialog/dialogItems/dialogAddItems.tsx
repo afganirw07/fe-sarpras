@@ -38,6 +38,7 @@ interface ItemFormData {
   brand: string;
   unit: string;
   stock: number;
+  spesification: string;
   created_by: string
   spesifikasi: string;
   type?: "Consumable" | "Loanable";
@@ -78,6 +79,7 @@ export default function DialogAddItems({
     brand: "",
     spesifikasi:"",
     unit: "",
+    spesification: "",
     stock: 0,
     created_by: userId,
     type: "Loanable"
@@ -148,6 +150,7 @@ export default function DialogAddItems({
         subcategory_id: "",
         brand: "",
         unit: "",
+        spesification: "",
         stock: 0,
         created_by: userId,
         type: "Loanable",
@@ -230,6 +233,7 @@ export default function DialogAddItems({
         brand: "",
         spesifikasi:"",
         unit: "",
+        spesification: "",
         stock: 0,
         created_by: userId
 
