@@ -18,6 +18,7 @@ export interface Item {
   brand?: string;
   stock: number;
   unit: string;
+  spesifikasi: string;
   category: {
     name: string;
   };

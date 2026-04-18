@@ -39,6 +39,7 @@ interface ItemFormData {
   unit: string;
   stock: number;
   created_by: string
+  spesifikasi: string;
   type?: "Consumable" | "Loanable";
 }
 
@@ -51,6 +52,7 @@ interface FormErrors {
   unit?: string;
   stock?: string;
   type?:string;
+  spesifikasi?: string;
 }
 
 export default function DialogAddItems({
@@ -74,6 +76,7 @@ export default function DialogAddItems({
     category_id: "",
     subcategory_id: "",
     brand: "",
+    spesifikasi:"",
     unit: "",
     stock: 0,
     created_by: userId,
@@ -147,7 +150,8 @@ export default function DialogAddItems({
         unit: "",
         stock: 0,
         created_by: userId,
-        type: "Loanable"
+        type: "Loanable",
+        spesifikasi:""
       });
       setSelectedCategorySubcategories([]);
       setErrors({});
@@ -169,7 +173,8 @@ export default function DialogAddItems({
       unit: formData.unit.trim(),
       stock: formData.stock,
       brand: formData.brand.trim(),
-        created_by: formData.created_by,
+      spesifikasi: formData.spesifikasi.trim(),
+      created_by: formData.created_by,
     };
 
     console.log("Validation data:", validationData);
@@ -204,6 +209,7 @@ export default function DialogAddItems({
         category_id: formData.category_id,
         subcategory_id: formData.subcategory_id || null,
         brand: formData.brand?.trim() || null,
+        spesifikasi: formData.spesifikasi?.trim() || null,
         unit: formData.unit.trim(),
         stock: formData.stock,
         type: formData.type,
@@ -222,6 +228,7 @@ export default function DialogAddItems({
         category_id: "",
         subcategory_id: "",
         brand: "",
+        spesifikasi:"",
         unit: "",
         stock: 0,
         created_by: userId
@@ -344,6 +351,24 @@ export default function DialogAddItems({
                     placeholder="Merek Item"
                     defaultValue={formData.brand}
                     onChange={(e) => handleInputChange("brand", e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+               
+              </div>
+              {/* spesifikasi */}
+              <div className="grid gap-2">
+                <div className="flex gap-2 items-center">
+                <Label>Spesifikasi *</Label>
+                 {errors.spesifikasi && (
+                  <p className="text-xs text-red-500 mt-1">{errors.spesifikasi}</p>
+                )}
+                </div>
+                <div className={`${errors.spesifikasi ? 'border-red-500' : ''}`}>
+                  <Input
+                    placeholder="Spesifikasi Item"
+                    defaultValue={formData.spesifikasi}
+                    onChange={(e) => handleInputChange("spesifikasi", e.target.value)}
                     disabled={loading}
                   />
                 </div>
