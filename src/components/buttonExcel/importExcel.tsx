@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { toast } from "sonner";
 import { ItemConditions } from "@/lib/transaction";
 
+// ── Types ──────────────────────────────────────────────────────────────────
 interface TransactionItemRow {
   item_id: string;
   item_name: string;
@@ -12,11 +13,12 @@ interface TransactionItemRow {
   qty: number;
   condition: ItemConditions;
   procurement_year: number;
+  serial_number?: string; 
+  warehouse_id?: string;
 }
 
 interface ImportedExcelRow {
   No?: number;
-  // Po_Number?: string | number;
   Warehouse?: string;
   supplier?: string;
   price?: string | number;
@@ -24,6 +26,9 @@ interface ImportedExcelRow {
   sub_kategori?: string;
   nama_item?: string;
   Qty?: number;
+  sumber_dana?: string; 
+  serial_number?: string; 
+
 }
 
 export interface ParsedImportData {
@@ -56,11 +61,6 @@ export default function ImportExcel({
   const normalize = (val: any) =>
     val?.toString().trim().toLowerCase() ?? "";
 
-  // 🔥 OPTIMIZATION: bikin map biar gak find terus (O(n²) → O(n))
-  const itemMap = new Map(
-    items.map((i) => [normalize(i.name), i])
-  );
-
   const findMatch = <T extends { name: string }>(
     list: T[],
     keyword?: string
@@ -90,7 +90,6 @@ export default function ImportExcel({
           {
             header: [
               "No",
-              // "Po_Number",
               "Warehouse",
               "supplier",
               "Kategori",
@@ -98,6 +97,8 @@ export default function ImportExcel({
               "nama_item",
               "price",
               "Qty",
+              "sumber_dana",
+              "serial_number", // ✅ kolom ke-9
             ],
             range: 1,
             defval: "",
@@ -119,49 +120,64 @@ export default function ImportExcel({
 
         const firstRow = dataRows[0];
 
-        // 🔹 MATCH MASTER
-        const matchedWarehouse = findMatch(warehouses, firstRow.Warehouse);
-        const matchedSupplier = findMatch(suppliers, firstRow.supplier);
+        // ── Match master data ──────────────────────────────────────────────
+        const matchedWarehouse   = findMatch(warehouses, firstRow.Warehouse);
+        const matchedSupplier    = findMatch(suppliers, firstRow.supplier);
         const matchedSubcategory = findMatch(subcategories, firstRow.sub_kategori);
 
         const importedRows: TransactionItemRow[] = [];
         const unmatchedItems: string[] = [];
 
-        for (const row of dataRows) {
-          const itemName = row.nama_item?.toString().trim();
-          if (!itemName) continue;
+for (const row of dataRows) {
+  const itemName = row.nama_item?.toString().trim();
+  if (!itemName) continue;
 
-          const matchedItem = items.find(
-            (i) =>
-              normalize(i.name).includes(normalize(itemName)) ||
-              normalize(itemName).includes(normalize(i.name))
-          );
+  const matchedItem = items.find(
+    (i) =>
+      normalize(i.name).includes(normalize(itemName)) ||
+      normalize(itemName).includes(normalize(i.name))
+  );
 
-          if (!matchedItem) {
-            unmatchedItems.push(itemName);
-            continue;
-          }
+  if (!matchedItem) {
+    unmatchedItems.push(itemName);
+    continue;
+  }
 
-          if (importedRows.some((r) => r.item_id === matchedItem.id)) continue;
+  const qty = Number(row.Qty) || 1;
+  const priceExcel = Number(row.price);
+  const finalPrice = !isNaN(priceExcel)
+    ? priceExcel
+    : price[matchedItem.id] ?? matchedItem.price ?? 0;
 
-          const qty = Number(row.Qty) || 1;
-          const priceExcel = Number(row.price);
+  const serialFromExcel = row.serial_number?.toString().trim() || undefined;
 
-          const finalPrice = !isNaN(priceExcel)
-            ? priceExcel
-            : price[matchedItem.id] ?? matchedItem.price ?? 0;
+  const rowWarehouse = findMatch(warehouses, row.Warehouse);
 
-          importedRows.push({
-            item_id: matchedItem.id,
-            item_name: matchedItem.name,
-            price: finalPrice,
-            qty,
-            condition: ItemConditions.GOOD,
-            procurement_year: new Date().getFullYear(),
-          });
-        }
+  const existingIndex = importedRows.findIndex(
+    (r) =>
+      r.item_id === matchedItem.id &&
+      r.warehouse_id === (rowWarehouse?.id ?? "") &&
+      r.serial_number === serialFromExcel
+  );
 
-        // 🔹 VALIDATION
+  if (existingIndex !== -1) {
+    // Benar-benar duplikat → gabung qty
+    importedRows[existingIndex].qty += qty;
+  } else {
+    // Beda warehouse atau beda serial → row baru
+    importedRows.push({
+      item_id: matchedItem.id,
+      item_name: matchedItem.name,
+      price: finalPrice,
+      qty,
+      condition: ItemConditions.GOOD,
+      procurement_year: new Date().getFullYear(),
+      serial_number: serialFromExcel,
+      warehouse_id: rowWarehouse?.id ?? "",  
+    });
+  }
+}
+        // ── Validasi ───────────────────────────────────────────────────────
         if (unmatchedItems.length) {
           toast.warning(`Item tidak ditemukan: ${unmatchedItems.join(", ")}`);
         }
@@ -176,7 +192,7 @@ export default function ImportExcel({
           return;
         }
 
-        const hasZero = importedRows.some((r) => r.price === 0);
+        const hasZero    = importedRows.some((r) => r.price === 0);
         const hasNonZero = importedRows.some((r) => r.price > 0);
 
         if (hasZero && hasNonZero) {
@@ -188,26 +204,23 @@ export default function ImportExcel({
           toast.info("Semua item dianggap DONATION");
         }
 
-        // 🔹 FINAL
+        // ── Final ──────────────────────────────────────────────────────────
         const parsedData: ParsedImportData = {
-          // poNumber: firstRow.Po_Number?.toString() ?? "",
-          warehouse: matchedWarehouse?.id ?? "",
-          supplier: matchedSupplier?.id ?? "",
+          poNumber:    "",
+          warehouse:   matchedWarehouse?.id   ?? "",
+          supplier:    matchedSupplier?.id    ?? "",
           subKategori: matchedSubcategory?.id ?? "",
-          rows: importedRows,
+          rows:        importedRows,
         };
 
         if (!matchedWarehouse)
           toast.warning(`Warehouse "${firstRow.Warehouse}" tidak ditemukan`);
-
         if (!matchedSupplier)
           toast.warning(`Supplier "${firstRow.supplier}" tidak ditemukan`);
-
         if (!matchedSubcategory)
           toast.warning(`Sub-kategori "${firstRow.sub_kategori}" tidak ditemukan`);
 
         onImport(parsedData);
-
         toast.success(`Import ${importedRows.length} item berhasil`);
       } catch (err) {
         console.error(err);

@@ -47,12 +47,13 @@ import { useState } from "react";
 import { toast, Toaster } from "sonner";
 import { Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { z } from "zod";
-import { tansactionInSchema } from "@/schema/transaction_jn.schema";
+// import { z } from "zod";
+// import { tansactionInSchema } from "@/schema/transaction_jn.schema";
 import { getMyEmployeeId } from "@/lib/roles";
 import ImportExcel, { ParsedImportData } from "@/components/buttonExcel/importExcel";
 import { getFundingSources, FundingSource } from "@/lib/funding-sources";
 
+// ── Types ──────────────────────────────────────────────────────────────────
 interface TransactionItemRow {
   item_id: string;
   item_name: string;
@@ -60,18 +61,38 @@ interface TransactionItemRow {
   qty: number;
   condition: ItemConditions;
   procurement_year: number;
+  serial_number?: string;
+  warehouse_id?:string;
 }
 
 interface FormErrors {
   poNumber?: string;
   warehouse?: string;
   supplier?: string;
-  fundingSource?: string;  // ← tambah ini
+  fundingSource?: string;
   categori?: string;
   notes?: string;
   items?: string;
-
 }
+
+// ── Helper: ambil nama parent category dari subcategory yang dipilih ────────
+function getParentCategoryName(
+  subcategoryId: string,
+  subcategories: Subcategory[],
+  categories: Category[],
+): string {
+  const sub = subcategories.find((s) => s.id === subcategoryId);
+  if (!sub) return "";
+  const cat = categories.find((c) => c.id === sub.category_id);
+  return cat?.name ?? "";
+  
+}
+
+
+// ── Kategori yang boleh input serial number custom ─────────────────────────
+const SERIAL_CUSTOM_CATEGORIES = ["elektronik"];
+
+// ── Komponen utama ─────────────────────────────────────────────────────────
 export default function DialogTransactionIn({
   onSuccess,
 }: {
@@ -98,9 +119,29 @@ export default function DialogTransactionIn({
   const [errors, setErrors] = useState<FormErrors>({});
   const [itemSearch, setItemSearch] = useState("");
   const [fundingSources, setFundingSources] = useState<FundingSource[]>([]);
-const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("");
+  const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("");
 
-  // ── Filter items berdasarkan subkategori & search ──────────────────────────
+  const [customSerial, setCustomSerial] = useState("");
+
+  const parentCategoryName = getParentCategoryName(
+    selectedSubcategoryId,
+    subcategories,
+    categories,
+  );
+
+const getParentCategoryNameById = (itemId: string): string => {
+  const item = items.find((i) => i.id === itemId);
+  if (!item) return "";
+  const sub = subcategories.find((s) => s.id === item.subcategory_id);
+  if (!sub) return "";
+  const cat = categories.find((c) => c.id === sub.category_id);
+  return cat?.name ?? "";
+};
+
+  const isCustomSerial = SERIAL_CUSTOM_CATEGORIES.includes(
+    parentCategoryName.toLowerCase(),
+  );
+
   const filteredItems = selectedSubcategoryId
     ? items.filter(
         (item) =>
@@ -109,29 +150,29 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
       )
     : [];
 
+  // ── Fetch semua data saat dialog dibuka
   const fetchAll = async () => {
-  try {
-    const [catRes, subCatRes, supRes, roomRes, itemRes, fsRes] = await Promise.all([
-      getCategories(1, 1000),
-      getSubcategories(1, 1000),
-      getSuppliers(),
-      getRooms(),
-      getItems(),
-      getFundingSources(1, 1000),  // ← tambah ini
-    ]);
-    setCategories(catRes.data);
-    setSubcategories(subCatRes.data);
-    setSuppliers(supRes.data);
-    setWarehouses(roomRes.data);
-    setItems(itemRes.data);
-    setFundingSources(fsRes.data?.fundingSource || []);  // ← tambah ini
-  } catch (error) {
-    console.error("Fetch dialog data error:", error);
-  }
-};
+    try {
+      const [catRes, subCatRes, supRes, roomRes, itemRes, fsRes] = await Promise.all([
+        getCategories(1, 1000),
+        getSubcategories(1, 1000),
+        getSuppliers(),
+        getRooms(),
+        getItems(),
+        getFundingSources(1, 1000),
+      ]);
+      setCategories(catRes.data);
+      setSubcategories(subCatRes.data);
+      setSuppliers(supRes.data);
+      setWarehouses(roomRes.data);
+      setItems(itemRes.data);
+      setFundingSources(fsRes.data?.fundingSource || []);
+    } catch (error) {
+      console.error("Fetch dialog data error:", error);
+    }
+  };
 
   const handleaddItem = () => {
-    // ── Kategori wajib hanya saat mau tambah item baru ──
     if (!selectedSubcategoryId) {
       setErrors((prev) => ({ ...prev, categori: "Pilih kategori dulu sebelum menambah item" }));
       toast.error("Pilih kategori dulu sebelum menambah item");
@@ -152,7 +193,6 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
         item_id: item.id,
         item_name: item.name,
         price: item.price ?? 0,
-        // qty_request: 1,
         qty: 1,
         condition: ItemConditions.GOOD,
         procurement_year: new Date().getFullYear(),
@@ -168,27 +208,22 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
   };
 
   const priceMap = items.reduce((acc, item) => {
-  acc[item.id] = item.price ?? 0;
-  return acc;
-}, {} as { [key: string]: number });
+    acc[item.id] = item.price ?? 0;
+    return acc;
+  }, {} as { [key: string]: number });
 
+  // ── Submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     setErrors({});
-
-    // ── Validasi manual: kategori boleh kosong asal rows sudah ada ──────────
+    
     const newErrors: FormErrors = {};
-
     if (!poNumber) newErrors.poNumber = "PO Number wajib diisi";
     if (!selectedWarehouseId) newErrors.warehouse = "Warehouse wajib dipilih";
     if (!selectedSupplierId) newErrors.supplier = "Supplier wajib dipilih";
     if (!notes) newErrors.notes = "Catatan wajib diisi";
-
-    // Kategori hanya wajib kalau rows KOSONG
-    // Kalau rows sudah ada item → kategori boleh tidak dipilih
     if (rows.length === 0 && !selectedSubcategoryId) {
       newErrors.categori = "Pilih kategori atau tambahkan item terlebih dahulu";
     }
-
     if (rows.length === 0) {
       newErrors.items = "Tambahkan minimal satu item";
     }
@@ -205,47 +240,78 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
       ? InType.DONATION
       : InType.BUY;
 
-    let counter = 1;
     const dateStr = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}${String(new Date().getDate()).padStart(2, "0")}`;
+
+    // const serialBase =
+    //   isCustomSerial && customSerial.trim()
+    //     ? customSerial.trim()
+    //     : `${subCategoryCode}-${poNumber}-${dateStr}`;
 
     const payload = {
       user_id: userId,
-      supplier_id: selectedSupplierId,
+      supplier_id: selectedSupplierId || null, 
       po_number: poNumber,
       transaction_date: new Date(transactionDate),
       status: TransactionStatus.DRAFT,
-      returned_by: employeeId,
+      returned_by: employeeId || null,
+      type: "In",
+      
       in_type: inType,
-      notes: notes,  // ← tambah ini
-       fundingSource: selectedFundingSourceId,  
+      notes,
+      fundingSource: selectedFundingSourceId || null,
       transaction_details: rows.map((row) => ({
         created_by: userId,
         item_id: row.item_id,
-        room_id: selectedWarehouseId,
+        room_id: row.warehouse_id || selectedWarehouseId || null, 
         quantity: row.qty,
         price: inType === InType.DONATION ? null : row.price,
         condition: row.condition,
         procurement_month: new Date().getMonth() + 1,
         procurement_year: row.procurement_year,
       })),
-      detail_items: rows.flatMap((row) =>
-        Array.from({ length: row.qty }).map(() => ({
-          item_id: row.item_id,
-          room_id: selectedWarehouseId,
-          serial_number: `${subCategoryCode}-${poNumber}-${dateStr}-${counter++}`,
-          condition: row.condition,
-          status: ItemStatus.AVAILABLE,
-          created_by: userId,
-        })),
-      ),
+  detail_items: rows.flatMap((row) => {
+  let itemCounter = 1;
+
+  const rowSuffix = `${dateStr}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+  return Array.from({ length: row.qty }).map(() => {
+    const rowParentCategory = getParentCategoryNameById(row.item_id);
+    const rowIsCustomSerial = SERIAL_CUSTOM_CATEGORIES.includes(
+      rowParentCategory.toLowerCase()
+    );
+
+    const rowItem = items.find((i) => i.id === row.item_id);
+    const rowSubCode =
+      subcategories.find((s) => s.id === rowItem?.subcategory_id)?.code ??
+      subCategoryCode;
+
+      const base = row.serial_number?.trim()
+    ? `${row.serial_number.trim()}`                 
+    : rowIsCustomSerial && customSerial.trim()
+      ? `${customSerial.trim()}`                   
+      : `${rowSubCode}-${poNumber}-${rowSuffix}`;   
+
+    return {
+      item_id: row.item_id,
+      room_id: row.warehouse_id || selectedWarehouseId || null,
+      serial_number: `${base}-${itemCounter++}`,  
+      condition: row.condition,
+      status: ItemStatus.AVAILABLE,
+      created_by: userId,
     };
-
-
+  });
+}),
+    };
+    
+     console.log("payload FULL:", JSON.stringify(payload, null, 2));
     try {
       const result = await createTransactionIn(payload as any);
       console.log("===============================", result);
       toast.success("Transaction berhasil dibuat");
+     
       await onSuccess?.();
+
+      // ── Reset semua state ──────────────────────────────────────────────
       setRows([]);
       setPoNumber("");
       setNotes("");
@@ -254,7 +320,8 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
       setSelectedItemId("");
       setSelectedSubcategoryId("");
       setSubCategoryCode("");
-      setSelectedFundingSourceId("");  // ← tambah di bagian reset
+      setSelectedFundingSourceId("");
+      setCustomSerial("");
       setErrors({});
     } catch (error) {
       console.error("Create transaction error:", error);
@@ -274,6 +341,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
     setRows(data.rows);
   };
 
+
   return (
     <div className="flex justify-end">
       <Dialog onOpenChange={(open) => open && fetchAll()}>
@@ -292,6 +360,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
             </DialogHeader>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+
               {/* PO Number */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
@@ -363,32 +432,27 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
               </div>
 
               {/* Funding Source */}
-<div className="flex flex-col gap-2">
-  <div className="flex items-center gap-2">
-    <Label>Sumber dana</Label>
-    {errors.fundingSource && (
-      <p className="text-xs text-red-500">{errors.fundingSource}</p>
-    )}
-  </div>
-  <Select
-    value={selectedFundingSourceId}
-    onValueChange={(v) => {
-      setSelectedFundingSourceId(v);
-      clearError("fundingSource");
-    }}
-  >
-    <SelectTrigger className={`h-11 w-full max-w-xl ${errors.fundingSource ? "border-red-500" : ""}`}>
-      <SelectValue placeholder="Pilih Funding Source" />
-    </SelectTrigger>
-    <SelectContent>
-      {fundingSources.map((fs) => (
-        <SelectItem key={fs.id} value={fs.id}>
-          {fs.name}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Label>Sumber Dana</Label>
+                  {errors.fundingSource && (
+                    <p className="text-xs text-red-500">{errors.fundingSource}</p>
+                  )}
+                </div>
+                <Select
+                  value={selectedFundingSourceId}
+                  onValueChange={(v) => { setSelectedFundingSourceId(v); clearError("fundingSource"); }}
+                >
+                  <SelectTrigger className={`h-11 w-full max-w-xl ${errors.fundingSource ? "border-red-500" : ""}`}>
+                    <SelectValue placeholder="Pilih Funding Source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fundingSources.map((fs) => (
+                      <SelectItem key={fs.id} value={fs.id}>{fs.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* Kategori — opsional kalau rows sudah ada */}
               <div className="flex flex-col gap-2">
@@ -406,6 +470,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
                   onValueChange={(v) => {
                     setSelectedSubcategoryId(v);
                     setSelectedItemId("");
+                    setCustomSerial(""); // ✅ reset serial saat ganti kategori
                     clearError("categori");
                     const subcategory = subcategories.find((c) => c.id === v);
                     setSubCategoryCode(subcategory?.code ?? "");
@@ -421,6 +486,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
                         if (subs.length === 0) return null;
                         return (
                           <div key={cat.id}>
+                            {/* Header parent category — tidak bisa diklik */}
                             <div className="select-none bg-gray-50 dark:bg-black px-2 py-1.5 text-xs font-semibold text-gray-400">
                               {cat.name}
                             </div>
@@ -474,43 +540,35 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
                   </SelectContent>
                 </Select>
               </div>
+
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <Label>Nomor Serial</Label>
-                  {errors.items && <p className="text-xs text-red-500">{errors.items}</p>}
+                  {!isCustomSerial && (
+                    <span className="text-xs text-gray-400">(generate otomatis)</span>
+                  )}
+                  {isCustomSerial && (
+                    <span className="text-xs text-blue-500">(Elektronik — bisa diisi manual)</span>
+                  )}
                 </div>
-                <Select
-                  value={selectedItemId}
-                  onValueChange={(v) => { setSelectedItemId(v); setItemSearch(""); }}
-                  disabled={!selectedSubcategoryId}
-                >
-                  <SelectTrigger className={`h-11 w-full max-w-xl ${errors.items ? "border-red-500" : ""}`}>
-                    <SelectValue placeholder={selectedSubcategoryId ? "Pilih Item" : "Ini masih dummy"} />
-                  </SelectTrigger>
-                  <SelectContent position="popper" side="bottom" avoidCollisions={false}>
-                    <div className="sticky top-0 z-10 bg-white dark:bg-black p-2">
-                      <input
-                        className="w-full rounded-md border border-gray-200 px-3 py-1.5 text-sm outline-none focus:border-blue-500"
-                        placeholder="Cari item..."
-                        value={itemSearch}
-                        onChange={(e) => setItemSearch(e.target.value)}
-                        onKeyDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="max-h-52 overflow-y-auto">
-                      {filteredItems.length === 0 ? (
-                        <div className="px-4 py-2 text-sm text-gray-500">Tidak ada item</div>
-                      ) : (
-                        filteredItems.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
-                        ))
-                      )}
-                    </div>
-                  </SelectContent>
-                </Select>
+                <Input
+                  placeholder={
+                    isCustomSerial
+                      ? `Isi prefix serial, contoh: SN-ABC`
+                      : `${subCategoryCode || "CODE"}-${poNumber || "PO"}-YYYYMMDD-1 (otomatis)`
+                  }
+                  value={customSerial}
+                  onChange={(e) => setCustomSerial(e.target.value)}
+                  disabled={!isCustomSerial}
+                  className={
+                    !isCustomSerial
+                      ? "cursor-not-allowed bg-gray-50 text-gray-400 dark:bg-white/5"
+                      : ""
+                  }
+                />
               </div>
 
+              {/* Add Item Button */}
               <Button
                 type="button"
                 onClick={handleaddItem}
@@ -519,6 +577,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
               >
                 Add Item
               </Button>
+
               <ImportExcel
                 items={items}
                 subcategories={subcategories}
@@ -561,7 +620,7 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
                         </TableRow>
                       ) : (
                         rows.map((row, index) => (
-                          <TableRow key={row.item_id}>
+                          <TableRow key={`${row.item_id}-${index}`}>
                             <TableCell className="border px-4 py-3">{index + 1}</TableCell>
                             <TableCell className="border px-4 py-3">{row.item_id}</TableCell>
                             <TableCell className="border px-4 py-3">{row.item_name}</TableCell>
@@ -569,29 +628,39 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
                               <Input
                                 type="number"
                                 value={row.price}
-                                onChange={(e) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, price: Number(e.target.value) } : r))}
+                                onChange={(e) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index ? { ...r, price: Number(e.target.value) } : r
+                                    )
+                                  )
+                                }
                               />
                             </TableCell>
-                            {/* <TableCell className="border px-4 py-3">
-                              <Input
-                                type="number"
-                                min={1}
-                                value={row.qty_request}
-                                onChange={(e) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, qty_request: Number(e.target.value) } : r))}
-                              />
-                            </TableCell> */}
                             <TableCell className="border px-4 py-3">
                               <Input
                                 type="number"
                                 min={0}
                                 value={row.qty}
-                                onChange={(e) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, qty: Number(e.target.value) } : r))}
+                                onChange={(e) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index ? { ...r, qty: Number(e.target.value) } : r
+                                    )
+                                  )
+                                }
                               />
                             </TableCell>
                             <TableCell className="border px-4 py-3">
                               <Select
                                 value={row.condition}
-                                onValueChange={(v: ItemConditions) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, condition: v } : r))}
+                                onValueChange={(v: ItemConditions) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index ? { ...r, condition: v } : r
+                                    )
+                                  )
+                                }
                               >
                                 <SelectTrigger className="h-9">
                                   <SelectValue placeholder="Pilih" />
@@ -607,14 +676,22 @@ const [selectedFundingSourceId, setSelectedFundingSourceId] = useState<string>("
                               <Input
                                 type="number"
                                 value={row.procurement_year}
-                                onChange={(e) => setRows((prev) => prev.map((r, i) => i === index ? { ...r, procurement_year: Number(e.target.value) } : r))}
+                                onChange={(e) =>
+                                  setRows((prev) =>
+                                    prev.map((r, i) =>
+                                      i === index ? { ...r, procurement_year: Number(e.target.value) } : r
+                                    )
+                                  )
+                                }
                               />
                             </TableCell>
                             <TableCell className="border px-4 py-3">
                               <Button
                                 size="icon"
                                 variant="destructive"
-                                onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
+                                onClick={() =>
+                                  setRows((prev) => prev.filter((_, i) => i !== index))
+                                }
                               >
                                 <Trash2 />
                               </Button>

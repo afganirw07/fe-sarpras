@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table, TableBody, TableCell, TableHeader, TableRow,
 } from "@/components/ui/table/index";
-import { Search, Trash2, ArrowRightFromLine, PackageX, Loader2, Pencil } from "lucide-react";
+import { Search, Trash2, ArrowRightFromLine, PackageX, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getRooms, Room } from "@/lib/warehouse";
 import {
@@ -24,14 +24,15 @@ import {
   CategoryWithSubcategories,
   ItemOption,
 } from "@/lib/detail-items";
-import { updatePurging, Purging } from "@/lib/purging";
+import { updatePurging, getPurgingById, Purging } from "@/lib/purging";
 import { useSession } from "next-auth/react";
 import Pagination from "@/components/tables/Pagination";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface DetailItem {
-  id: string;
+  id: string;                 // DetailItem.id — dipakai sebagai FK detail_item_id
+  purging_detail_id?: string; // PurgingDetail.id — hanya referensi existing
   serial_number: string;
   condition: "Good" | "Fair" | "Poor";
   status: string;
@@ -79,78 +80,99 @@ export default function DialogEditPemutihan({
   onSuccess,
 }: DialogEditPemutihanProps) {
   const { data: session } = useSession();
-  const skipNextFetch     = useRef(false);
-  const initialized       = useRef(false);
 
-  // state: loading
-  const [loading, setLoading]                       = useState(false);
-  const [loadingItems, setLoadingItems]             = useState(false);
-  const [loadingCategories, setLoadingCategories]   = useState(false);
-  const [loadingItemNames, setLoadingItemNames]     = useState(false);
-  const [loadingSelectAll, setLoadingSelectAll]     = useState(false);
+  // ── Refs ──────────────────────────────────────────────────────────────────
+  const stagedIdsRef  = useRef<Set<string>>(new Set());
+  const skipNextFetch = useRef(false);
+  const initialized   = useRef(false);
 
-  // state: filter
+  // ── Loading ───────────────────────────────────────────────────────────────
+  const [initLoading, setInitLoading]             = useState(false);
+  const [loading, setLoading]                     = useState(false);
+  const [loadingItems, setLoadingItems]           = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loadingItemNames, setLoadingItemNames]   = useState(false);
+  const [loadingSelectAll, setLoadingSelectAll]   = useState(false);
+
+  // ── Filter ────────────────────────────────────────────────────────────────
   const [warehouseId, setWarehouseId]       = useState("");
   const [subcategoryId, setSubcategoryId]   = useState("");
   const [selectedItemId, setSelectedItemId] = useState("");
   const [notes, setNotes]                   = useState("");
 
-  // state: opsi dropdown
+  // ── Dropdown options ──────────────────────────────────────────────────────
   const [rooms, setRooms]                           = useState<Room[]>([]);
   const [categoriesWithSubs, setCategoriesWithSubs] = useState<CategoryWithSubcategories[]>([]);
   const [itemOptions, setItemOptions]               = useState<ItemOption[]>([]);
 
-  // state: tabel kiri
-  const [leftItems, setLeftItems]             = useState<DetailItem[]>([]);
-  const [leftPage, setLeftPage]               = useState(1);
-  const [leftTotalPages, setLeftTotalPages]   = useState(1);
-  const [leftTotal, setLeftTotal]             = useState(0);
-  const [searchInput, setSearchInput]         = useState("");
-  const [search, setSearch]                   = useState("");
-  const [selectedIds, setSelectedIds]         = useState<string[]>([]);
+  // ── Left panel ────────────────────────────────────────────────────────────
+  const [leftItems, setLeftItems]           = useState<DetailItem[]>([]);
+  const [leftPage, setLeftPage]             = useState(1);
+  const [leftTotalPages, setLeftTotalPages] = useState(1);
+  const [leftTotal, setLeftTotal]           = useState(0);
+  const [searchInput, setSearchInput]       = useState("");
+  const [search, setSearch]                 = useState("");
+  const [selectedIds, setSelectedIds]       = useState<string[]>([]);
   const [selectAllPagesMode, setSelectAllPagesMode] = useState(false);
 
-  // state: tabel kanan (staged = item yang akan dibuang)
+  // ── Right panel ───────────────────────────────────────────────────────────
   const [stagedItems, setStagedItems] = useState<DetailItem[]>([]);
   const [rightPage, setRightPage]     = useState(1);
   const [searchRight, setSearchRight] = useState("");
   const RIGHT_PAGE_SIZE               = 10;
 
-  // ── Inisialisasi dari data purging yang ada ──────────────────────────────
+  // =========================================================================
+  // INISIALISASI — fetch data lengkap via getPurgingById
+  // karena list API tidak include details[]
+  // =========================================================================
   useEffect(() => {
     if (!open) { initialized.current = false; return; }
     if (initialized.current) return;
     initialized.current = true;
 
-    // setNotes(purging.notes ?? "");
+    setNotes(purging.notes ?? "");
+    setInitLoading(true);
 
-    // Ambil warehouseId dari detail pertama jika ada
-    const firstDetail = purging.details?.[0];
-    if (firstDetail?.warehouse_id) {
-      setWarehouseId(firstDetail.warehouse_id);
-    }
+    getPurgingById(purging.id)
+      .then((res) => {
+        const full = res.data;
+        setNotes(full.notes ?? "");
 
-    // Map detail purging yang sudah ada ke format DetailItem untuk staged
-    if (purging.details?.length) {
-      const existingItems: DetailItem[] = purging.details.map((d: any) => ({
-        id:            d.detail_item_id ?? d.id,
-        serial_number: d.serial_number ?? "",
-        condition:     d.condition ?? "Good",
-        status:        "available",
-        item: {
-          id:   d.item_id ?? "",
-          name: d.item_name ?? "",
-          category:    d.category    ? { id: "", name: d.category }    : undefined,
-          subcategory: d.subcategory ? { id: "", name: d.subcategory } : undefined,
-        },
-        room: { id: d.warehouse_id ?? "", name: "" },
-      }));
-      skipNextFetch.current = true;
-      setStagedItems(existingItems);
-    }
+        if (!full.details?.length) return;
+
+const existingItems: DetailItem[] = full.details.map((d: any) => ({
+
+  id:                d.detail_item_id,
+  purging_detail_id: d.id,
+  serial_number:     d.serial_number ?? "",
+  condition:         (d.condition as any) ?? "Good",
+  status:            "available",
+  item: {
+    id:   d.item_id ?? "",
+    name: d.item_name ?? "",
+    category:    d.category
+      ? { id: "", name: d.category }
+      : undefined,
+    subcategory: d.subcategory
+      ? { id: "", name: d.subcategory }
+      : undefined,
+  },
+  room: { id: d.warehouse_id ?? "", name: d.warehouse_name ?? "" },
+}));
+
+        stagedIdsRef.current = new Set(existingItems.map((i) => i.id));
+        setStagedItems(existingItems);
+
+        const firstDetail = full.details[0];
+        if (firstDetail?.warehouse_id) {
+          setWarehouseId(firstDetail.warehouse_id); // trigger fetchLeftItems
+        }
+      })
+      .catch(() => toast.error("Gagal memuat data pemutihan."))
+      .finally(() => setInitLoading(false));
   }, [open, purging]);
 
-  // ── Load rooms ───────────────────────────────────────────────────────────
+  // ── Load rooms ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!open) return;
     getRooms()
@@ -158,7 +180,7 @@ export default function DialogEditPemutihan({
       .catch(() => toast.error("Gagal memuat data gudang."));
   }, [open]);
 
-  // ── Load kategori + subkategori ──────────────────────────────────────────
+  // ── Load kategori ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!warehouseId) {
       setCategoriesWithSubs([]); setSubcategoryId(""); setItemOptions([]); setSelectedItemId(""); return;
@@ -170,7 +192,7 @@ export default function DialogEditPemutihan({
       .finally(() => setLoadingCategories(false));
   }, [warehouseId]);
 
-  // ── Load item by subkategori ─────────────────────────────────────────────
+  // ── Load item by subkategori ──────────────────────────────────────────────
   useEffect(() => {
     if (!warehouseId || !subcategoryId) { setItemOptions([]); setSelectedItemId(""); return; }
     setLoadingItemNames(true);
@@ -180,7 +202,7 @@ export default function DialogEditPemutihan({
       .finally(() => setLoadingItemNames(false));
   }, [warehouseId, subcategoryId]);
 
-  // ── Debounce search ──────────────────────────────────────────────────────
+  // ── Debounce search ───────────────────────────────────────────────────────
   useEffect(() => {
     const t = setTimeout(() => {
       setSearch(searchInput); setLeftPage(1); setSelectAllPagesMode(false);
@@ -188,8 +210,10 @@ export default function DialogEditPemutihan({
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  // ── Fetch tabel kiri ─────────────────────────────────────────────────────
-  const fetchLeftItems = useCallback(async (currentStaged: DetailItem[] = []) => {
+  // =========================================================================
+  // FETCH LEFT ITEMS — pakai stagedIdsRef agar tidak stale
+  // =========================================================================
+  const fetchLeftItems = useCallback(async () => {
     if (!warehouseId) return;
     setLoadingItems(true);
     try {
@@ -199,9 +223,8 @@ export default function DialogEditPemutihan({
         itemId:        selectedItemId || undefined,
       });
 
-      const stagedIds = new Set(currentStaged.map((s) => s.id));
-      const filtered  = (res.data ?? []).filter(
-        (d: DetailItem) => !stagedIds.has(d.id) && d.status === "available"
+      const filtered = (res.data ?? []).filter(
+        (d: DetailItem) => !stagedIdsRef.current.has(d.id) && d.status === "available"
       );
 
       setLeftItems(filtered);
@@ -218,12 +241,12 @@ export default function DialogEditPemutihan({
 
   useEffect(() => {
     if (skipNextFetch.current) { skipNextFetch.current = false; return; }
-    if (warehouseId) fetchLeftItems(stagedItems);
+    if (warehouseId) fetchLeftItems();
     else { setLeftItems([]); setLeftTotal(0); setLeftTotalPages(1); }
-  }, [warehouseId, leftPage, search, subcategoryId, selectedItemId]);
+  }, [fetchLeftItems, warehouseId]);
 
-  // ── Tabel kanan (client-side) ────────────────────────────────────────────
-  const filteredRight   = stagedItems.filter((item) =>
+  // ── Right panel pagination ────────────────────────────────────────────────
+  const filteredRight = stagedItems.filter((item) =>
     item.item.name.toLowerCase().includes(searchRight.toLowerCase()) ||
     item.serial_number.toLowerCase().includes(searchRight.toLowerCase())
   );
@@ -234,26 +257,30 @@ export default function DialogEditPemutihan({
   );
   useEffect(() => { setRightPage(1); }, [searchRight]);
 
-  // ── Checkbox ─────────────────────────────────────────────────────────────
+  // ── Checkbox ──────────────────────────────────────────────────────────────
   const isCurrentPageAllSelected =
     leftItems.length > 0 && leftItems.every((i) => selectedIds.includes(i.id));
 
   const toggleSelectAll = () => {
     if (selectAllPagesMode) {
-      setSelectAllPagesMode(false); setSelectedIds(leftItems.map((i) => i.id)); return;
+      setSelectAllPagesMode(false);
+      setSelectedIds(leftItems.map((i) => i.id));
+      return;
     }
     setSelectedIds(isCurrentPageAllSelected ? [] : leftItems.map((i) => i.id));
   };
 
   const toggleSelect = (id: string) => {
     setSelectAllPagesMode(false);
-    setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   };
 
+  // ── Select all pages ──────────────────────────────────────────────────────
   const handleSelectAllPages = async () => {
     setLoadingSelectAll(true);
     try {
-      const stagedIds = new Set(stagedItems.map((s) => s.id));
       let allItems: DetailItem[] = [];
       let page = 1;
       while (true) {
@@ -263,7 +290,7 @@ export default function DialogEditPemutihan({
           itemId:        selectedItemId || undefined,
         });
         const batch = (res.data ?? []).filter(
-          (d: DetailItem) => !stagedIds.has(d.id) && d.status === "available"
+          (d: DetailItem) => !stagedIdsRef.current.has(d.id) && d.status === "available"
         );
         allItems = [...allItems, ...batch];
         if (page >= (res.pagination?.totalPages ?? 1)) break;
@@ -283,17 +310,21 @@ export default function DialogEditPemutihan({
     }
   };
 
-  // ── Pindahkan ke staged ───────────────────────────────────────────────────
+  // =========================================================================
+  // PINDAHKAN KE STAGED
+  // =========================================================================
   const handlePindahkan = () => {
     if (!selectedIds.length && !selectAllPagesMode) {
       toast.warning("Pilih item terlebih dahulu."); return;
     }
     const selectedSet = new Set(selectedIds);
-    const newItems    = leftItems
+    const newItems = leftItems
       .filter((i) => selectedSet.has(i.id))
-      .filter((i) => !stagedItems.find((s) => s.id === i.id));
+      .filter((i) => !stagedIdsRef.current.has(i.id));
 
     if (!newItems.length) { toast.warning("Item sudah ada di daftar pemutihan."); return; }
+
+    newItems.forEach((i) => stagedIdsRef.current.add(i.id));
 
     skipNextFetch.current = true;
     setStagedItems((prev) => [...prev, ...newItems]);
@@ -303,22 +334,36 @@ export default function DialogEditPemutihan({
     setSelectAllPagesMode(false);
   };
 
-  // ── Hapus dari staged ─────────────────────────────────────────────────────
+  // =========================================================================
+  // HAPUS DARI STAGED
+  // =========================================================================
   const handleRemoveStaged = (id: string) => {
     const removed = stagedItems.find((i) => i.id === id);
-    skipNextFetch.current = true;
+
+    stagedIdsRef.current.delete(id);
     setStagedItems((prev) => prev.filter((i) => i.id !== id));
+
     if (removed) {
       const matchesSub  = !subcategoryId || removed.item?.subcategory?.id === subcategoryId;
       const matchesItem = !selectedItemId || removed.item?.id === selectedItemId;
-      if (matchesSub && matchesItem) {
-        setLeftItems((prev) => [...prev, removed]);
+      const matchSearch = !search ||
+        removed.item.name.toLowerCase().includes(search.toLowerCase()) ||
+        removed.serial_number.toLowerCase().includes(search.toLowerCase());
+
+      if (matchesSub && matchesItem && matchSearch) {
+        skipNextFetch.current = true;
+        setLeftItems((prev) => {
+          if (prev.find((i) => i.id === removed.id)) return prev;
+          return [...prev, removed];
+        });
         setLeftTotal((prev) => prev + 1);
       }
     }
   };
 
-  // ── Submit (Update) ───────────────────────────────────────────────────────
+  // =========================================================================
+  // SUBMIT
+  // =========================================================================
   const handleSubmit = async () => {
     if (!warehouseId)        { toast.error("Pilih gudang terlebih dahulu."); return; }
     if (!stagedItems.length) { toast.error("Pilih minimal 1 item."); return; }
@@ -360,18 +405,24 @@ export default function DialogEditPemutihan({
 
   // ── Reset ─────────────────────────────────────────────────────────────────
   const resetForm = () => {
+    stagedIdsRef.current  = new Set();
+    skipNextFetch.current = false;
+    initialized.current   = false;
+
     setWarehouseId(""); setSubcategoryId(""); setSelectedItemId(""); setNotes("");
     setLeftItems([]); setStagedItems([]); setSelectedIds([]);
     setSearchInput(""); setSearch(""); setSearchRight("");
     setCategoriesWithSubs([]); setItemOptions([]);
     setLeftPage(1); setRightPage(1);
+    setLeftTotal(0); setLeftTotalPages(1);
     setSelectAllPagesMode(false);
-    initialized.current = false;
   };
 
   const selectedCount = selectAllPagesMode ? leftTotal : selectedIds.length;
 
-  // ── JSX ───────────────────────────────────────────────────────────────────
+  // =========================================================================
+  // JSX
+  // =========================================================================
   return (
     <Dialog open={open} onOpenChange={(val) => { onOpenChange(val); if (!val) resetForm(); }}>
       <DialogContent className="w-full max-w-5xl p-6 dark:bg-black">
@@ -382,16 +433,31 @@ export default function DialogEditPemutihan({
           </DialogTitle>
         </DialogHeader>
 
+        {/* ── Init loading ── */}
+        {initLoading && (
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-blue-100 bg-blue-50 py-4 text-sm text-blue-600 dark:border-blue-900/30 dark:bg-blue-900/20 dark:text-blue-400">
+            <Loader2 size={16} className="animate-spin" />
+            Memuat data pemutihan...
+          </div>
+        )}
+
         {/* ── Filter row ── */}
         <div className="mt-4 grid grid-cols-3 gap-4">
 
           {/* Gudang */}
           <div className="grid gap-2">
             <Label>Gudang <span className="text-red-500">*</span></Label>
-            <Select value={warehouseId} onValueChange={(val) => {
-              setWarehouseId(val); setSubcategoryId(""); setSelectedItemId("");
-              setStagedItems([]); setLeftPage(1); setSearchInput(""); setSelectAllPagesMode(false);
-            }}>
+            <Select
+              value={warehouseId}
+              onValueChange={(val) => {
+                stagedIdsRef.current = new Set();
+                setWarehouseId(val);
+                setSubcategoryId(""); setSelectedItemId("");
+                setStagedItems([]); setLeftPage(1);
+                setSearchInput(""); setSelectAllPagesMode(false);
+              }}
+              disabled={initLoading}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Pilih Gudang" />
               </SelectTrigger>
@@ -417,7 +483,7 @@ export default function DialogEditPemutihan({
                 setSubcategoryId(val === "all" ? "" : val);
                 setSelectedItemId(""); setLeftPage(1); setSelectAllPagesMode(false);
               }}
-              disabled={!warehouseId || loadingCategories}
+              disabled={!warehouseId || loadingCategories || initLoading}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={!warehouseId ? "Pilih gudang dulu" : "Semua Subkategori"} />
@@ -460,7 +526,7 @@ export default function DialogEditPemutihan({
                 setSelectedItemId(val === "all" ? "" : val);
                 setLeftPage(1); setSelectAllPagesMode(false);
               }}
-              disabled={!subcategoryId || loadingItemNames}
+              disabled={!subcategoryId || loadingItemNames || initLoading}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={!subcategoryId ? "Pilih subkategori dulu" : "Semua Item"} />
@@ -506,7 +572,6 @@ export default function DialogEditPemutihan({
             </div>
 
             <div className="overflow-hidden rounded-xl border border-gray-200/70 dark:border-white/10">
-              {/* Banner: pilih semua halaman */}
               {isCurrentPageAllSelected && !selectAllPagesMode && leftTotalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 border-b border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/20 dark:text-blue-400">
                   <span>Semua {leftItems.length} item di halaman ini dipilih.</span>
@@ -523,7 +588,6 @@ export default function DialogEditPemutihan({
                   </button>
                 </div>
               )}
-              {/* Banner: semua halaman terpilih */}
               {selectAllPagesMode && (
                 <div className="flex items-center justify-center gap-2 border-b border-green-100 bg-green-50 px-3 py-2 text-xs text-green-700 dark:border-green-900/30 dark:bg-green-900/20 dark:text-green-400">
                   <span>Semua <strong>{leftTotal}</strong> item terpilih dari semua halaman.</span>
@@ -557,7 +621,12 @@ export default function DialogEditPemutihan({
                     {!warehouseId ? (
                       <TableRow>
                         <td colSpan={5} className="py-10 text-center text-sm text-gray-400">
-                          Pilih gudang terlebih dahulu
+                          {initLoading ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <Loader2 size={14} className="animate-spin" />
+                              Memuat...
+                            </div>
+                          ) : "Pilih gudang terlebih dahulu"}
                         </td>
                       </TableRow>
                     ) : loadingItems ? (
@@ -622,7 +691,7 @@ export default function DialogEditPemutihan({
             <Button
               type="button"
               onClick={handlePindahkan}
-              disabled={!selectedIds.length && !selectAllPagesMode}
+              disabled={(!selectedIds.length && !selectAllPagesMode) || initLoading}
               className="mt-1 w-full gap-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
             >
               Pindahkan ke Pemutihan
@@ -665,7 +734,16 @@ export default function DialogEditPemutihan({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedRight.length === 0 ? (
+                    {initLoading ? (
+                      <TableRow>
+                        <td colSpan={5} className="py-10 text-center text-sm text-gray-400">
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 size={14} className="animate-spin" />
+                            Memuat data...
+                          </div>
+                        </td>
+                      </TableRow>
+                    ) : paginatedRight.length === 0 ? (
                       <TableRow>
                         <td colSpan={5} className="py-10 text-center text-sm text-gray-400">
                           Belum ada item dipilih
@@ -692,13 +770,18 @@ export default function DialogEditPemutihan({
                             <ConditionBadge condition={item.condition} />
                           </TableCell>
                           <TableCell className="px-3 py-3">
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveStaged(item.id)}
-                              className="rounded-lg p-1.5 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-                            >
-                              <Trash2 size={14} />
-                            </button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveStaged(item.id)}
+                                  className="rounded-lg p-1.5 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>Hapus dari daftar</TooltipContent>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))
@@ -716,6 +799,7 @@ export default function DialogEditPemutihan({
               />
             )}
 
+            {/* ── Catatan ── */}
             <div className="mt-2 grid gap-2">
               <Label>
                 Catatan <span className="text-xs font-normal text-gray-400">(opsional)</span>
@@ -733,12 +817,12 @@ export default function DialogEditPemutihan({
 
         <DialogFooter className="mt-6">
           <DialogClose asChild>
-            <Button variant="outline" type="button" disabled={loading}>Batal</Button>
+            <Button variant="outline" type="button" disabled={loading || initLoading}>Batal</Button>
           </DialogClose>
           <Button
             type="button"
             onClick={handleSubmit}
-            disabled={loading || !stagedItems.length}
+            disabled={loading || initLoading || !stagedItems.length}
             className="gap-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? (
