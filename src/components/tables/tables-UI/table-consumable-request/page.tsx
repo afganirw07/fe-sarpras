@@ -108,8 +108,8 @@ export default function TableConsumableRequest({ refreshKey, onSearchChange }: P
     if (!q) return data;
     return data.filter(
       (d) =>
-        d.item?.name?.toLowerCase().includes(q) ||
-        d.item?.code?.toLowerCase().includes(q) ||
+        d.item?.[0]?.name?.toLowerCase().includes(q) ||
+        d.item?.[0]?.code?.toLowerCase().includes(q) ||
         d.createdBy?.username?.toLowerCase().includes(q) ||
         // approved by → relasi employee (EmployeeOwner)
         d.employee?.full_name?.toLowerCase().includes(q) ||
@@ -127,7 +127,7 @@ export default function TableConsumableRequest({ refreshKey, onSearchChange }: P
     { label: "Qty"                                            },
     { label: "Kondisi"                                        },
     { label: "Status"                                         },
-    { label: "Requested By"                                   },
+    // { label: "Requested By"                                   },
     { label: "Approved By"                                    },
     { label: "Warehouse"                                      },
     { label: "Tanggal"                                        },
@@ -245,20 +245,16 @@ export default function TableConsumableRequest({ refreshKey, onSearchChange }: P
                       <TableCell className="px-2 py-4">
                         <div>
                           <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                            {d.item?.name ?? "—"}
-                          </p>
-                          <p className="font-mono text-[10px] text-gray-400">
-                            {d.item?.code}
-                            {d.item?.category?.name ? ` · ${d.item.category.name}` : ""}
+                            {d.item?.[0]?.name ?? "—"}
                           </p>
                         </div>
                       </TableCell>
 
                       {/* Qty */}
                       <TableCell className="px-2 py-4">
-                        <span className="rounded-lg bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                          {d.quantity} {d.item?.unit ?? "pcs"}
-                        </span>
+                        {/* <span className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"> */}
+                          {d.quantity} {d.item?.[0]?.unit ?? "pcs"}
+                        {/* </span> */}
                       </TableCell>
 
                       {/* Kondisi (Good/Fair/Poor) */}
@@ -282,14 +278,14 @@ export default function TableConsumableRequest({ refreshKey, onSearchChange }: P
                       </TableCell>
 
                       {/* Approved By → employee (EmployeeOwner) */}
-                      <TableCell className="px-2 py-4">
+                      {/* <TableCell className="px-2 py-4">
                         <div className="flex items-center gap-2">
                           <Avatar name={d.employee?.full_name ?? "?"} color="emerald" />
                           <p className="text-sm text-gray-700 dark:text-gray-300">
                             {d.employee?.full_name ?? "—"}
                           </p>
                         </div>
-                      </TableCell>
+                      </TableCell> */}
 
                       {/* Warehouse */}
                       <TableCell className="px-2 py-4">

@@ -62,8 +62,8 @@ export default function ConsumableRequestPage() {
       label:     "Kondisi Good",
       value:     totalGood,
       icon:      CheckCircle2,
-      color:     "bg-emerald-100 dark:bg-emerald-900/30",
-      iconColor: "text-emerald-600 dark:text-emerald-400",
+      color:     "bg-blue-100 dark:bg-blue-900/30",
+      iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
       label:     "Kondisi Fair",
@@ -88,12 +88,12 @@ export default function ConsumableRequestPage() {
       <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 shadow-lg shadow-emerald-500/20">
+            <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
               <PackageOpen className="h-6 w-6 text-white" />
             </div>
             <div>
               <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                Consumable Request
+                Permintaan
               </h1>
               <p className="text-[clamp(10px,0.7rem,12px)] text-gray-500 dark:text-gray-400">
                 Kelola permintaan barang habis pakai

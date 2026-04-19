@@ -193,9 +193,7 @@ export default function TableRoles() {
                               <p className="font-medium text-gray-900 dark:text-white">
                                 {employeeMap[row.employeeId] ?? "-"}
                               </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                ID: {row.employeeId.slice(0, 8)}...
-                              </p>
+
                             </div>
                           </div>
                         </TableCell>

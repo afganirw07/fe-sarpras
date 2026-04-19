@@ -17,7 +17,7 @@ export interface ConsumableRequest {
     brand?: string;
     category?: { name: string };
     subcategory?: { name: string };
-  };
+  }[];
   quantity: number;
   // kondisi barang (Good | Fair | Poor) → kolom "status" di Prisma
   status: ConsumableRequestStatus;

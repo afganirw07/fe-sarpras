@@ -304,7 +304,7 @@ export default function TableTransactionOut() {
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
                   {[
                     { label: "No",          cls: "w-16" },
-                    { label: "ID",          cls: "" },
+                    // { label: "ID",          cls: "" },
                     { label: "User",        cls: "" },
                     // { label: "Item",        cls: "" },
                     // { label: "Serial No",   cls: "" },
@@ -366,12 +366,12 @@ export default function TableTransactionOut() {
                         </span>
                       </TableCell>
 
-                      {/* ID */}
+                      {/* ID
                       <TableCell className=" px-2 py-4 dark:border-gray-800">
                         <span className="rounded-md bg-blue-50 px-2.5 py-1 font-mono text-[clamp(9px,0.65rem,11px)] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                           {trx.id.slice(0, 4)}…
                         </span>
-                      </TableCell>
+                      </TableCell> */}
 
                       {/* User */}
                       <TableCell className=" px-2 py-4 dark:border-gray-800">

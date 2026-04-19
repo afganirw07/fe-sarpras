@@ -239,7 +239,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
-        <Button size="lg" className="bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 font-quicksand text-md transition duration-300">
+        <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20 font-quicksand text-md transition duration-300">
           + Add Consumable Request
         </Button>
       </DialogTrigger>
@@ -399,7 +399,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
                 type="button"
                 onClick={handleAddItem}
                 disabled={!selectedItemId || loading}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
               >
                 <Plus size={16} /> Add Item
               </Button>
@@ -412,7 +412,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
             <DialogClose asChild>
               <Button variant="outline" type="button" disabled={loading}>Cancel</Button>
             </DialogClose>
-            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white border-0" disabled={loading}>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white border-0" disabled={loading}>
               {loading ? "Menyimpan..." : `Save${rows.length > 0 ? ` (${rows.length} item)` : ""}`}
             </Button>
           </DialogFooter>

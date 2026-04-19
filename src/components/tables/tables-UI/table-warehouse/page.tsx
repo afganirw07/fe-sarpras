@@ -184,9 +184,6 @@ export default function TableWarehouse({
                           </div>
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">{item.code}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              ID: {item.id.slice(0, 8)}...
-                            </p>
                           </div>
                         </div>
                       </TableCell>

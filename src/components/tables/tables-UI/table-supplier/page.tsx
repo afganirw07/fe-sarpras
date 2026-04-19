@@ -170,9 +170,6 @@ export default function TableSupplier({
                             <p className="font-medium text-gray-900 dark:text-white">
                               {supplier.name}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              ID: {supplier.id.slice(0, 8)}...
-                            </p>
                           </div>
                         </div>
                       </TableCell>
