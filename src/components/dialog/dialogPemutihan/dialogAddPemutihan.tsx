@@ -102,6 +102,11 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
   const [searchRight, setSearchRight] = useState("");
   const RIGHT_PAGE_SIZE               = 10;
 
+  //state: surat menyurat
+  const [knowing, setKnowing]           = useState("");
+  const [submission, setSubmission]     = useState("");
+  const [chargePerson, setChargePerson] = useState("");
+
   // ── Load rooms ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (!open) return;
@@ -274,6 +279,9 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
   const handleSubmit = async () => {
     if (!warehouseId)        { toast.error("Pilih gudang terlebih dahulu."); return; }
     if (!stagedItems.length) { toast.error("Pilih minimal 1 item."); return; }
+    if (!submission)   { toast.error("Nama Waka Sarpras wajib diisi.");           return; }
+    if (!chargePerson) { toast.error("Nama Penanggung Jawab Sarpras wajib diisi."); return; }
+    if (!knowing)      { toast.error("Nama Sarpras Yayasan wajib diisi.");         return; }
 
     setLoading(true);
     try {
@@ -287,6 +295,9 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
         letter_status: "pending",
         created_by:    session?.user?.id ?? "",
         notes,
+        knowing,
+        submission,
+        charge_person: chargePerson, 
         details: stagedItems.map((i) => ({
           detail_item_id: i.id,
           item_name:      i.item?.name ?? "",
@@ -316,6 +327,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
     setWarehouseId(""); setSubcategoryId(""); setSelectedItemId(""); setNotes("");
     setLeftItems([]); setStagedItems([]); setSelectedIds([]);
     setSearchInput(""); setSearch(""); setSearchRight("");
+    setKnowing(""); setSubmission(""); setChargePerson("");
     setCategoriesWithSubs([]); setItemOptions([]);
     setLeftPage(1); setRightPage(1);
     setSelectAllPagesMode(false);
@@ -437,6 +449,46 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
             </Select>
           </div>
         </div>
+
+        {/* ── Penandatangan Surat ── */}
+<div className="mt-6 rounded-xl border border-gray-200/70 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-white/5">
+  <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+    Penandatangan Surat
+  </p>
+  <div className="grid grid-cols-3 gap-4">
+
+    <div className="grid gap-1.5">
+      <Label className="text-xs">Waka Sarpras <span className="text-red-500">*</span></Label>
+      <input
+        value={submission}
+        onChange={(e) => setSubmission(e.target.value)}
+        placeholder="Nama Waka Sarpras"
+        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+      />
+    </div>
+
+    <div className="grid gap-1.5">
+      <Label className="text-xs">Penanggung Jawab Sarpras <span className="text-red-500">*</span></Label>
+      <input
+        value={chargePerson}
+        onChange={(e) => setChargePerson(e.target.value)}
+        placeholder="Nama Penanggung Jawab"
+        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+      />
+    </div>
+
+    <div className="grid gap-1.5">
+      <Label className="text-xs">Mengetahui (Sarpras Yayasan) <span className="text-red-500">*</span></Label>
+      <input
+        value={knowing}
+        onChange={(e) => setKnowing(e.target.value)}
+        placeholder="Nama Sarpras Yayasan"
+        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+      />
+    </div>
+
+  </div>
+</div>
 
         {/* ── Two-panel ── */}
         <div className="mt-6 grid grid-cols-2 gap-6">
@@ -679,6 +731,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
               />
             )}
 
+            
             <div className="mt-2 grid gap-2">
               <Label>
                 Catatan <span className="text-xs font-normal text-gray-400">(opsional)</span>
@@ -693,6 +746,8 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
             </div>
           </div>
         </div>
+
+        
 
         <DialogFooter className="mt-6">
           <DialogClose asChild>
