@@ -18,6 +18,7 @@ export async function api(path: string, options: RequestInit = {}) {
     const text = await res.text();
     console.error("Fetch error:", res.status, text);
     throw new Error(`HTTP ${res.status}: ${text}`);
+    
   }
 
   return res.json();

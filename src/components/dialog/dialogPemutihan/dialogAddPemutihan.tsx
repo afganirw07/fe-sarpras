@@ -348,7 +348,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-full max-w-5xl p-6 dark:bg-black">
+      <DialogContent className="w-full max-w-5xl p-6 dark:bg-black max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <PackageX size={20} className="text-blue-500" />

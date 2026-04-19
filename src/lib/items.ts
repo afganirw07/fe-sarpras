@@ -15,10 +15,11 @@ export interface Item {
   subCategory?: string;
   code: string;
   name: string;
-  spesification: string;
+  specification: string;
   brand?: string;
   stock: number;
   unit: string;
+  // specification: string;
   category: {
     name: string;
   };
@@ -47,6 +48,7 @@ export interface DetailItem {
   spesification: string;
   serial_number: string;
   condition: string;
+  specification: string;
   status: string;
   created_by: string;
   created_at: string;
