@@ -350,10 +350,16 @@ export default function DialogTransactionIn({
       setSelectedFundingSourceId("");
       setCustomSerial("");
       setErrors({});
-    } catch (error) {
-      console.error("Create transaction error:", error);
-      toast.error("Gagal membuat transaksi");
-    }
+} catch (error: any) {
+  const message = error?.message ?? "";
+
+  if (message.includes("PO Number")) {
+    toast.error(`PO Number "${poNumber}" sudah digunakan`);
+    setErrors((prev) => ({ ...prev, poNumber: `PO Number "${poNumber}" sudah digunakan` }));
+  } else {
+    toast.error("Gagal membuat transaksi");
+  }
+}
   };
 
   const handleImport = (data: ParsedImportData) => {

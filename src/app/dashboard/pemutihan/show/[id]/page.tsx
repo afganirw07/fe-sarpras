@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { getPurgingById, Purging } from "@/lib/purging";
 import {
-  Box, Tag, Hash, Warehouse, Activity, User,
+  Box, Tag, Hash, NotebookPen, Activity, User,
   Calendar, Shield, FileText, PackageX, ClipboardList,
 } from "lucide-react";
 import ButtonBack from "@/components/ui/button/backButton";
@@ -97,6 +97,7 @@ const paginatedItems = useMemo(() => {
     { label: "Kondisi",        value: purging.condition ?? "-",     icon: <Shield size={15} />,    badge: true },
     { label: "Status Barang",  value: purging.item_status ?? "-",   icon: <Activity size={15} />,  badge: true },
     { label: "Status Surat",   value: purging.letter_status ?? "-", icon: <FileText size={15} />,  badge: true },
+    { label: "Alasan",   value: purging.notes ?? "-", icon: <FileText size={15} />,  badge: true },
     {
       label: "Tanggal Update",
       value: purging.updated_at

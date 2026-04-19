@@ -75,6 +75,11 @@ export interface Transaction {
   transaction_details: TransactionDetail[];
   detail_items: DetailItem[];
   notes?: string;
+  fundingSourceId?: string | null;  
+  fundingSource?: {                
+    id: string;
+    name: string;
+  } | null;
 }
 
 export interface TransactionPaginationResponse {
@@ -93,6 +98,8 @@ export interface BaseTransactionPayload {
   po_number: number;
   transaction_date: Date;
   status: TransactionStatus;
+  fundingSource?: string | null; 
+  returned_by?: string | null;
 }
 
 export interface TransactionDetailPayload {
@@ -112,13 +119,15 @@ export interface DetailItemPayload {
   condition: ItemConditions;
   status: ItemStatus;
   created_by: string;
+
 }
 
 export interface TransactionInPayload extends BaseTransactionPayload {
   in_type: InType;
+   notes?: string; 
   transaction_details: TransactionDetailPayload[];
   detail_items: DetailItemPayload[];
-  returned_by?: string | null;
+  
 }
 
 export interface TransactionOutPayload extends BaseTransactionPayload {

@@ -121,10 +121,11 @@ export default function DialogEditPemutihan({
   const [searchRight, setSearchRight] = useState("");
   const RIGHT_PAGE_SIZE               = 10;
 
-  // =========================================================================
-  // INISIALISASI — fetch data lengkap via getPurgingById
-  // karena list API tidak include details[]
-  // =========================================================================
+  //state : penyuratan tanda tangan
+  const [knowing, setKnowing]           = useState("");
+  const [submission, setSubmission]     = useState("");
+  const [chargePerson, setChargePerson] = useState("");
+
   useEffect(() => {
     if (!open) { initialized.current = false; return; }
     if (initialized.current) return;
@@ -137,6 +138,9 @@ export default function DialogEditPemutihan({
       .then((res) => {
         const full = res.data;
         setNotes(full.notes ?? "");
+        setKnowing(full.knowing ?? "");
+        setSubmission(full.submission ?? "");
+        setChargePerson(full.charge_person ?? "");
 
         if (!full.details?.length) return;
 
@@ -367,6 +371,9 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
   const handleSubmit = async () => {
     if (!warehouseId)        { toast.error("Pilih gudang terlebih dahulu."); return; }
     if (!stagedItems.length) { toast.error("Pilih minimal 1 item."); return; }
+    if (!submission)   { toast.error("Nama Waka Sarpras wajib diisi.");           return; }
+    if (!chargePerson) { toast.error("Nama Penanggung Jawab Sarpras wajib diisi."); return; }
+    if (!knowing)      { toast.error("Nama Sarpras Yayasan wajib diisi.");         return; }
 
     setLoading(true);
     try {
@@ -379,6 +386,9 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
         item_status:   "damaged",
         letter_status: purging.letter_status ?? "pending",
         notes,
+        knowing,
+        submission,
+        charge_person: chargePerson,
         details: stagedItems.map((i) => ({
           detail_item_id: i.id,
           item_name:      i.item?.name ?? "",
@@ -412,6 +422,7 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
     setWarehouseId(""); setSubcategoryId(""); setSelectedItemId(""); setNotes("");
     setLeftItems([]); setStagedItems([]); setSelectedIds([]);
     setSearchInput(""); setSearch(""); setSearchRight("");
+    setKnowing(""); setSubmission(""); setChargePerson("");
     setCategoriesWithSubs([]); setItemOptions([]);
     setLeftPage(1); setRightPage(1);
     setLeftTotal(0); setLeftTotalPages(1);
@@ -425,7 +436,7 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
   // =========================================================================
   return (
     <Dialog open={open} onOpenChange={(val) => { onOpenChange(val); if (!val) resetForm(); }}>
-      <DialogContent className="w-full max-w-5xl p-6 dark:bg-black">
+      <DialogContent className="w-full max-w-5xl p-6 dark:bg-black max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <PackageX size={20} className="text-blue-500" />
@@ -540,6 +551,46 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
             </Select>
           </div>
         </div>
+
+        {/* ── Penandatangan Surat ── */}
+<div className="mt-6 rounded-xl border border-gray-200/70 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-white/5">
+  <p className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+    Penandatangan Surat
+  </p>
+  <div className="grid grid-cols-3 gap-4">
+
+    <div className="grid gap-1.5">
+      <Label className="text-xs">Waka Sarpras <span className="text-red-500">*</span></Label>
+      <input
+        value={submission}
+        onChange={(e) => setSubmission(e.target.value)}
+        placeholder="Nama Waka Sarpras"
+        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+      />
+    </div>
+
+    <div className="grid gap-1.5">
+      <Label className="text-xs">Penanggung Jawab Sarpras <span className="text-red-500">*</span></Label>
+      <input
+        value={chargePerson}
+        onChange={(e) => setChargePerson(e.target.value)}
+        placeholder="Nama Penanggung Jawab"
+        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+      />
+    </div>
+
+    <div className="grid gap-1.5">
+      <Label className="text-xs">Mengetahui (Sarpras Yayasan) <span className="text-red-500">*</span></Label>
+      <input
+        value={knowing}
+        onChange={(e) => setKnowing(e.target.value)}
+        placeholder="Nama Sarpras Yayasan"
+        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
+      />
+    </div>
+
+  </div>
+</div>
 
         {/* ── Two-panel ── */}
         <div className="mt-6 grid grid-cols-2 gap-6">

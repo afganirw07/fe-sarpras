@@ -19,6 +19,9 @@ export interface Purging {
   letter_status: string;
   item_status: string;
   notes: string;
+  charge_person?:string;
+  knowing?:string;
+  submission?:string;
   created_by: string;
   createdBy?: {          
     id: string;
@@ -96,9 +99,17 @@ export async function restorePurging(id: string): Promise<ApiResponse<Purging>> 
   });
 }
 
-export async function generateSuratPemutihan(purgingId: string): Promise<void> {
+// Ubah signature fungsi
+export async function generateSuratPemutihan(
+  purgingId: string,
+  signatories: {
+    knowing?:       string;
+    submission?:    string;
+    charge_person?: string;
+  } = {}
+): Promise<void> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  const token = process.env.NEXT_PUBLIC_API_KEY;
+  const token   = process.env.NEXT_PUBLIC_API_KEY;
 
   const res = await fetch(`${baseUrl}/api/letters/generate/${purgingId}`, {
     method: 'POST',
@@ -106,6 +117,7 @@ export async function generateSuratPemutihan(purgingId: string): Promise<void> {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify(signatories), // ← kirim ke backend
   });
 
   if (!res.ok) {
@@ -113,11 +125,10 @@ export async function generateSuratPemutihan(purgingId: string): Promise<void> {
     throw new Error(`Gagal generate surat: ${text}`);
   }
 
-  // ── Ambil sebagai blob (bukan json) ──
   const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
   a.download = `berita-acara-${purgingId}.pdf`;
   document.body.appendChild(a);
   a.click();
