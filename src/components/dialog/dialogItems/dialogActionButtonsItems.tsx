@@ -60,6 +60,7 @@ interface ItemFormData {
   stock: number;
   type: string;
   created_by: string
+  specification?: string;
 }
 
 interface FormErrors {
@@ -70,6 +71,7 @@ interface FormErrors {
   brand?: string;
   unit?: string;
   stock?: string;
+  specification?: string;
 }
 
 export default function ActionButtonsItems({
@@ -97,7 +99,8 @@ export default function ActionButtonsItems({
     unit: item.unit || "",
     stock: item.stock || 0,
     type: item.type || "Loanable",
-    created_by: userId
+    created_by: userId,
+    specification: item.spesifikasi || "",
   });
 
   // Fetch categories
@@ -142,7 +145,8 @@ export default function ActionButtonsItems({
         unit: item.unit || "",
         stock: item.stock || 0,
         type: item.type || "Loanable",
-        created_by: userId
+        created_by: userId,
+        specification: item.spesifikasi || "",
       });
       // Reset errors
       setErrors({});
@@ -200,6 +204,7 @@ export default function ActionButtonsItems({
       subCategory: formData.subcategory_id,
       unit: formData.unit.trim(),
       brand: formData.brand.trim(),
+      specification: formData.specification?.trim() || "",
       
     };
 
@@ -241,7 +246,8 @@ export default function ActionButtonsItems({
         brand: formData.brand?.trim() || null,
         unit: formData.unit.trim(),
         type: formData.type,
-        created_by: userId
+        created_by: userId,
+        specification: formData.specification?.trim() || null,
       };
 
       console.log("Submitting update data:", updateData);
@@ -390,6 +396,23 @@ export default function ActionButtonsItems({
                   />
                 </div>
               </div>
+              {/* Spesifikasi */}
+<div className="grid gap-2">
+  <div className="flex gap-2 items-center">
+    <Label>Spesifikasi *</Label>
+    {errors.specification && (
+      <p className="text-xs text-red-500">{errors.specification}</p>
+    )}
+  </div>
+  <div className={`${errors.specification ? 'border-red-500' : ''}`}>
+    <Input
+      placeholder="Spesifikasi Item"
+      defaultValue={formData.specification}
+      onChange={(e) => handleInputChange("specification", e.target.value)}
+      disabled={loading}
+    />
+  </div>
+</div>
 
               {/* Sub Kategori */}
               <div className="grid gap-2">

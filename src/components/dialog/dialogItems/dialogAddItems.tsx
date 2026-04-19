@@ -38,9 +38,9 @@ interface ItemFormData {
   brand: string;
   unit: string;
   stock: number;
-  spesification: string;
+  // specification: string;
   created_by: string
-  spesifikasi: string;
+  specification: string;
   type?: "Consumable" | "Loanable";
 }
 
@@ -53,7 +53,7 @@ interface FormErrors {
   unit?: string;
   stock?: string;
   type?:string;
-  spesifikasi?: string;
+  specification?: string;
 }
 
 export default function DialogAddItems({
@@ -77,9 +77,9 @@ export default function DialogAddItems({
     category_id: "",
     subcategory_id: "",
     brand: "",
-    spesifikasi:"",
+    specification:"",
     unit: "",
-    spesification: "",
+    specification: "",
     stock: 0,
     created_by: userId,
     type: "Loanable"
@@ -150,11 +150,11 @@ export default function DialogAddItems({
         subcategory_id: "",
         brand: "",
         unit: "",
-        spesification: "",
+        // specification: "",
         stock: 0,
         created_by: userId,
         type: "Loanable",
-        spesifikasi:""
+        specification:""
       });
       setSelectedCategorySubcategories([]);
       setErrors({});
@@ -176,7 +176,7 @@ export default function DialogAddItems({
       unit: formData.unit.trim(),
       stock: formData.stock,
       brand: formData.brand.trim(),
-      spesifikasi: formData.spesifikasi.trim(),
+      specification: formData.specification.trim(),
       created_by: formData.created_by,
     };
 
@@ -212,7 +212,7 @@ export default function DialogAddItems({
         category_id: formData.category_id,
         subcategory_id: formData.subcategory_id || null,
         brand: formData.brand?.trim() || null,
-        spesifikasi: formData.spesifikasi?.trim() || null,
+        specification: formData.specification?.trim() || null,
         unit: formData.unit.trim(),
         stock: formData.stock,
         type: formData.type,
@@ -231,9 +231,9 @@ export default function DialogAddItems({
         category_id: "",
         subcategory_id: "",
         brand: "",
-        spesifikasi:"",
+        // specification:"",
         unit: "",
-        spesification: "",
+        specification: "",
         stock: 0,
         created_by: userId
 
@@ -360,19 +360,19 @@ export default function DialogAddItems({
                 </div>
                
               </div>
-              {/* spesifikasi */}
+              {/* specification */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                <Label>Spesifikasi *</Label>
-                 {errors.spesifikasi && (
-                  <p className="text-xs text-red-500 mt-1">{errors.spesifikasi}</p>
+                <Label>specification *</Label>
+                 {errors.specification && (
+                  <p className="text-xs text-red-500 mt-1">{errors.specification}</p>
                 )}
                 </div>
-                <div className={`${errors.spesifikasi ? 'border-red-500' : ''}`}>
+                <div className={`${errors.specification ? 'border-red-500' : ''}`}>
                   <Input
-                    placeholder="Spesifikasi Item"
-                    defaultValue={formData.spesifikasi}
-                    onChange={(e) => handleInputChange("spesifikasi", e.target.value)}
+                    placeholder="specification Item"
+                    defaultValue={formData.specification}
+                    onChange={(e) => handleInputChange("specification", e.target.value)}
                     disabled={loading}
                   />
                 </div>

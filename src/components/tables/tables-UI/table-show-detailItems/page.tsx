@@ -105,7 +105,7 @@ export default function TableShow() {
   const categoryName = firstItem?.item?.category?.name ?? "-";
   const subCategory  = firstItem?.item?.subcategory?.name ?? "-";
   const createdBy    = firstItem?.userId?.username ?? firstItem?.created_by ?? "-";
-  const spesifikasi   = firstItem?.item?.spesifikasi ?? "-";
+  const specification   = firstItem?.item?.specification ?? "-";
 
   return (
     <div className="flex flex-col">
@@ -139,8 +139,8 @@ export default function TableShow() {
                 <Input value={createdBy} readOnly />
               </div>
               <div className="grid gap-2">
-                <Label>Spesifikasi :</Label>
-                <Input value={spesifikasi} readOnly />
+                <Label>specification :</Label>
+                <Input value={specification} readOnly />
               </div>
             </div>
           )}
