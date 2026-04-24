@@ -1,17 +1,20 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "../../ui/button";
 import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -24,55 +27,101 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { z } from "zod";
 import {
   FundingSource,
+  FundingSourcePayload,
+  deleteFundingSource,
   getFundingSourceById,
   updateFundingSource,
-  deleteFundingSource,
-  FundingSourcePayload,
 } from "@/lib/funding-sources";
-import { z } from "zod";
 import { FundingSourceSchema } from "@/schema/funding-sources.schema";
-import { useSession } from "next-auth/react";
 
-interface FundingSourceError {
-  name?: string;
-  description?: string;
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type EditPayload = Omit<FundingSourcePayload, "created_by">;
+
+type FormErrors = Partial<Record<keyof EditPayload, string>>;
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const INITIAL_PAYLOAD: EditPayload = {
+  name: "",
+  description: "",
+  email: "",
+  phone_number: "",
+};
+
+// ─── Subcomponents ────────────────────────────────────────────────────────────
+
+function IconButton({
+  onClick,
+  tooltip,
+  children,
+}: {
+  onClick?: () => void;
+  tooltip: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button type="button" onClick={onClick}>
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  );
 }
 
-export default function ActionButtonsFundingSource({
-  fundingSource,
-  onSuccess,
+function FormField({
+  label,
+  required,
+  error,
+  children,
 }: {
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <Label>
+          {label} {required && <span className="text-red-500">*</span>}
+        </Label>
+        {error && <p className="text-xs text-red-500">{error}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+interface Props {
   fundingSource: FundingSource;
   onSuccess?: () => void;
-}) {
+}
+
+export default function ActionButtonsFundingSource({ fundingSource, onSuccess }: Props) {
   const { data: session } = useSession();
   const userId = session?.user?.id as string;
 
   const [loading, setLoading] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [payload, setPayload] = useState<EditPayload>(INITIAL_PAYLOAD);
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const [payload, setPayload] = useState<Omit<FundingSourcePayload, "created_by">>({
-    name: "",
-    description: "",
-    email:"",
-    phone_number:""
-  });
-  const [errors, setErrors] = useState<FundingSourceError>({});
+  // ── Fetch on edit open ──────────────────────────────────────────────────────
 
-  // ── Fetch data saat dialog edit dibuka ─────────────────
   useEffect(() => {
-    if (!isEditOpen || !fundingSource) return;
+    if (!isEditOpen) return;
 
     const fetchData = async () => {
       try {
@@ -89,43 +138,51 @@ export default function ActionButtonsFundingSource({
     };
 
     fetchData();
-  }, [isEditOpen, fundingSource]);
+  }, [isEditOpen, fundingSource.id]);
 
-  // ── Dialog open/close ───────────────────────────────────
+  // ── Handlers ────────────────────────────────────────────────────────────────
+
   const handleDialogChange = (open: boolean) => {
     setIsEditOpen(open);
     if (open) setErrors({});
   };
 
-  // ── Input change ────────────────────────────────────────
-  const handleInputChange = (
-    field: keyof Omit<FundingSourcePayload, "created_by">,
-    value: string
-  ) => {
+  const handleChange = (field: keyof EditPayload, value: string) => {
     setPayload((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  // ── Update ──────────────────────────────────────────────
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({});
+     console.log("1. form submitted", { payload, userId });
 
-    try {
-      FundingSourceSchema.parse({
-        name: payload.name.trim(),
-        description: payload.description?.trim() || undefined,
+    if (!userId) {
+      toast.error("Session tidak ditemukan, silakan login ulang");
+      return;
+    }
+
+      console.log("2. about to validate", {
+  name: payload.name.trim(),
+  description: payload.description?.trim() || undefined,
+});
+
+    // Validate
+    const result = FundingSourceSchema.safeParse({
+      name: payload.name.trim(),
+      description: payload.description?.trim() || undefined,
+        email: payload.email?.trim() || undefined,         // tambah ini
+  phone_number: payload.phone_number?.trim() || undefined, // tambah ini
+    });
+    console.log("3. validation result", result);
+
+    if (!result.success) {
+      const formattedErrors: FormErrors = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof FormErrors;
+        formattedErrors[field] = issue.message;
       });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const formattedErrors: FundingSourceError = {};
-        error.issues.forEach((err) => {
-          const field = err.path[0] as keyof FundingSourceError;
-          formattedErrors[field] = err.message;
-        });
-        setErrors(formattedErrors);
-        return;
-      }
+      setErrors(formattedErrors);
+      return;
     }
 
     setLoading(true);
@@ -133,15 +190,15 @@ export default function ActionButtonsFundingSource({
       await updateFundingSource(fundingSource.id, {
         name: payload.name.trim(),
         description: payload.description?.trim() || undefined,
-        email: payload.email.trim(),
-        phone_number: payload.phone_number.trim(),
+        email: payload.email?.trim(),
+        phone_number: payload.phone_number?.trim(),
         created_by: userId,
       });
 
       toast.success("Funding source berhasil diperbarui");
       setIsEditOpen(false);
       setErrors({});
-      await onSuccess?.();
+      onSuccess?.();
     } catch (err: any) {
       toast.error(err.message || "Gagal update funding source");
     } finally {
@@ -149,13 +206,12 @@ export default function ActionButtonsFundingSource({
     }
   };
 
-  // ── Delete ──────────────────────────────────────────────
   const handleDelete = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       await deleteFundingSource(fundingSource.id);
       toast.success("Funding source berhasil dihapus");
-      await onSuccess?.();
+      onSuccess?.();
     } catch (err: any) {
       toast.error(err.message || "Gagal hapus funding source");
     } finally {
@@ -163,21 +219,16 @@ export default function ActionButtonsFundingSource({
     }
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
+
   return (
     <div className="flex justify-center gap-4">
-      {/* ── EDIT ─────────────────────────────────────────── */}
+      {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
-          <button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Pencil size={15} />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Edit</TooltipContent>
-            </Tooltip>
-          </button>
+          <IconButton tooltip="Edit">
+            <Pencil size={15} />
+          </IconButton>
         </DialogTrigger>
 
         <DialogContent className="w-full max-w-3xl p-8 dark:bg-black">
@@ -188,70 +239,47 @@ export default function ActionButtonsFundingSource({
             </DialogHeader>
 
             <div className="grid grid-cols-1 gap-4">
-              {/* Nama */}
-              <div className="flex flex-col gap-2">
-                <div className="flex gap-2 items-center">
-                  <Label>Nama Funding Source *</Label>
-                  {errors.name && (
-                    <p className="text-xs text-red-500">{errors.name}</p>
-                  )}
-                </div>
+              <FormField label="Nama Funding Source" required error={errors.name}>
                 <Input
                   value={payload.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  onChange={(e) => handleChange("name", e.target.value)}
                   placeholder="Nama funding source (tanpa simbol)"
                   disabled={loading}
                   className={errors.name ? "border-red-500" : ""}
                 />
-              </div>
+              </FormField>
 
-              {/* Deskripsi */}
-              <div className="flex flex-col gap-2">
-                <div className="flex gap-2 items-center">
-                  <Label>Deskripsi</Label>
-                  {errors.description && (
-                    <p className="text-xs text-red-500">{errors.description}</p>
-                  )}
-                </div>
+              <FormField label="Deskripsi" error={errors.description}>
                 <Textarea
                   value={payload.description ?? ""}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  onChange={(e) => handleChange("description", e.target.value)}
                   placeholder="Deskripsi (opsional)"
                   disabled={loading}
                   className={errors.description ? "border-red-500" : ""}
                   rows={3}
                 />
-              </div>
+              </FormField>
+
+              <FormField label="Email">
+                <Input
+                  type="email"
+                  value={payload.email ?? ""}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  placeholder="Email (opsional)"
+                  disabled={loading}
+                />
+              </FormField>
+
+              <FormField label="Nomor Telepon">
+                <Input
+                  type="tel"
+                  value={payload.phone_number ?? ""}
+                  onChange={(e) => handleChange("phone_number", e.target.value)}
+                  placeholder="Nomor telepon (opsional)"
+                  disabled={loading}
+                />
+              </FormField>
             </div>
-
-       
-{/* Email */}
-<div className="flex flex-col gap-2">
-  <div className="flex gap-2 items-center">
-    <Label>Email</Label>
-  </div>
-  <Input
-    type="email"
-    value={payload.email ?? ""}
-    onChange={(e) => handleInputChange("email", e.target.value)}
-    placeholder="Email (opsional)"
-    disabled={loading}
-  />
-</div>
-
-{/* Nomor Telepon */}
-<div className="flex flex-col gap-2">
-  <div className="flex gap-2 items-center">
-    <Label>Nomor Telepon</Label>
-  </div>
-  <Input
-    type="tel"
-    value={payload.phone_number ?? ""}
-    onChange={(e) => handleInputChange("phone_number", e.target.value)}
-    placeholder="Nomor telepon (opsional)"
-    disabled={loading}
-  />
-</div>
 
             <DialogFooter className="mt-10 flex justify-end gap-3">
               <DialogClose asChild>
@@ -271,25 +299,22 @@ export default function ActionButtonsFundingSource({
         </DialogContent>
       </Dialog>
 
-      {/* ── DELETE ───────────────────────────────────────── */}
+      {/* Delete Dialog */}
       <AlertDialog>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <AlertDialogTrigger asChild>
-              <button type="button">
-                <Trash2 size={15} />
-              </button>
-            </AlertDialogTrigger>
-          </TooltipTrigger>
-          <TooltipContent>Delete</TooltipContent>
-        </Tooltip>
+        <IconButton tooltip="Delete">
+          <AlertDialogTrigger asChild>
+            <span>
+              <Trash2 size={15} />
+            </span>
+          </AlertDialogTrigger>
+        </IconButton>
 
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Yakin hapus funding source?</AlertDialogTitle>
             <AlertDialogDescription>
-              Funding source <strong>{fundingSource.name}</strong> akan dihapus.
-              Data tidak bisa dikembalikan.
+              Funding source <strong>{fundingSource.name}</strong> akan dihapus. Data tidak bisa
+              dikembalikan.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
