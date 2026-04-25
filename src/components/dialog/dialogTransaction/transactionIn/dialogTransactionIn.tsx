@@ -243,7 +243,7 @@ export default function DialogTransactionIn({
     const item = items.find((i) => i.id === selectedItemId);
     if (!item) return;
 
-    if (rows.some((r) => r.item_id === item.id)) return;
+    if (rows.some((r) => r.item_id === item.id && r.warehouse_id === selectedWarehouseId)) return;
 
     const rowParentCategory = getParentCategoryNameById(item.id);
     const rowIsCustomSerial = SERIAL_CUSTOM_CATEGORIES.includes(
@@ -717,7 +717,7 @@ export default function DialogTransactionIn({
                         </TableRow>
                       ) : (
                         rows.map((row, index) => (
-                          <TableRow key={`${row.item_id}-${index}`}>
+                          <TableRow key={`${row.item_id}-${row.warehouse_id}-${index}`}>
                             {/* No */}
                             <TableCell className="border px-4 py-3">{index + 1}</TableCell>
 
