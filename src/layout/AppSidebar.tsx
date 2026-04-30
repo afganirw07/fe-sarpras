@@ -46,6 +46,7 @@ const navItems: NavItem[] = [
       { name: "Items", path: "/dashboard/items", pro: false },
       { name: "Supplier", path: "/dashboard/supplier", pro: false },
       { name: "Warehouse", path: "/dashboard/warehouse", pro: false },
+      { name: "Sumber Dana",path: "/dashboard/funding-sources",},
     ],
   },
      {
@@ -63,11 +64,7 @@ const navItems: NavItem[] = [
     name: "Mutasi",
     path: "/dashboard/mutasi",
   },
-   {
-    icon: <Coins />,
-    name: "Sumber Dana",
-    path: "/dashboard/funding-sources",
-  },
+
    {
     icon: <ArrowDownUp />,
     name: "Pemutihan",

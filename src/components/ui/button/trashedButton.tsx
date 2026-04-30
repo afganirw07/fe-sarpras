@@ -10,7 +10,7 @@ export default function ButtonTrashed ({
               size={"lg"}
               className="text-White bg-red-600 transition duration-300 hover:bg-red-700 font-quicksand font-semibold"
             >
-              <Link href={`/dashboard/${route}/trashed`}>Trashed</Link>
+              <Link href={`/dashboard/${route}/trashed`}>Data Terhapus</Link>
             </Button>
     </>
     )

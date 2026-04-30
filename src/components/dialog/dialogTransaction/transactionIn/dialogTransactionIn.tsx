@@ -297,7 +297,7 @@ export default function DialogTransactionIn({
     setErrors({});
 
     const newErrors: FormErrors = {};
-    if (!poNumber) newErrors.poNumber = "PO Number wajib diisi";
+    if (!poNumber) newErrors.poNumber = "Nomor Surat wajib diisi";
     if (!selectedSupplierId) newErrors.supplier = "Supplier wajib dipilih";
     if (!notes) newErrors.notes = "Catatan wajib diisi";
     if (rows.length === 0 && !selectedSubcategoryId)
@@ -382,10 +382,10 @@ export default function DialogTransactionIn({
     } catch (error: any) {
       const message = error?.message ?? "";
       if (message.includes("PO Number")) {
-        toast.error(`PO Number "${poNumber}" sudah digunakan`);
+        toast.error(`Nomor Surat "${poNumber}" sudah digunakan`);
         setErrors((prev) => ({
           ...prev,
-          poNumber: `PO Number "${poNumber}" sudah digunakan`,
+          poNumber: `Nomor Surat "${poNumber}" sudah digunakan`,
         }));
       } else {
         toast.error("Gagal membuat transaksi");
@@ -428,7 +428,7 @@ export default function DialogTransactionIn({
       <Dialog onOpenChange={(open) => open && fetchAll()}>
         <DialogTrigger asChild>
           <Button size="lg" className="bg-blue-800 text-white hover:bg-blue-900">
-            + Add Transaction In
+            + Tambah Pengadaan
           </Button>
         </DialogTrigger>
 
@@ -446,13 +446,13 @@ export default function DialogTransactionIn({
               {/* PO Number */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <Label>PO Number</Label>
+                  <Label>Nomor Surat</Label>
                   {errors.poNumber && (
                     <p className="text-xs text-red-500">{errors.poNumber}</p>
                   )}
                 </div>
                 <Input
-                  placeholder="PO Number"
+                  placeholder="Nomor Surat"
                   value={poNumber}
                   onChange={(e) => { setPoNumber(e.target.value); clearError("poNumber"); }}
                   className={`no-spinner ${errors.poNumber ? "border-red-500" : ""}`}
@@ -462,13 +462,13 @@ export default function DialogTransactionIn({
               {/* Detail Transaction */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <Label>Detail Transaction</Label>
+                  <Label>Catatan Transaksi</Label>
                   {errors.notes && (
                     <p className="text-xs text-red-500">{errors.notes}</p>
                   )}
                 </div>
                 <Input
-                  placeholder="Detail Transaction"
+                  placeholder="Catatan Transaksi"
                   value={notes}
                   onChange={(e) => { setNotes(e.target.value); clearError("notes"); }}
                   className={errors.notes ? "border-red-500" : ""}
@@ -511,7 +511,7 @@ export default function DialogTransactionIn({
                   onValueChange={(v) => { setSelectedFundingSourceId(v); clearError("fundingSource"); }}
                 >
                   <SelectTrigger className={`h-11 w-full max-w-xl ${errors.fundingSource ? "border-red-500" : ""}`}>
-                    <SelectValue placeholder="Pilih Funding Source" />
+                    <SelectValue placeholder="Sumber Dana" />
                   </SelectTrigger>
                   <SelectContent>
                     {fundingSources.map((fs) => (
@@ -614,7 +614,7 @@ export default function DialogTransactionIn({
               {/* Warehouse — default per-sesi, disimpan ke row saat add */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <Label>Warehouse</Label>
+                  <Label>Ruangan</Label>
                   {errors.warehouse && (
                     <p className="text-xs text-red-500">{errors.warehouse}</p>
                   )}

@@ -19,11 +19,8 @@ export interface ConsumableRequest {
     subcategory?: { name: string };
   }[];
   quantity: number;
-  // kondisi barang (Good | Fair | Poor) → kolom "status" di Prisma
   status: ConsumableRequestStatus;
-  // status alur request (pending | approved | returned) → kolom "request_status" di Prisma
   request_status: ConsumableRequestLoanStatus;
-  // relasi ke User (yang login / buat request)
   created_by: string;
   createdBy?: {
     id: string;

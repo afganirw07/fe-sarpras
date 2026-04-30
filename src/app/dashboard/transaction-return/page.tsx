@@ -95,7 +95,7 @@ export default function TransactionReturnPage() {
             </div>
             <div>
               <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                Transaction Return
+                Pengembalian Barang
               </h1>
               <p className="text-[clamp(10px,0.7rem,12px)] text-gray-500 dark:text-gray-400">
                 Kelola pengembalian barang dari peminjaman

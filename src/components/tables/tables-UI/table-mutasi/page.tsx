@@ -181,8 +181,8 @@ export default function TableMutasi({
     "No",
     "Tanggal",
     "Nama Item",
-    "Dari WH",
-    "Ke WH",
+    "Ruangan Asal",
+    "Ruangan Tujuan",
     "Dipindahkan Oleh",
     "Catatan",
     "Status Surat",  // ← kolom baru

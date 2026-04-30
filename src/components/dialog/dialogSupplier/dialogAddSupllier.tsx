@@ -177,7 +177,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
               {/* Email */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                  <Label>Email *</Label>
+                  <Label>Email ( Opsional ) </Label>
                   {errors.email && (
                     <p className="text-xs text-red-500">{errors.email}</p>
                   )}
@@ -195,7 +195,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
               {/* Phone */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                  <Label>Phone *</Label>
+                  <Label>Nomor Handphone*</Label>
                   {errors.phoneNumber && (
                     <p className="text-xs text-red-500">{errors.phoneNumber}</p>
                   )}
@@ -213,7 +213,7 @@ export default function DialogAddSupplier({ onSuccess }: Props) {
               {/* Address */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                  <Label>Address *</Label>
+                  <Label>Alamat  *</Label>
                   {errors.address && (
                     <p className="text-xs text-red-500">{errors.address}</p>
                   )}

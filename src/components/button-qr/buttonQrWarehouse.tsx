@@ -81,7 +81,7 @@ export default function ButtonQrWarehouse({
       className="bg-blue-700 text-white"
       onClick={() => downloadPdfQr(warehouses)}
     >
-      Generate QR All (PDF)
+    Buat semua QR gudang (PDF)
     </Button>
   );
 }

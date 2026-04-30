@@ -38,7 +38,7 @@ const items = [
   return (
     
    <CardNav
-  logo="SarprasTb"
+  logo="Sarpras SMK TB"
   logoAlt="Company Logo"
   items={items}
   baseColor="#FFF"        

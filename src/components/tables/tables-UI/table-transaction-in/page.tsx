@@ -280,7 +280,7 @@ const handlePageChange = (page: number) => {
             <Table className="w-full">
               <TableHeader>
                 <TableRow className="border-b border-gray-200/50 dark:border-white/5">
-                  {["No", "User", "Tipe", "Warehouse", "Tanggal", "Status", "Aksi"].map((header) => (
+                  {["No", "User", "Tipe", "Ruangan", "Tanggal", "Status", "Aksi"].map((header) => (
                     <TableCell
                       key={header}
                       isHeader

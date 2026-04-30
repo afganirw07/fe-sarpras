@@ -310,7 +310,7 @@ export default function ActionButtonsWarehouse({
           <TooltipTrigger asChild>
             <AlertDialogTrigger asChild>
               <button type="button">
-                <Trash2 size={15} />
+                <Trash2 color="red" size={15} />
               </button>
             </AlertDialogTrigger>
           </TooltipTrigger>

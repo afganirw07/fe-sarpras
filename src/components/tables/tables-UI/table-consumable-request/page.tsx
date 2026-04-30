@@ -129,9 +129,9 @@ export default function TableConsumableRequest({ refreshKey, onSearchChange }: P
     { label: "Status"                                         },
     // { label: "Requested By"                                   },
     { label: "Approved By"                                    },
-    { label: "Warehouse"                                      },
+    { label: "Ruangan"                                      },
     { label: "Tanggal"                                        },
-    { label: "Action",         className: "text-center"       },
+    { label: "Aksi",         className: "text-center"       },
   ];
 
   const formatDate = (dateStr: string) => {

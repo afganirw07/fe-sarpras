@@ -232,6 +232,10 @@ const filteredItems: Item[] = selectedSubcategoryId
       toast.error("Tanggal wajib diisi");
       return;
     }
+    if (!remarks) {
+      toast.error("Deskripsi wajib diisi");
+      return;
+    }
     if (!borrowerWarehouseId || !originWarehouseId) {
       toast.error("Warehouse belum dipilih");
       return;
@@ -282,7 +286,7 @@ const filteredItems: Item[] = selectedSubcategoryId
       >
         <DialogTrigger asChild>
           <Button size="sm" className="bg-blue-800 text-white hover:bg-blue-900">
-            + Add Transaction Out
+            + Tambah Peminjaman
           </Button>
         </DialogTrigger>
 
@@ -290,7 +294,7 @@ const filteredItems: Item[] = selectedSubcategoryId
           <form>
             <DialogHeader className="mb-6">
               <DialogTitle className="text-xl font-semibold">
-                Add Transaction Out
+                Tambah Peminjaman
               </DialogTitle>
             </DialogHeader>
 
@@ -494,7 +498,7 @@ const filteredItems: Item[] = selectedSubcategoryId
 
               {/* Remark */}
               <div className="flex flex-col gap-2">
-                <Label>Remark</Label>
+                <Label>Keterangan</Label>
                 <Input
                   placeholder="Masukkan keterangan..."
                   value={remarks}
@@ -504,7 +508,7 @@ const filteredItems: Item[] = selectedSubcategoryId
 
               {/* Bertanggung Jawab */}
               <div className="flex flex-col gap-2">
-                <Label>Bertanggung Jawab</Label>
+                <Label>Penanggung Jawab</Label>
                 <Select value={selectedUsersId} onValueChange={setSelectedUsersId}>
                   <SelectTrigger className="h-11 w-full">
                     <SelectValue placeholder="Pilih User" />
@@ -528,7 +532,7 @@ const filteredItems: Item[] = selectedSubcategoryId
               {/* Tanggal */}
               <div className="flex flex-row space-x-6 py-4">
                 <div className="flex flex-col gap-2">
-                  <Label>Borrow Date</Label>
+                  <Label>Tanggal Peminjaman</Label>
                   <Calendar
                     mode="single"
                     selected={borrowDate}
@@ -537,7 +541,7 @@ const filteredItems: Item[] = selectedSubcategoryId
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Return Date</Label>
+                  <Label>Pengembalian</Label>
                   <Calendar
                     mode="single"
                     selected={returnDate}
@@ -570,14 +574,14 @@ const filteredItems: Item[] = selectedSubcategoryId
                         {[
                           "No",
                           "Item ID",
-                          "Item Name",
-                          "Item SN Number",
-                          "Item Subcategory",
-                          "Item WH Asal",
-                          "Item Condition",
+                          "Nama Barang",
+                          "Nomor Serial",
+                          "Sub Kategori",
+                          "Asal Ruangan",
+                          "Kondidi Barang",
                           "QTY",
-                          "Item Remarks",
-                          "Action",
+                          "Keterangan",
+                          "Aksi",
                         ].map((header, i) => (
                           <TableCell
                             key={header}

@@ -80,7 +80,7 @@ export default function DetailItems() {
           side: "left",
         },
         {
-          label: "Serial Number",
+          label: "Nomor Serial",
           value: detail.serial_number ?? "-",
           icon: <Hash size={15} />,
           side: "left",
@@ -104,7 +104,7 @@ export default function DetailItems() {
           badge: true,
         },
         {
-          label: "PO Number",
+          label: "Nomor Surat",
           value: detail.transaction?.po_number ?? "-",
           icon: <FileText size={15} />,
           side: "right",

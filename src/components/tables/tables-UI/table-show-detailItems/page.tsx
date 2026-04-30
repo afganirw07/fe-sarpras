@@ -139,7 +139,7 @@ export default function TableShow() {
                 <Input value={createdBy} readOnly />
               </div>
               <div className="grid gap-2">
-                <Label>specification :</Label>
+                <Label>spesifikasi :</Label>
                 <Input value={specification} readOnly />
               </div>
             </div>
@@ -209,7 +209,7 @@ export default function TableShow() {
                         />
                       </TableCell>
 
-                      {["No", "SN Number", "Warehouse", "PO Number", "Kondisi", "Status", "Action"].map((h, i) => (
+                      {["No", "SN Number", "Warehouse", "Nomor Surat", "Kondisi", "Status", "Action"].map((h, i) => (
                         <TableCell
                           key={i}
                           isHeader

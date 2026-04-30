@@ -91,7 +91,7 @@ export default function TransactionOut({
             </div>
             <div>
               <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                Transaksi Keluar
+                Transaksi Peminjaman
               </h1>
               <p className="text-[clamp(10px,0.7rem,10px)] text-gray-500 dark:text-gray-400">
                 Kelola riwayat transaksi keluar & peminjaman

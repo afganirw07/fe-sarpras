@@ -92,7 +92,7 @@ export default function SupplierPage() {
               <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="flex-1">
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Memiliki Kontak</p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Kontak</p>
               {stats === null ? (
                 <div className="h-6 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
               ) : (

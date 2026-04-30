@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import {
@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -33,7 +34,6 @@ import {
   ReturnItemEntry,
 } from "@/lib/transaction-return";
 import { getLoanRequestById } from "@/lib/loan-request";
-import { getEmployees, Employee } from "@/lib/roles";
 import { getUsers, User } from "@/lib/user";
 
 const KONDISI_OPTIONS = ["Good", "Fair", "Poor"] as const;
@@ -53,47 +53,29 @@ export default function DialogTransactionReturn({
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   const [approvedLoans, setApprovedLoans]   = useState<any[]>([]);
-  const [employees, setEmployees]           = useState<Employee[]>([]);
   const [selectedLoanId, setSelectedLoanId] = useState("");
   const [selectedLoan, setSelectedLoan]     = useState<any | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState("");
+  const [returnerName, setReturnerName]     = useState(""); // ← ganti jadi text input
   const [kondisiMap, setKondisiMap]         = useState<Record<string, string>>({});
-  const [user, setUsers] = useState<User[]>([]);
-  // Search state khusus untuk employee select
-  const [employeeSearch, setEmployeeSearch] = useState("");
+  const [user, setUsers]                    = useState<User[]>([]);
 
   useEffect(() => {
-      getUsers().then(setUsers);
-    }, []);
-
-  // ── Filtered employees berdasarkan search ─────────────────────────────────
-  const filteredEmployees = useMemo(() => {
-    const q = employeeSearch.toLowerCase();
-    if (!q) return employees;
-    return employees.filter((e) => e.full_name.toLowerCase().includes(q));
-  }, [employees, employeeSearch]);
+    getUsers().then(setUsers);
+  }, []);
 
   const userMap = useMemo(() => {
-  if (!Array.isArray(user)) return {};
-  return user.reduce((acc, u) => {
-    acc[u.id] = u.username;
-    return acc;
-  }, {} as Record<string, string>);
-}, [user]);
-
-  // ── Label employee yang terpilih (untuk SelectValue display) ──────────────
-  const selectedEmployeeLabel = useMemo(() => {
-    return employees.find((e) => e.id === selectedUserId)?.full_name ?? "";
-  }, [employees, selectedUserId]);
+    if (!Array.isArray(user)) return {};
+    return user.reduce((acc, u) => {
+      acc[u.id] = u.username;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [user]);
 
   useEffect(() => {
     if (!open) return;
     setLoadingLoans(true);
-    Promise.all([getApprovedLoanRequests(), getEmployees()])
-      .then(([loans, employeesRes]) => {
-        setApprovedLoans(loans);
-        setEmployees(employeesRes);
-      })
+    getApprovedLoanRequests()
+      .then(setApprovedLoans)
       .catch(() => toast.error("Gagal memuat data"))
       .finally(() => setLoadingLoans(false));
   }, [open]);
@@ -127,9 +109,9 @@ export default function DialogTransactionReturn({
     selectedLoan.item.every((d: LoanDetailItem) => kondisiMap[d.id]);
 
   const handleSubmit = async () => {
-    if (!selectedLoan)     return toast.error("Pilih transaksi dulu");
-    if (!selectedUserId)   return toast.error("Pilih user");
-    if (!allKondisiFilled) return toast.error("Isi semua kondisi item");
+    if (!selectedLoan)              return toast.error("Pilih transaksi dulu");
+    if (!returnerName.trim())       return toast.error("Isi nama yang mengembalikan");
+    if (!allKondisiFilled)          return toast.error("Isi semua kondisi item");
 
     const entries: ReturnItemEntry[] = selectedLoan.item.map(
       (d: LoanDetailItem) => ({ detail_item: d, new_condition: kondisiMap[d.id] })
@@ -137,8 +119,7 @@ export default function DialogTransactionReturn({
 
     try {
       setLoading(true);
-     await returnLoanRequest(selectedLoan, entries, selectedUserId); // pass it here
-    //  await returnLoanRequest(selectedLoan, entries); // pass it here
+      await returnLoanRequest(selectedLoan, entries, returnerName.trim());
       toast.success(`${entries.length} item berhasil dikembalikan`);
       resetForm();
       setOpen(false);
@@ -154,11 +135,9 @@ export default function DialogTransactionReturn({
   const resetForm = () => {
     setSelectedLoanId("");
     setSelectedLoan(null);
-    setSelectedUserId("");
+    setReturnerName("");
     setKondisiMap({});
     setApprovedLoans([]);
-    setEmployees([]);
-    setEmployeeSearch("");
   };
 
   return (
@@ -171,7 +150,7 @@ export default function DialogTransactionReturn({
     >
       <DialogTrigger asChild>
         <Button className="bg-blue-800 text-white hover:bg-blue-900">
-          + Add Transaction Return
+          + Pengembalian Barang
         </Button>
       </DialogTrigger>
 
@@ -190,7 +169,7 @@ export default function DialogTransactionReturn({
 
             {/* Loan select */}
             <div className="flex flex-col gap-2">
-              <Label>Not Returned Transaction</Label>
+              <Label>Barang Di pinjam</Label>
               <Select
                 value={selectedLoanId}
                 onValueChange={handleSelectLoan}
@@ -199,77 +178,29 @@ export default function DialogTransactionReturn({
                 <SelectTrigger className="h-11 w-full">
                   <SelectValue placeholder="Pilih transaksi" />
                 </SelectTrigger>
-              <SelectContent>
-  {approvedLoans.map((loan) => (
-    <SelectItem key={loan.id} value={loan.id}>
-      Return -{" "}
-      {format(new Date(loan.borrow_date), "dd MMM yyyy", { locale: id })} -{" "}
-      {userMap[loan.user_id || "loading"]} -{""}
-      {loan.item?.length ?? 0} item 
-    </SelectItem>
-  ))}
-</SelectContent>
+                <SelectContent>
+                  {approvedLoans.map((loan) => (
+                    <SelectItem key={loan.id} value={loan.id}>
+                      Return -{" "}
+                      {format(new Date(loan.borrow_date), "dd MMM yyyy", { locale: id })} -{" "}
+                      {userMap[loan.user_id] ?? "..."} -{" "}
+                      {loan.item?.length ?? 0} item
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
 
-            {/* Employee select — dengan search */}
+            {/* ── Ganti Select → Input text ── */}
             <div className="flex flex-col gap-2">
-              <Label>User Yang Mengembalikan</Label>
-              <Select
-                value={selectedUserId}
-                onValueChange={(val) => {
-                  setSelectedUserId(val);
-                  setEmployeeSearch(""); // reset search setelah pilih
-                }}
-              >
-                <SelectTrigger className="h-11 w-full">
-                  {/* Tampilkan nama yang terpilih, bukan value (UUID) */}
-                  <SelectValue placeholder="Pilih user">
-                    {selectedEmployeeLabel || "Pilih user"}
-                  </SelectValue>
-                </SelectTrigger>
-
-                <SelectContent
-                  position="popper"
-                  side="bottom"
-                  align="start"
-                  sideOffset={4}
-                  className="w-(--radix-select-trigger-width)"
-                >
-                  {/* Search input */}
-                  <div className="sticky top-0 z-10 bg-white dark:bg-black px-2 pb-2 pt-1">
-                    <div className="relative">
-                      <Search
-                        size={14}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
-                        placeholder="Cari employee..."
-                        value={employeeSearch}
-                        onChange={(e) => setEmployeeSearch(e.target.value)}
-                        onKeyDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Employee list */}
-                  <div className="max-h-52 overflow-y-auto">
-                    {filteredEmployees.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-gray-400">
-                        Employee tidak ditemukan
-                      </div>
-                    ) : (
-                      filteredEmployees.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>
-                          {e.full_name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </div>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="returner-name">Yang Mengembalikan</Label>
+              <Input
+                id="returner-name"
+                placeholder="Masukkan nama..."
+                value={returnerName}
+                onChange={(e) => setReturnerName(e.target.value)}
+                className="h-11"
+              />
             </div>
           </div>
 
@@ -278,7 +209,7 @@ export default function DialogTransactionReturn({
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
-                  {["Item ID", "Name", "SN", "Subcategory", "WH", "Condition"].map((col) => (
+                  {["Item ID", "Nama", "Nomor Serial", "Sub Kategori", "Ruangan", "Kondisi"].map((col) => (
                     <th
                       key={col}
                       className="text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400"
@@ -347,7 +278,7 @@ export default function DialogTransactionReturn({
             </DialogClose>
             <Button
               onClick={handleSubmit}
-              disabled={loading || !selectedLoan || !selectedUserId || !allKondisiFilled}
+              disabled={loading || !selectedLoan || !returnerName.trim() || !allKondisiFilled}
               className="bg-blue-800 px-6 text-white hover:bg-blue-900 disabled:opacity-50"
             >
               {loading ? <Loader2 className="animate-spin" size={16} /> : "Save"}

@@ -282,6 +282,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
     if (!submission)   { toast.error("Nama Waka Sarpras wajib diisi.");           return; }
     if (!chargePerson) { toast.error("Nama Penanggung Jawab Sarpras wajib diisi."); return; }
     if (!knowing)      { toast.error("Nama Sarpras Yayasan wajib diisi.");         return; }
+    if (!notes)      { toast.error("catatan wajib diisi.");         return; }
 
     setLoading(true);
     try {

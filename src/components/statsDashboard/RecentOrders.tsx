@@ -203,7 +203,7 @@ export default function RecentTransactions() {
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            Recent Transactions
+            Riwayat Transaksi
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Gabungan transaksi masuk, peminjaman &amp; pengembalian terbaru

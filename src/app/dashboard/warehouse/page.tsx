@@ -34,7 +34,7 @@ export default function WarehousePage() {
             </div>
             <div>
               <h1 className="font-figtree text-2xl font-bold text-gray-900 dark:text-white">
-                Data Warehouse
+                Data Ruangan 
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Kelola data ruangan dan gudang

@@ -31,11 +31,11 @@ import { Search, Trash2, Plus } from "lucide-react";
 const STATUS_OPTIONS: ConsumableRequestStatus[] = ["Good", "Fair", "Poor"];
 
 interface ItemRow {
-  item_id:  string;
-  name:     string;
-  stock:    number;
-  qty:      number;
-  status:   ConsumableRequestStatus;
+  item_id: string;
+  name:    string;
+  stock:   number;
+  qty:     number;
+  status:  ConsumableRequestStatus;
 }
 
 interface Props {
@@ -57,7 +57,11 @@ function SearchableSelect({
         <Label>{label}</Label>
         {error && <p className="text-xs text-red-500">{error}</p>}
       </div>
-      <Select value={value} onValueChange={(val) => { onValueChange(val); onSearchChange(""); }} disabled={disabled}>
+      <Select
+        value={value}
+        onValueChange={(val) => { onValueChange(val); onSearchChange(""); }}
+        disabled={disabled}
+      >
         <SelectTrigger className={`h-10 ${error ? "border-red-500" : ""}`}>
           <SelectValue placeholder={placeholder}>{displayLabel || placeholder}</SelectValue>
         </SelectTrigger>
@@ -93,17 +97,18 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
   const [rooms,     setRooms]     = useState<Room[]>([]);
 
   // ── Selector state ────────────────────────────────────────────────────────
-  const [selectedItemId,   setSelectedItemId]   = useState("");
-  const [selectedRoomId,   setSelectedRoomId]   = useState("");
-  const [selectedRoomSearch, setSelectedRoomSearch] = useState("");
-  const [itemSearch,       setItemSearch]       = useState("");
-  const [requesterSearch,  setRequesterSearch]  = useState("");
-  const [requestBy,        setRequestBy]        = useState("");
+  const [selectedItemId,      setSelectedItemId]      = useState("");
+  const [selectedRoomId,      setSelectedRoomId]      = useState("");
+  const [selectedRoomSearch,  setSelectedRoomSearch]  = useState("");
+  const [itemSearch,          setItemSearch]          = useState("");
+  const [requesterSearch,     setRequesterSearch]     = useState("");
+  const [requestBy,           setRequestBy]           = useState("");
 
   // ── Rows (multiple items) ─────────────────────────────────────────────────
-  const [rows, setRows] = useState<ItemRow[]>([]);
+  const [rows,   setRows]   = useState<ItemRow[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Fix error 1: cast eksplisit pada hasil getItems
   const fetchData = useCallback(async () => {
     try {
       const [itemsRes, empRes, roomsRes] = await Promise.all([
@@ -111,9 +116,10 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
         getEmployees(),
         getRooms(),
       ]);
-      setItems((itemsRes.data ?? []).filter((i: Item) => i.type === "Consumable"));
-      setEmployees(Array.isArray(empRes) ? empRes : (empRes.data ?? []));
-      setRooms(Array.isArray(roomsRes) ? roomsRes : (roomsRes.data ?? []));
+      const itemsData = (itemsRes as any).data ?? itemsRes ?? [];
+      setItems((itemsData as Item[]).filter((i: Item) => i.type === "Consumable"));
+      setEmployees(Array.isArray(empRes) ? empRes : ((empRes as any).data ?? []));
+      setRooms(Array.isArray(roomsRes) ? roomsRes : ((roomsRes as any).data ?? []));
     } catch {
       toast.error("Gagal memuat data master");
     }
@@ -122,7 +128,6 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
   useEffect(() => { if (isOpen) fetchData(); }, [isOpen, fetchData]);
 
   const filteredItems = useMemo(() => {
-    // Exclude items already in rows
     const addedIds = new Set(rows.map((r) => r.item_id));
     return items.filter(
       (i) =>
@@ -168,6 +173,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
     setRows((prev) => prev.filter((r) => r.item_id !== itemId));
   };
 
+  // Fix error 2: cast value ke ConsumableRequestStatus
   const handleRowChange = (itemId: string, field: "qty" | "status", value: number | string) => {
     setRows((prev) => prev.map((r) => {
       if (r.item_id !== itemId) return r;
@@ -175,7 +181,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
         const qty = Math.min(Math.max(1, Number(value)), r.stock);
         return { ...r, qty };
       }
-      return { ...r, [field]: value };
+      return { ...r, status: value as ConsumableRequestStatus };
     }));
   };
 
@@ -200,9 +206,9 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: Record<string, string> = {};
-    if (!selectedRoomId) newErrors.room    = "Warehouse wajib dipilih";
-    if (!requestBy)      newErrors.request = "Pemohon wajib dipilih";
-    if (rows.length === 0) newErrors.rows  = "Tambahkan minimal satu item";
+    if (!selectedRoomId)   newErrors.room    = "Warehouse wajib dipilih";
+    if (!requestBy)        newErrors.request = "Pemohon wajib dipilih";
+    if (rows.length === 0) newErrors.rows    = "Tambahkan minimal satu item";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -212,16 +218,17 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
 
     setLoading(true);
     try {
-      // Kirim satu per satu karena API consumable request per-item
+      // Fix error 3: tambah approved_by di payload
       await Promise.all(
         rows.map((row) =>
           createConsumableRequest({
-            item_id:    row.item_id,
-            quantity:   row.qty,
-            status:     row.status,
-            request_by: requestBy,
-            room_id:    selectedRoomId,
-            created_by: userId,
+            item_id:     row.item_id,
+            quantity:    row.qty,
+            status:      row.status,
+            approved_by: userId,   // user yang login sebagai approver default
+            request_by:  requestBy,
+            room_id:     selectedRoomId,
+            created_by:  userId,
           })
         )
       );
@@ -239,8 +246,11 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
-        <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20 font-quicksand text-md transition duration-300">
-          + Add Consumable Request
+        <Button
+          size="lg"
+          className="bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20 font-quicksand text-md transition duration-300"
+        >
+          + Permintaan
         </Button>
       </DialogTrigger>
 
@@ -266,7 +276,9 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
                 disabled={loading}
               >
                 {filteredItems.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-gray-400 text-center">Item tidak ditemukan</div>
+                  <div className="px-3 py-2 text-sm text-gray-400 text-center">
+                    Item tidak ditemukan
+                  </div>
                 ) : (
                   filteredItems.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
@@ -290,7 +302,9 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
                 disabled={loading}
               >
                 {filteredRooms.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-gray-400 text-center">Warehouse tidak ditemukan</div>
+                  <div className="px-3 py-2 text-sm text-gray-400 text-center">
+                    Warehouse tidak ditemukan
+                  </div>
                 ) : (
                   filteredRooms.map((r) => (
                     <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
@@ -299,16 +313,16 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
               </SearchableSelect>
             </div>
 
-            {/* ── Tombol Add Item ── */}
-           
-
             {/* ── Tabel Items ── */}
             <div className="rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
                     {["No", "Nama Item", "Stock", "Qty", "Kondisi", ""].map((col) => (
-                      <th key={col} className="text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400">
+                      <th
+                        key={col}
+                        className="text-left px-4 py-3 font-medium text-gray-500 dark:text-gray-400"
+                      >
                         {col}
                       </th>
                     ))}
@@ -326,16 +340,20 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
                     </tr>
                   ) : (
                     rows.map((row, index) => (
-                      <tr key={row.item_id} className="border-t border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                      <tr
+                        key={row.item_id}
+                        className="border-t border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                      >
                         <td className="px-4 py-3 text-gray-500">{index + 1}</td>
                         <td className="px-4 py-3 font-medium">{row.name}</td>
                         <td className="px-4 py-3 text-gray-500">{row.stock}</td>
                         <td className="px-4 py-3 w-24">
+                          {/* Fix error 4 & 5: min max jadi string */}
                           <Input
                             type="number"
-                            min={1}
-                            max={row.stock}
-                            value={row.qty}
+                            min="1"
+                            max={String(row.stock)}
+                            defaultValue={row.qty}
                             onChange={(e) => handleRowChange(row.item_id, "qty", Number(e.target.value))}
                             disabled={loading}
                           />
@@ -374,27 +392,33 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
                 </tbody>
               </table>
             </div>
-             <div className="flex justify-between items-center">
-            {/* ── Request By ── */}
-            <SearchableSelect
-              label="Request By *"
-              error={errors.request}
-              value={requestBy}
-              displayLabel={selectedRequesterLabel}
-              placeholder="Pilih pemohon"
-              searchValue={requesterSearch}
-              onSearchChange={setRequesterSearch}
-              onValueChange={(val) => { setRequestBy(val); setErrors((p) => ({ ...p, request: "" })); }}
-              disabled={loading}
-            >
-              {filteredRequesters.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-gray-400 text-center">Employee tidak ditemukan</div>
-              ) : (
-                filteredRequesters.map((e) => (
-                  <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
-                ))
-              )}
-            </SearchableSelect>
+
+            {/* ── Request By + Add Item ── */}
+            <div className="flex justify-between items-end">
+              <div className="w-72">
+                <SearchableSelect
+                  label="Request By *"
+                  error={errors.request}
+                  value={requestBy}
+                  displayLabel={selectedRequesterLabel}
+                  placeholder="Pilih pemohon"
+                  searchValue={requesterSearch}
+                  onSearchChange={setRequesterSearch}
+                  onValueChange={(val) => { setRequestBy(val); setErrors((p) => ({ ...p, request: "" })); }}
+                  disabled={loading}
+                >
+                  {filteredRequesters.length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-gray-400 text-center">
+                      Employee tidak ditemukan
+                    </div>
+                  ) : (
+                    filteredRequesters.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
+                    ))
+                  )}
+                </SearchableSelect>
+              </div>
+
               <Button
                 type="button"
                 onClick={handleAddItem}
@@ -405,14 +429,19 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
               </Button>
             </div>
 
-
           </div>
 
           <DialogFooter className="mt-6">
             <DialogClose asChild>
-              <Button variant="outline" type="button" disabled={loading}>Cancel</Button>
+              <Button variant="outline" type="button" disabled={loading}>
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white border-0" disabled={loading}>
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+              disabled={loading}
+            >
               {loading ? "Menyimpan..." : `Save${rows.length > 0 ? ` (${rows.length} item)` : ""}`}
             </Button>
           </DialogFooter>

@@ -95,12 +95,12 @@ export default function TableTransactionReturn({
 
   const tableHeaders = [
     { label: "No", className: "w-16 text-center" },
-    { label: "PO Number" },
+    { label: "Nomor Surat" },
     { label: "Item" },
-    { label: "Serial Number" },
-    { label: "Room" },
+    { label: "Nomor Serial" },
+    { label: "Ruangan" },
     { label: "Kondisi" },
-    { label: "User" },
+    { label: "Pengguna" },
   ];
 
   const renderLoading = () => (

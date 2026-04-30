@@ -288,10 +288,10 @@ export default function TableDetailWarehouse() {
                       "No",
                       "Nama Item",
                       "Kategori",
-                      "PO Number",
+                      "Nomor Surat",
                       "Kondisi",
                       "Status",
-                      "SN Number",
+                      "Nomor Serial",
                     ].map((header, i) => (
                       <TableCell
                         key={header}

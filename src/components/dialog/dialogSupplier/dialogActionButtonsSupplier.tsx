@@ -211,7 +211,7 @@ export default function ActionButtonsSupplier({
               {/* Email */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                  <Label>Email *</Label>
+                  <Label>Email ( Opsional )</Label>
                   {errors.email && (
                     <p className="text-xs text-red-500">{errors.email}</p>
                   )}
@@ -229,7 +229,7 @@ export default function ActionButtonsSupplier({
               {/* Phone */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                  <Label>Phone *</Label>
+                  <Label>Nomor Handphone *</Label>
                   {errors.phoneNumber && (
                     <p className="text-xs text-red-500">{errors.phoneNumber}</p>
                   )}
@@ -287,11 +287,11 @@ export default function ActionButtonsSupplier({
           <TooltipTrigger asChild>
             <AlertDialogTrigger asChild>
               <button type="button">
-                <Trash2 size={15} />
+                <Trash2 color="red" size={15} />
               </button>
             </AlertDialogTrigger>
           </TooltipTrigger>
-          <TooltipContent>Delete</TooltipContent>
+          <TooltipContent>Hapus</TooltipContent>
         </Tooltip>
 
         <AlertDialogContent>
@@ -304,13 +304,13 @@ export default function ActionButtonsSupplier({
           </AlertDialogHeader>
 
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={loading}>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={loading}
               className="bg-red-600 text-white hover:bg-red-700"
             >
-              {loading ? "Menghapus..." : "Delete"}
+              {loading ? "Menghapus..." : "Hapus"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

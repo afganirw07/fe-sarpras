@@ -363,7 +363,7 @@ export default function DialogAddItems({
               {/* specification */}
               <div className="grid gap-2">
                 <div className="flex gap-2 items-center">
-                <Label>specification *</Label>
+                <Label>spesifikasi *</Label>
                  {errors.specification && (
                   <p className="text-xs text-red-500 mt-1">{errors.specification}</p>
                 )}

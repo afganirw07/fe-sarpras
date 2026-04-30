@@ -28,6 +28,7 @@ import { getMigrationById, ItemMigration } from "@/lib/migration";
 import { getUsers } from "@/lib/user";
 import { getRooms } from "@/lib/warehouse";
 import Pagination from "@/components/tables/Pagination";
+import ButtonBack from "@/components/ui/button/backButton";
 
 
 interface LoanRequest {
@@ -59,16 +60,16 @@ function formatDate(date: string | null | undefined) {
 
 function statusBadgeClass(status: string) {
   switch (status.toLowerCase()) {
-    case "approved":
+      
+  
+ 
+    case "available":
       return "border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
-    case "pending":
-      return "border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
-    case "returned":
+    case "borrowed":
       return "border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
-    case "rejected":
+    case "damaged":
       return "border-rose-200 bg-rose-100 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-400";
-    default:
-      return "border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400";
+
   }
 }
 
@@ -184,7 +185,7 @@ const itemsPerPage = 10;
     <div className="mx-auto w-full max-w-xs md:max-w-3xl lg:max-w-7xl">
       <Toaster />
 
-      <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
+      <div className="flex w-full justify-between items-center   mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-linear-to-br from-blue-500 to-blue-600 p-3 shadow-lg shadow-blue-500/20">
             <ArrowUpFromLine className="h-6 w-6 text-white" />
@@ -198,6 +199,7 @@ const itemsPerPage = 10;
             </p>
           </div>
         </div>
+        <ButtonBack route="/mutasi"/>
       </div>
 
       <div className="mb-6 rounded-2xl border border-gray-200/50 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-white/5 dark:bg-white/5">
@@ -210,7 +212,7 @@ const itemsPerPage = 10;
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <User className="h-4 w-4 text-blue-500" />
-              Asal Wh
+              Ruangan Asal
             </label>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
               {migration.from_room_id && rooms.find((r) => r.id === migration.from_room_id)?.name} &rarr;{" "}
@@ -220,7 +222,7 @@ const itemsPerPage = 10;
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <Tag className="h-4 w-4 text-blue-500" />
-              Wh Tujuan
+              Ruangan Tujuan
             </label>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-white/10 dark:bg-white/5">
               <span
@@ -234,7 +236,7 @@ const itemsPerPage = 10;
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <CalendarDays className="h-4 w-4 text-blue-500" />
-              Created At
+              Tanggal mutasi
             </label>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
               {formatDate(migration.migrated_at)}
@@ -253,7 +255,7 @@ const itemsPerPage = 10;
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <FileText className="h-4 w-4 text-blue-500" />
-              Notes
+              Catatan
             </label>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
               {migration.notes ?? "-"}
