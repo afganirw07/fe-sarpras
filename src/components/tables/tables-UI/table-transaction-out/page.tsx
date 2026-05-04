@@ -38,16 +38,16 @@ import Pagination from "../../Pagination";
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    pending: {
+    Pending: {
       label: "Pending",
       cls: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
     },
-    approved: {
-      label: "Approved",
+    Disetujui: {
+      label: "Disetujui",
       cls: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
     },
-    returned: {
-      label: "Returned",
+    Dikembalikan: {
+      label: "Dikembalikan",
       cls: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
     },
   };
@@ -217,7 +217,7 @@ export default function TableTransactionOut() {
 
   const hasDamagedItem = (items: LoanDetailItem[]): boolean => {
   if (!items || items.length === 0) return false;
-  return items.some((d) => d.condition === "Poor");
+  return items.some((d) => d.condition === "Buruk");
 };
 
   return (
@@ -273,9 +273,9 @@ export default function TableTransactionOut() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="returned">Returned</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Disetujui">Disetujui</SelectItem>
+                <SelectItem value="Dikembalikan">Dikembalikan</SelectItem>
               </SelectContent>
             </Select>
 
@@ -437,7 +437,7 @@ export default function TableTransactionOut() {
 <TableCell className="px-2 py-4 dark:border-gray-800">
   <div className="flex items-center gap-2">
     <StatusBadge status={trx.status} />
-    {trx.status === "returned" && hasDamagedItem(trx.item) && (
+    {trx.status === "Dikembalikan" && hasDamagedItem(trx.item) && (
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="flex h-2.5 w-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50 animate-pulse" />

@@ -21,7 +21,7 @@ import {
 import { Filter, RotateCcw } from "lucide-react";
 import { getCategories, getSubcategories, Category, Subcategory } from "@/lib/category";
 
-export type ConditionFilter = "Poor" | "Fair" | "Good" | "";
+export type ConditionFilter = "Buruk" | "Sedang" | "Baik" | "";
 export type PeriodFilter = 3 | 6 | 12 | null;
 
 export interface FilterState {
@@ -38,9 +38,9 @@ interface DialogFilterItemsProps {
 }
 
 const CONDITIONS: { value: ConditionFilter; label: string; color: string }[] = [
-  { value: "Poor", label: "Poor (Rusak)", color: "border-red-300 bg-red-50 text-red-700 data-[active=true]:bg-red-600 data-[active=true]:text-white data-[active=true]:border-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400 dark:data-[active=true]:bg-red-600 dark:data-[active=true]:text-white" },
-  { value: "Fair", label: "Fair (Cukup)", color: "border-amber-300 bg-amber-50 text-amber-700 data-[active=true]:bg-amber-500 data-[active=true]:text-white data-[active=true]:border-amber-500 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400 dark:data-[active=true]:bg-amber-500 dark:data-[active=true]:text-white" },
-  { value: "Good", label: "Good (Baik)", color: "border-green-300 bg-green-50 text-green-700 data-[active=true]:bg-green-600 data-[active=true]:text-white data-[active=true]:border-green-600 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400 dark:data-[active=true]:bg-green-600 dark:data-[active=true]:text-white" },
+  { value: "Buruk", label: "Buruk", color: "border-red-300 bg-red-50 text-red-700 data-[active=true]:bg-red-600 data-[active=true]:text-white data-[active=true]:border-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400 dark:data-[active=true]:bg-red-600 dark:data-[active=true]:text-white" },
+  { value: "Sedang", label: "Sedang", color: "border-amber-300 bg-amber-50 text-amber-700 data-[active=true]:bg-amber-500 data-[active=true]:text-white data-[active=true]:border-amber-500 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400 dark:data-[active=true]:bg-amber-500 dark:data-[active=true]:text-white" },
+  { value: "Baik", label: "Baik", color: "border-green-300 bg-green-50 text-green-700 data-[active=true]:bg-green-600 data-[active=true]:text-white data-[active=true]:border-green-600 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400 dark:data-[active=true]:bg-green-600 dark:data-[active=true]:text-white" },
 ];
 
 const PERIODS: { value: PeriodFilter; label: string }[] = [

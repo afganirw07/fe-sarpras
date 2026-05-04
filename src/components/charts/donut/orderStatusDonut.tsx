@@ -50,9 +50,9 @@ export default function OrderStatusDonut() {
 
   // ── Series ────────────────────────────────────────────────────────────────
   const series = useMemo(() => {
-    const masuk        = transactions.filter((t) => t.type === "In").length;
-    const dipinjam     = loans.filter((l) => l.status === "borrowed").length;
-    const dikembalikan = loans.filter((l) => l.status === "returned").length;
+    const masuk        = transactions.filter((t) => t.type === "Masuk").length;
+    const dipinjam     = loans.filter((l) => l.status === "Dipinjam").length;
+    const dikembalikan = loans.filter((l) => l.status === "Dikembalikan").length;
     return [masuk, dipinjam, dikembalikan];
   }, [transactions, loans]);
 

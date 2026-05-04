@@ -41,7 +41,7 @@ interface ItemFormData {
   // specification: string;
   created_by: string
   specification: string;
-  type?: "Consumable" | "Loanable";
+  type?: "DapatDipinjam" | "DapatDipinjam";
 }
 
 interface FormErrors {
@@ -79,10 +79,9 @@ export default function DialogAddItems({
     brand: "",
     specification:"",
     unit: "",
-    specification: "",
     stock: 0,
     created_by: userId,
-    type: "Loanable"
+    type: "DapatDipinjam"
   });
   
 
@@ -153,7 +152,7 @@ export default function DialogAddItems({
         // specification: "",
         stock: 0,
         created_by: userId,
-        type: "Loanable",
+        type: "DapatDipinjam",
         specification:""
       });
       setSelectedCategorySubcategories([]);
@@ -455,8 +454,8 @@ export default function DialogAddItems({
       <SelectValue placeholder="Pilih Tipe Item" />
     </SelectTrigger>
     <SelectContent>
-      <SelectItem value="Loanable">Loanable</SelectItem>
-      <SelectItem value="Consumable">Consumable</SelectItem>
+      <SelectItem value="DapatDipinjam">Dipinjam</SelectItem>
+      <SelectItem value="HabisPakai">Diminta</SelectItem>
     </SelectContent>
   </Select>
 </div>

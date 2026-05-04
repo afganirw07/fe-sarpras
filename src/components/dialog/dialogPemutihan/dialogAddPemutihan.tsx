@@ -27,12 +27,15 @@ import {
 import { createPurging } from "@/lib/purging";
 import { useSession } from "next-auth/react";
 import Pagination from "@/components/tables/Pagination";
+import DatePickerTanggalSurat from "./datePickerPemutihan";
+
+
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface DetailItem {
   id: string;
   serial_number: string;
-  condition: "Good" | "Fair" | "Poor";
+  condition: "Baik" | "Sedang" | "Buruk";
   status: string;
   item: {
     id: string;
@@ -45,9 +48,9 @@ interface DetailItem {
 
 // ── Badge kondisi ──────────────────────────────────────────────────────────
 const CONDITION_CONFIG: Record<string, { label: string; className: string }> = {
-  good: { label: "Good", className: "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  fair: { label: "Fair", className: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
-  poor: { label: "Poor", className: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
+  Baik: { label: "Baik", className: "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+  Sedang: { label: "Sedang", className: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
+  Buruk: { label: "Buruk", className: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
 };
 
 function ConditionBadge({ condition }: { condition: string }) {
@@ -85,6 +88,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
   const [rooms, setRooms]                           = useState<Room[]>([]);
   const [categoriesWithSubs, setCategoriesWithSubs] = useState<CategoryWithSubcategories[]>([]);
   const [itemOptions, setItemOptions]               = useState<ItemOption[]>([]);
+  const [tanggalDokumen, setTanggalDokumen] = useState<Date>(new Date());
 
   // state: tabel kiri
   const [leftItems, setLeftItems]             = useState<DetailItem[]>([]);
@@ -158,7 +162,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
 
       const stagedIds = new Set(currentStaged.map((s) => s.id));
       const filtered  = (res.data ?? []).filter(
-        (d: DetailItem) => !stagedIds.has(d.id) && d.status === "available"
+        (d: DetailItem) => !stagedIds.has(d.id) && d.status === "Tersedia"
       );
 
       setLeftItems(filtered);
@@ -220,7 +224,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
           itemId:        selectedItemId || undefined,
         });
         const batch = (res.data ?? []).filter(
-          (d: DetailItem) => !stagedIds.has(d.id) && d.status === "available"
+          (d: DetailItem) => !stagedIds.has(d.id) && d.status === "Tersedia"
         );
         allItems = [...allItems, ...batch];
         if (page >= (res.pagination?.totalPages ?? 1)) break;
@@ -292,10 +296,11 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
         item_name:     firstItem.item?.name ?? "",
         category:      firstItem.item?.category?.name ?? "",
         condition:     firstItem.condition,
-        item_status:   "damaged",
-        letter_status: "pending",
+        item_status:   "Rusak",
+        letter_status: "Pending",
         created_by:    session?.user?.id ?? "",
         notes,
+        tanggal_dokumen: tanggalDokumen.toISOString(),
         knowing,
         submission,
         charge_person: chargePerson, 
@@ -306,7 +311,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
           subcategory:    i.item?.subcategory?.name ?? "",
           serial_number:  i.serial_number,
           warehouse_id:   warehouseId,
-          item_status:    "damaged",
+          item_status:    "Rusak",
           condition:      i.condition,
           created_by:     session?.user?.id ?? "",
         })),
@@ -327,6 +332,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
   const resetForm = () => {
     setWarehouseId(""); setSubcategoryId(""); setSelectedItemId(""); setNotes("");
     setLeftItems([]); setStagedItems([]); setSelectedIds([]);
+    setTanggalDokumen(new Date());
     setSearchInput(""); setSearch(""); setSearchRight("");
     setKnowing(""); setSubmission(""); setChargePerson("");
     setCategoriesWithSubs([]); setItemOptions([]);
@@ -490,6 +496,11 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
 
   </div>
 </div>
+
+        <DatePickerTanggalSurat
+          value={tanggalDokumen}
+          onChange={setTanggalDokumen}
+        />
 
         {/* ── Two-panel ── */}
         <div className="mt-6 grid grid-cols-2 gap-6">

@@ -63,11 +63,11 @@ function statusBadgeClass(status: string) {
       
   
  
-    case "available":
+    case "Tersedia":
       return "border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
-    case "borrowed":
+    case "Dipinjam":
       return "border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
-    case "damaged":
+    case "Rusak":
       return "border-rose-200 bg-rose-100 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-400";
 
   }
@@ -75,11 +75,11 @@ function statusBadgeClass(status: string) {
 
 function conditionBadgeClass(condition: string) {
   switch (condition?.toLowerCase()) {
-    case "good":
+    case "Baik":
       return "border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
-    case "fair":
+    case "Sedang":
       return "border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
-    case "poor":
+    case "Buruk":
       return "border-rose-200 bg-rose-100 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-400";
     default:
       return "border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400";

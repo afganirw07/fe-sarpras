@@ -118,7 +118,7 @@ export default function DialogTransactionOut({ onSuccess }: DialogTransactionOut
 const filteredItems: Item[] = selectedSubcategoryId
   ? allItems.filter(
       (item) =>
-        item.type === "Loanable" && // ← tambah ini
+        item.type === "DapatDipinjam" && // ← tambah ini
         item.subcategory_id === selectedSubcategoryId &&
         item.name.toLowerCase().includes(itemSearch.toLowerCase()),
     )

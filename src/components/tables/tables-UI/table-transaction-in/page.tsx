@@ -168,15 +168,15 @@ const handlePageChange = (page: number) => {
 
   const getStatusConfig = (status: string) => {
     const s = status.toLowerCase();
-    if (s === "draft") return {
+    if (s === "Draft") return {
       class: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
       icon: <Package className="h-3.5 w-3.5" />,
     };
-    if (s === "approved") return {
+    if (s === "Disetujui") return {
       class: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800",
       icon: <Clock className="h-3.5 w-3.5" />,
     };
-    if (s === "received") return {
+    if (s === "Diterima") return {
       class: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
       icon: <CheckCircle2 className="h-3.5 w-3.5" />,
     };
@@ -188,7 +188,7 @@ const handlePageChange = (page: number) => {
 
   const getTypeConfig = (in_type: string) => {
     const t = in_type?.toLowerCase() ?? "";
-    if (t.includes("donation") || t.includes("donasi")) return {
+    if (t.includes("Donasi") || t.includes("Donasi")) return {
       class: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
       label: in_type,
     };
@@ -251,8 +251,8 @@ const handlePageChange = (page: number) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Tipe</SelectItem>
-                  <SelectItem value="buy">Beli</SelectItem>
-                  <SelectItem value="donation">Donasi</SelectItem>
+                  <SelectItem value="Beli">Beli</SelectItem>
+                  <SelectItem value="Donasi">Donasi</SelectItem>
                 </SelectContent>
               </Select>
 

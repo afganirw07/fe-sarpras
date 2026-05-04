@@ -36,7 +36,7 @@ import {
 import { getLoanRequestById } from "@/lib/loan-request";
 import { getUsers, User } from "@/lib/user";
 
-const KONDISI_OPTIONS = ["Good", "Fair", "Poor"] as const;
+const KONDISI_OPTIONS = ["Baik", "Sedang", "Buruk"] as const;
 
 interface DialogTransactionReturnProps {
   onSuccess?: () => void;

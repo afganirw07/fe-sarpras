@@ -22,8 +22,8 @@ export default function ActionButtonConsumable({
 }: ActionButtonConsumableProps) {
   const [loading, setLoading] = useState(false);
 
-  // Hanya bisa approve jika status masih "pending"
-  const isPending = request.request_status === "pending";
+ 
+  const isPending = request.request_status === "Pending";
 
   const handleApprove = async () => {
     if (!isPending) return;
@@ -32,9 +32,9 @@ export default function ActionButtonConsumable({
     try {
       // Update request_status dari "pending" → "approved"
       await updateConsumableRequest(request.id, {
-        request_status: "approved",
+        request_status: "Disetujui",
       });
-      toast.success("Consumable request berhasil di-approve");
+      toast.success("Permintaan berhasil di setujui");
       onSuccess?.();
     } catch (error: any) {
       console.error(error);

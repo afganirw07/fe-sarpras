@@ -36,8 +36,8 @@ export default function ConsumableRequestPage() {
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const totalRequests = requests.length;
-  const totalGood     = requests.filter((r) => r.status === "Good").length;
-  const totalFair     = requests.filter((r) => r.status === "Fair").length;
+  const totalGood     = requests.filter((r) => r.status === "Baik").length;
+  const totalFair     = requests.filter((r) => r.status === "Sedang").length;
 
   // ── Filter ────────────────────────────────────────────────────────────────
   const filteredRequests = useMemo(() => {

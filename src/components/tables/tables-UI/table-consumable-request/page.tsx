@@ -20,9 +20,9 @@ import ActionButtonConsumable from "@/components/dialog/dialogConsumableRequest/
 // ─── Badge: Kondisi Barang (Good / Fair / Poor) ───────────────────────────────
 function ConditionBadge({ condition }: { condition: string }) {
   const map: Record<string, string> = {
-    Good: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-    Fair: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-    Poor: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400",
+    Baik: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+    Sedang: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+    Buruk: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400",
   };
   return (
     <span
@@ -38,17 +38,17 @@ function ConditionBadge({ condition }: { condition: string }) {
 // ─── Badge: Status Request (pending / approved / returned) ────────────────────
 function RequestStatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    pending:
+    Pending:
       "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-    approved:
+    Disetujui:
       "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
-    returned:
+    Dikembalikand:
       "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   };
   const label: Record<string, string> = {
-    pending:  "Pending",
-    approved: "Approved",
-    returned: "Returned",
+    Pending:  "Pending",
+    Disetujui: "Disetujui",
+    Dikembalikan: "Dikembalikan",
   };
   return (
     <span

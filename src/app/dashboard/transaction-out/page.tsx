@@ -59,13 +59,13 @@ export default function TransactionOut({
   };
 
   const totalPending = transactions.filter(
-    (t) => t.status.toLowerCase() === "pending"
+    (t) => t.status.toLowerCase() === "Pending"
   ).length;
 
   const totalApproved = transactions.filter(
     (t) =>
-      t.status.toLowerCase() === "approved" ||
-      t.status.toLowerCase() === "returned"
+      t.status.toLowerCase() === "Disetujui" ||
+      t.status.toLowerCase() === "Dikembalikan"
   ).length;
 
   const filteredCount = useMemo(() => {

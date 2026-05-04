@@ -281,9 +281,9 @@ export default function TableShow() {
                           <TableCell className="px-2 py-4">
                             <span
                               className={`inline-block rounded-lg border px-2.5 py-1 text-xs font-semibold ${
-                                d.condition === "Poor"
+                                d.condition === "Buruk"
                                   ? "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400"
-                                  : d.condition === "Fair"
+                                  : d.condition === "Sedang"
                                   ? "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
                                   : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
                               }`}

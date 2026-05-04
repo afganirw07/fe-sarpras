@@ -261,7 +261,7 @@ export async function getPoorStockByItemId(
 ): Promise<number> {
   const query = new URLSearchParams({
     item_id: itemId,
-    condition: "Poor",
+    condition: "Buruk",
     limit: "1",
     page: "1",
   });

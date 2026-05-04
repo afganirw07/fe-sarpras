@@ -66,12 +66,12 @@ export default function TransactionIn( {
         
         
           const totalPending = transactions.filter((t) =>
-            t.status.toLowerCase().includes("draft"),
+            t.status.toLowerCase().includes("Draft"),
           ).length;
           const totalApproved = transactions.filter(
             (t) =>
-              t.status.toLowerCase().includes("approved") ||
-              t.status.toLowerCase().includes("received"),
+              t.status.toLowerCase().includes("Disetujui") ||
+              t.status.toLowerCase().includes("Diterima"),
           ).length; 
           
             const handleRefresh = () => {

@@ -98,9 +98,9 @@ export default function ActionButtonsItems({
     brand: item.brand || "",
     unit: item.unit || "",
     stock: item.stock || 0,
-    type: item.type || "Loanable",
+    type: item.type || "DapatDipinjam",
     created_by: userId,
-    specification: item.spesifikasi || "",
+    specification: item.specification || "",
   });
 
   // Fetch categories
@@ -144,9 +144,9 @@ export default function ActionButtonsItems({
         brand: item.brand || "",
         unit: item.unit || "",
         stock: item.stock || 0,
-        type: item.type || "Loanable",
+        type: item.type || "DapatDipinjam",
         created_by: userId,
-        specification: item.spesifikasi || "",
+        specification: item.specification|| "",
       });
       // Reset errors
       setErrors({});

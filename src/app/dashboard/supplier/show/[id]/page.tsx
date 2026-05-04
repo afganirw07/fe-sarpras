@@ -91,7 +91,7 @@ export default function SupplierShowPage() {
 
   const getStatusColor = (status: string) => {
     const statusLower = status.toLowerCase();
-    if (statusLower.includes("active") || statusLower.includes("available")) 
+    if (statusLower.includes("active") || statusLower.includes("Tersedia")) 
       return "bg-emerald-100 text-emerald-700 border-emerald-200";
     if (statusLower.includes("pending")) 
       return "bg-amber-100 text-amber-700 border-amber-200";
@@ -102,7 +102,7 @@ export default function SupplierShowPage() {
 
   const getConditionColor = (condition: string) => {
     const conditionLower = condition.toLowerCase();
-    if (conditionLower.includes("baik") || conditionLower.includes("good")) 
+    if (conditionLower.includes("baik") || conditionLower.includes("Baik")) 
       return "bg-emerald-100 text-emerald-700 border-emerald-200";
     if (conditionLower.includes("rusak") || conditionLower.includes("broken")) 
       return "bg-rose-100 text-rose-700 border-rose-200";
@@ -318,7 +318,7 @@ export default function SupplierShowPage() {
 
                       <div className="flex flex-wrap gap-2">
                         <span className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold ${getConditionColor(item.condition)}`}>
-                          {item.condition.toLowerCase().includes("baik") || item.condition.toLowerCase().includes("good") ? (
+                          {item.condition.toLowerCase().includes("baik") || item.condition.toLowerCase().includes("Baik") ? (
                             <CheckCircle2 className="h-3 w-3" />
                           ) : (
                             <AlertCircle className="h-3 w-3" />
@@ -444,7 +444,7 @@ export default function SupplierShowPage() {
 
                         <TableCell className="px-6 py-4">
                           <span className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold ${getConditionColor(item.condition)}`}>
-                            {item.condition.toLowerCase().includes("baik") || item.condition.toLowerCase().includes("good") ? (
+                            {item.condition.toLowerCase().includes("baik") || item.condition.toLowerCase().includes("Baik") ? (
                               <CheckCircle2 className="h-3.5 w-3.5" />
                             ) : (
                               <AlertCircle className="h-3.5 w-3.5" />

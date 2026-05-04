@@ -2,8 +2,8 @@ import { api } from "./api";
 
 // ─── Enums (sesuai Prisma schema) ─────────────────────────────────────────────
 
-export type ItemConditions = "Good" | "Fair" | "Poor";
-export type ItemStatus = "available" | "borrowed" | "damaged";
+export type ItemConditions = "Baik" | "Sedang" | "Buruk";
+export type ItemStatus = "Tersedia" | "Dipinjam" | "Rusak";
 
 export interface DetailItem {
   id: string;

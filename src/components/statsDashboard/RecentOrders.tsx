@@ -32,7 +32,7 @@ import {
 import { getConsumableRequests, ConsumableRequest } from "@/lib/consumable-request";
 
 
-type RowSource = "transaction" | "loan" | "return" | "consumable";
+type RowSource = "transaction" | "loan" | "return" | "HabisPakai";
 
 type MergedRow = {
   id: string;
@@ -65,16 +65,16 @@ function formatDate(iso: string) {
 
 function getStatusStyle(status: string) {
   switch (status) {
-    case "received":
+    case "Diterima":
       return "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400";
 
-    case "approved":
+    case "Disetujui":
       return "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400";
 
-    case "returned":
+    case "Dikembalikan":
       return "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400";
 
-    case "draft":
+    case "Draft":
       return "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400";
 
     default:
@@ -88,8 +88,8 @@ function SourceIcon({ source }: { source: RowSource }) {
   if (source === "return")
     return <RotateCcw className="h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400" />;
   return <BookOpen className="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" />;
-  if (source === "consumable")
-  return <ShoppingCart className="h-4 w-4 shrink-0 text-orange-500 dark:text-orange-400" />;
+  // if (source === "consumable")
+  // return <ShoppingCart className="h-4 w-4 shrink-0 text-orange-500 dark:text-orange-400" />;
 }
 
 
@@ -151,7 +151,7 @@ export default function RecentTransactions() {
     }));
 
     const loanRows: MergedRow[] = loans
-      .filter((l) => l.status === "approved")
+      .filter((l) => l.status === "Disetujui")
       .map((l) => ({
         id:        l.id,
         _source:   "loan" as const,
@@ -163,7 +163,7 @@ export default function RecentTransactions() {
       }));
 
     const returnRows: MergedRow[] = loans
-      .filter((l) => l.status === "returned")
+      .filter((l) => l.status === "Dikembalikan")
       .map((l) => ({
         id:        l.id,
         _source:   "return" as const,
@@ -176,7 +176,7 @@ export default function RecentTransactions() {
 
       const consumableRows: MergedRow[] = consumables.map((c) => ({
   id:        c.id,
-  _source:   "consumable" as const,
+  _source:   "HabisPakai" as const,
   _label:    "Permintaan Barang",
   _sortDate: c.created_at,
   username:  c.requestBy?.full_name ?? c.createdBy?.username,
@@ -234,11 +234,11 @@ export default function RecentTransactions() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua Status</SelectItem>
-              <SelectItem value="received">Received</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="returned">Returned</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="Diterima">Diterima</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Disetujui">Disetujui</SelectItem>
+              <SelectItem value="Dikembalikan">Dikembalikan</SelectItem>
+              <SelectItem value="Draft">Draft</SelectItem>
             </SelectContent>
           </Select>
 

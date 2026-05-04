@@ -34,7 +34,7 @@ interface DetailItem {
   id: string;                 // DetailItem.id — dipakai sebagai FK detail_item_id
   purging_detail_id?: string; // PurgingDetail.id — hanya referensi existing
   serial_number: string;
-  condition: "Good" | "Fair" | "Poor";
+  condition: "Baik" | "Sedang" | "Buruk";
   status: string;
   item: {
     id: string;
@@ -47,9 +47,9 @@ interface DetailItem {
 
 // ── Badge kondisi ──────────────────────────────────────────────────────────
 const CONDITION_CONFIG: Record<string, { label: string; className: string }> = {
-  good: { label: "Good", className: "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  fair: { label: "Fair", className: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
-  poor: { label: "Poor", className: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
+  Baik: { label: "Baik", className: "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+  Sedang: { label: "Sedang", className: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
+  Buruk: { label: "Buruk", className: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
 };
 
 function ConditionBadge({ condition }: { condition: string }) {
@@ -149,8 +149,8 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
   id:                d.detail_item_id,
   purging_detail_id: d.id,
   serial_number:     d.serial_number ?? "",
-  condition:         (d.condition as any) ?? "Good",
-  status:            "available",
+  condition:         (d.condition as any) ?? "Baik",
+  status:            "Tersedia",
   item: {
     id:   d.item_id ?? "",
     name: d.item_name ?? "",
@@ -228,7 +228,7 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
       });
 
       const filtered = (res.data ?? []).filter(
-        (d: DetailItem) => !stagedIdsRef.current.has(d.id) && d.status === "available"
+        (d: DetailItem) => !stagedIdsRef.current.has(d.id) && d.status === "Tersedia"
       );
 
       setLeftItems(filtered);
@@ -294,7 +294,7 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
           itemId:        selectedItemId || undefined,
         });
         const batch = (res.data ?? []).filter(
-          (d: DetailItem) => !stagedIdsRef.current.has(d.id) && d.status === "available"
+          (d: DetailItem) => !stagedIdsRef.current.has(d.id) && d.status === "Tersedia"
         );
         allItems = [...allItems, ...batch];
         if (page >= (res.pagination?.totalPages ?? 1)) break;
@@ -384,8 +384,8 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
         item_name:     firstItem.item?.name ?? "",
         category:      firstItem.item?.category?.name ?? "",
         condition:     firstItem.condition,
-        item_status:   "damaged",
-        letter_status: purging.letter_status ?? "pending",
+        item_status:   "Rusak",
+        letter_status: purging.letter_status ?? "Pending",
         notes,
         knowing,
         submission,
@@ -397,7 +397,7 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
           subcategory:    i.item?.subcategory?.name ?? "",
           serial_number:  i.serial_number,
           warehouse_id:   warehouseId,
-          item_status:    "damaged",
+          item_status:    "Rusak",
           condition:      i.condition,
           created_by:     session?.user?.id ?? "",
         })),

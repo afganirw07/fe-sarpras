@@ -27,7 +27,7 @@ export interface DetailItem {
   id: string;
   item_id: string;
   serial_number: string;
-  condition: "Good" | "Fair" | "Poor";
+  condition: "Baik" | "Sedang" | "Buruk";
   status: string;
   item: DetailItemMaster;
   room: DetailItemRoom;
@@ -71,7 +71,7 @@ export function getAvailableDetailItems(
   itemId: string,
   roomId: string
 ): Promise<PaginatedResponse<DetailItem>> {
-  return api(`/api/detail-items?item_id=${itemId}&room_id=${roomId}&status=available`);
+  return api(`/api/detail-items?item_id=${itemId}&room_id=${roomId}&status=Tersedia`);
 }
 
 // ── Basic: detail items by room dengan pagination + search ─────────────────
@@ -83,10 +83,10 @@ export function getDetailItemsByRoom(
 ): Promise<PaginatedResponse<DetailItem>> {
   const params = new URLSearchParams({
     room_id:            roomId,
-    status:             "available",
+    status:             "Tersedia",
     page:               String(page),
     limit:              String(limit),
-    transaction_status: "received",
+    transaction_status: "Diterima",
     ...(search ? { search } : {}),
   });
   return api(`/api/detail-items?${params.toString()}`);
@@ -108,7 +108,7 @@ export function getDetailItemsByRoomFiltered(
 
   const params = new URLSearchParams({
     room_id: roomId,
-    status:  "available",
+    status:  "Tersedia",
     page:    String(page),
     limit:   String(limit),
     ...(search        ? { search }                        : {}),

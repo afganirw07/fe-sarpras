@@ -1,31 +1,31 @@
 import { api } from "./api";
 
 export enum TransactionStatus {
-  DRAFT = "draft",
-  APPROVED = "approved",
-  RECEIVED = "received",
+  DRAFT = "Draft",
+  APPROVED = "Disetujui",
+  RECEIVED = "Diterima",
 }
 
 export enum TransactionType {
-  IN = "In",
-  OUT = "Out",
+  IN = "Masuk",
+  OUT = "Keluar",
 }
 
 export enum InType {
-  BUY = "Buy",
-  DONATION = "Donation",
+  BUY = "Beli",
+  DONATION = "Donasi",
 }
 
 export enum ItemConditions {
-  GOOD = "Good",
-  FAIR = "Fair",
-  POOR = "Poor",
+  GOOD = "Baik",
+  FAIR = "Sedang",
+  POOR = "Buruk",
 }
 
 export enum ItemStatus {
-  AVAILABLE = "available",
-  USED = "borrowed",
-  DAMAGED = "damaged",
+  AVAILABLE = "Tersedia",
+  USED = "Dipinjam",
+  DAMAGED = "Rusak",
 }
 
 export interface TransactionDetail {

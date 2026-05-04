@@ -367,7 +367,7 @@ export default function TableMutasi({
                         <span
                           className={`inline-block rounded-lg border px-2.5 py-1 text-xs font-semibold capitalize ${getLetterStatusBadge(m.letter_status)}`}
                         >
-                          {m.letter_status ?? "pending"}
+                          {m.letter_status ?? "Pending"}
                         </span>
                       </TableCell>
 

@@ -49,13 +49,13 @@ function formatDate(date: string | null | undefined) {
 
 function statusBadgeClass(status: string) {
   switch (status.toLowerCase()) {
-    case "approved":
+    case "Disetujui":
       return "border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
-    case "pending":
+    case "Pending":
       return "border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
-    case "returned":
+    case "Dikembalikan":
       return "border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
-    case "rejected":
+    case "Ditolak":
       return "border-rose-200 bg-rose-100 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-400";
     default:
       return "border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400";
@@ -64,11 +64,11 @@ function statusBadgeClass(status: string) {
 
 function conditionBadgeClass(condition: string) {
   switch (condition?.toLowerCase()) {
-    case "good":
+    case "Baik":
       return "border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
-    case "fair":
+    case "Sedang":
       return "border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
-    case "poor":
+    case "Buruk":
       return "border-rose-200 bg-rose-100 text-rose-700 dark:border-rose-800 dark:bg-rose-900/30 dark:text-rose-400";
     default:
       return "border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400";

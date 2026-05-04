@@ -41,7 +41,7 @@ export type ReturnItemEntry = {
 export async function getApprovedLoanRequests(): Promise<LoanRequestWithItems[]> {
   const res = await api("/api/loan-requests?limit=100");
   const all: LoanRequestWithItems[] = res.data ?? [];
-  return all.filter((loan) => loan.status === "approved");
+  return all.filter((loan) => loan.status === "Disetujui");
 }
 
 // ─── RETURN semua item dalam 1 LoanRequest sekaligus ─────────────────────────
@@ -75,7 +75,7 @@ export async function returnLoanRequest(
           transaction_id: detail_item.transaction_id,
           room_id: detail_item.room_id,
           serial_number: detail_item.serial_number,
-          status: "available",
+          status: "Tersedia",
           condition: new_condition,
         }),
       })
@@ -93,7 +93,7 @@ await api(`/api/loan-requests/${loan.id}`, {
     return_date: new Date().toISOString(),
     status:      "returned",
     description: loan.description ?? undefined,
-        returned_by,  // ← tambah ini
+        returned_by,  
   }),
 });
 }

@@ -3,9 +3,9 @@ import { api } from "./api";
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 export enum LoanStatus {
-  PENDING  = "pending",
-  APPROVED = "approved",
-  RETURNED = "returned",
+  PENDING  = "Pending",
+  APPROVED = "Disetujui",
+  RETURNED = "Dikembalikan",
 }
 
 // ─── Sub-types (sesuai controller include) ────────────────────────────────────

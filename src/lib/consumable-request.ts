@@ -1,8 +1,8 @@
 import { api } from "./api";
 
 
-export type ConsumableRequestStatus = "Good" | "Fair" | "Poor";
-export type ConsumableRequestLoanStatus = "pending" | "approved" | "returned";
+export type ConsumableRequestStatus = "Baik" | "Sedang" | "Buruk";
+export type ConsumableRequestLoanStatus = "Pending" | "Disetujui" | "Dikembalikan";
 
 export interface ConsumableRequest {
   id: string;

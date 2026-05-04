@@ -196,12 +196,12 @@ for (const row of dataRows) {
         const hasNonZero = importedRows.some((r) => r.price > 0);
 
         if (hasZero && hasNonZero) {
-          toast.error("Tidak boleh mix donation & pembelian");
+          toast.error("Tidak boleh mix antara donasi & pembelian");
           return;
         }
 
         if (hasZero) {
-          toast.info("Semua item dianggap DONATION");
+          toast.info("Semua item dianggap donasi");
         }
 
         // ── Final ──────────────────────────────────────────────────────────

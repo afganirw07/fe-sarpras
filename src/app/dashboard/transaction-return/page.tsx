@@ -34,14 +34,14 @@ export default function TransactionReturnPage() {
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const totalTransaksi    = loanRequests.length;
-  const totalSudahReturn  = loanRequests.filter((r) => r.status === "returned").length;
-  const totalBelumReturn  = loanRequests.filter((r) => r.status === "approved").length;
+  const totalSudahReturn  = loanRequests.filter((r) => r.status === "Dikembalikan").length;
+  const totalBelumReturn  = loanRequests.filter((r) => r.status === "Disetujui").length;
 
   const filteredCount = useMemo(() => {
     if (!search) return totalSudahReturn;
     const q = search.toLowerCase();
     return loanRequests
-      .filter((r) => r.status === "returned")
+      .filter((r) => r.status === "Dikembalikan")
       .filter((r) =>
         (r.user?.username ?? "").toLowerCase().includes(q) ||
         r.item.some(

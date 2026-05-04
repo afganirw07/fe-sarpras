@@ -195,11 +195,11 @@ function formatTanggal(dateStr: string): string {
 
 function getConditionBadge(condition: string) {
   switch (condition) {
-    case 'Good':
+    case 'Bail':
       return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800';
-    case 'Fair':
+    case 'Sedang':
       return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800';
-    case 'Poor':
+    case 'Buruk':
       return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
     default:
       return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-800';
@@ -282,7 +282,7 @@ function getConditionBadge(condition: string) {
                   <SelectContent>
                     <SelectItem value="all">Semua Status</SelectItem>
                     <SelectItem value="done">Done</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
                   </SelectContent>
                 </Select>
                   

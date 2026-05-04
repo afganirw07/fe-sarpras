@@ -31,9 +31,9 @@ function formatDate(iso: string | null | undefined): string {
 
 // ── Condition badge ────────────────────────────────────────────────────────
 const CONDITION_CONFIG: Record<string, { label: string; className: string }> = {
-  good: { label: "Good", className: "bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400" },
-  fair: { label: "Fair", className: "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400" },
-  poor: { label: "Poor", className: "bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-400" },
+  Baik: { label: "Baik", className: "bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400" },
+  Sedang: { label: "Sedang", className: "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400" },
+  Buruk: { label: "Buruk", className: "bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-400" },
 };
 
 function ConditionBadge({ condition }: { condition: string }) {

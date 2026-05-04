@@ -28,7 +28,7 @@ import { getRooms, Room } from "@/lib/warehouse";
 import { createConsumableRequest, ConsumableRequestStatus } from "@/lib/consumable-request";
 import { Search, Trash2, Plus } from "lucide-react";
 
-const STATUS_OPTIONS: ConsumableRequestStatus[] = ["Good", "Fair", "Poor"];
+const STATUS_OPTIONS: ConsumableRequestStatus[] = ["Baik", "Sedang", "Buruk"];
 
 interface ItemRow {
   item_id: string;
@@ -117,7 +117,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
         getRooms(),
       ]);
       const itemsData = (itemsRes as any).data ?? itemsRes ?? [];
-      setItems((itemsData as Item[]).filter((i: Item) => i.type === "Consumable"));
+      setItems((itemsData as Item[]).filter((i: Item) => i.type === "HabisPakai"));
       setEmployees(Array.isArray(empRes) ? empRes : ((empRes as any).data ?? []));
       setRooms(Array.isArray(roomsRes) ? roomsRes : ((roomsRes as any).data ?? []));
     } catch {
@@ -162,7 +162,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
       name:    item.name,
       stock:   item.stock,
       qty:     1,
-      status:  "Good",
+      status:  "Baik",
     }]);
     setSelectedItemId("");
     setItemSearch("");
@@ -218,14 +218,13 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
 
     setLoading(true);
     try {
-      // Fix error 3: tambah approved_by di payload
       await Promise.all(
         rows.map((row) =>
           createConsumableRequest({
             item_id:     row.item_id,
             quantity:    row.qty,
             status:      row.status,
-            approved_by: userId,   // user yang login sebagai approver default
+            approved_by: userId,   
             request_by:  requestBy,
             room_id:     selectedRoomId,
             created_by:  userId,
@@ -257,7 +256,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
       <DialogContent className="max-w-4xl p-6 dark:bg-black">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Tambah Consumable Request</DialogTitle>
+            <DialogTitle>Tambah Permintaan barang</DialogTitle>
           </DialogHeader>
 
           <div className="mt-4 flex flex-col gap-5">
@@ -265,7 +264,7 @@ export default function DialogAddConsumableRequest({ onSuccess }: Props) {
             {/* ── Row 1: Pilih Item + Pilih Warehouse ── */}
             <div className="grid grid-cols-2 gap-4">
               <SearchableSelect
-                label="Pilih Item (Consumable)"
+                label="Pilih Item (Habis pakai)"
                 error={errors.item}
                 value={selectedItemId}
                 displayLabel={selectedItemLabel}
