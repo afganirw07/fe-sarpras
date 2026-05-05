@@ -62,6 +62,7 @@ export default function DialogCategory({onSuccess}: {onSuccess?: () => void}) {
   const [subcategories, setSubcategories] = useState<SubcategoryTableItem[]>([]);
   const { data: session} = useSession();
   const user = session?.user;
+  console.log("============", user)
 
   const resetForm = () => {
     setCategoryName("");

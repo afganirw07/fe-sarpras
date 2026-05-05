@@ -1,10 +1,10 @@
 import { api } from "./api";
 
 export enum TypeRoom {
-  GUDANG = "gudang",
-  LAB = "lab",
-  KELAS = "kelas",
-  GURU = "guru",
+  GUDANG = "Gudang",
+  LAB = "Lab",
+  KELAS = "Kelas",
+  GURU = "Guru",
 }
 
 export interface Room {

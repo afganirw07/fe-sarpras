@@ -173,8 +173,8 @@ onDataUpdate?.(data); // ✅ cukup ini
 
                       <TableCell className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-blue-500 to-blue-600 lg:text-xs font-semibold text-white shadow-lg shadow-blue-500/20">
-                            {item.name.charAt(0).toUpperCase()}
+                          <div className="flex items-center justify-center lg:text-[.9rem] font-semibold text-black ">
+                            {item.name}
                           </div>
                         </div>
                       </TableCell>

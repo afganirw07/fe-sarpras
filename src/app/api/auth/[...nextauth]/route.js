@@ -53,7 +53,7 @@ const authOptions = {
             password: credentials.password,
           };
 
-          const url = `${baseUrl}/api/users`;
+          const url = `${baseUrl}/api/login`;
           console.log(" Fetching:", url);
           console.log(" Payload:", {
             ...payload,

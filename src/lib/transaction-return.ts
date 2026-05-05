@@ -91,7 +91,7 @@ await api(`/api/loan-requests/${loan.id}`, {
     item_ids:   loan.item.map((d) => d.id), // ← tambah ini
     borrow_date: loan.borrow_date,
     return_date: new Date().toISOString(),
-    status:      "returned",
+    status:      "Dikembalikan",
     description: loan.description ?? undefined,
         returned_by,  
   }),
