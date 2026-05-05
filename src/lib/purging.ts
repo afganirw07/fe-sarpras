@@ -20,6 +20,7 @@ export interface Purging {
   item_status: string;
   notes: string;
   charge_person?:string;
+  tanggal_dokumen: Date;
   knowing?:string;
   submission?:string;
   created_by: string;

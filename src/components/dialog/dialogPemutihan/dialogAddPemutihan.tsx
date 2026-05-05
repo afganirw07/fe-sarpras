@@ -28,6 +28,7 @@ import { createPurging } from "@/lib/purging";
 import { useSession } from "next-auth/react";
 import Pagination from "@/components/tables/Pagination";
 import DatePickerTanggalSurat from "./datePickerPemutihan";
+import ConditionFilter from "./conditionFilterPemutihan";
 
 
 
@@ -83,6 +84,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
   const [subcategoryId, setSubcategoryId]   = useState("");
   const [selectedItemId, setSelectedItemId] = useState("");
   const [notes, setNotes]                   = useState("");
+  const [conditionFilter, setConditionFilter] = useState<"Baik" | "Sedang" | "Buruk" | "">("");
 
   // state: opsi dropdown
   const [rooms, setRooms]                           = useState<Room[]>([]);
@@ -149,8 +151,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  // ── Fetch tabel kiri ─────────────────────────────────────────────────────
-  const fetchLeftItems = useCallback(async (currentStaged: DetailItem[] = []) => {
+const fetchLeftItems = useCallback(async (currentStaged: DetailItem[] = []) => {
     if (!warehouseId) return;
     setLoadingItems(true);
     try {
@@ -158,6 +159,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
         search:        search || undefined,
         subcategoryId: subcategoryId || undefined,
         itemId:        selectedItemId || undefined,
+        condition:     conditionFilter || undefined,
       });
 
       const stagedIds = new Set(currentStaged.map((s) => s.id));
@@ -175,13 +177,16 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
     } finally {
       setLoadingItems(false);
     }
-  }, [warehouseId, leftPage, search, subcategoryId, selectedItemId]);
+  }, [warehouseId, leftPage, search, subcategoryId, selectedItemId, conditionFilter]); 
 
   useEffect(() => {
+    if (!warehouseId) {                         
+      setLeftItems([]); setLeftTotal(0); setLeftTotalPages(1);
+      return;
+    }
     if (skipNextFetch.current) { skipNextFetch.current = false; return; }
-    if (warehouseId) fetchLeftItems(stagedItems);
-    else { setLeftItems([]); setLeftTotal(0); setLeftTotalPages(1); }
-  }, [warehouseId, leftPage, search, subcategoryId, selectedItemId]);
+    fetchLeftItems(stagedItems);
+  }, [warehouseId, leftPage, search, subcategoryId, selectedItemId, conditionFilter]);
 
   // ── Tabel kanan (client-side) ────────────────────────────────────────────
   const filteredRight   = stagedItems.filter((item) =>
@@ -222,6 +227,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
           search:        search || undefined,
           subcategoryId: subcategoryId || undefined,
           itemId:        selectedItemId || undefined,
+          condition:     conditionFilter || undefined,
         });
         const batch = (res.data ?? []).filter(
           (d: DetailItem) => !stagedIds.has(d.id) && d.status === "Tersedia"
@@ -332,7 +338,7 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
   const resetForm = () => {
     setWarehouseId(""); setSubcategoryId(""); setSelectedItemId(""); setNotes("");
     setLeftItems([]); setStagedItems([]); setSelectedIds([]);
-    setTanggalDokumen(new Date());
+    setTanggalDokumen(new Date()); setConditionFilter("");
     setSearchInput(""); setSearch(""); setSearchRight("");
     setKnowing(""); setSubmission(""); setChargePerson("");
     setCategoriesWithSubs([]); setItemOptions([]);
@@ -532,6 +538,16 @@ export default function DialogAddPemutihan({ onSuccess }: { onSuccess?: () => vo
               />
             </div>
 
+                    <ConditionFilter
+                value={conditionFilter}
+                onChange={(val) => {
+                setConditionFilter(val);
+                setLeftPage(1);
+                setSelectAllPagesMode(false);
+                setSelectedIds([]);
+              }}
+            />
+            
             <div className="overflow-hidden rounded-xl border border-gray-200/70 dark:border-white/10">
               {/* Banner: pilih semua halaman */}
               {isCurrentPageAllSelected && !selectAllPagesMode && leftTotalPages > 1 && (

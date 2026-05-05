@@ -22,7 +22,17 @@ export interface DetailItemRoom {
   id: string;
   name: string;
 }
+export interface CategoryWithSubcategories {
+  id: string;
+  name: string;
+  subcategories: { id: string; name: string; category_id: string }[];
+}
 
+export interface ItemOption {
+  id: string;
+  name: string;
+  category_id: string;
+}
 export interface DetailItem {
   id: string;
   item_id: string;
@@ -93,31 +103,32 @@ export function getDetailItemsByRoom(
 }
 
 // ── Filtered: semua kondisi dengan pagination (untuk pemutihan) ────────────
-export function getDetailItemsByRoomFiltered(
+export async function getDetailItemsByRoomFiltered(
   roomId: string,
-  page:   number = 1,
-  limit:  number = 10,
-  options: {
-    search?:        string;
-    categoryId?:    string;
+  page: number = 1,
+  limit: number = 10,
+  filters?: {
+    search?: string;
     subcategoryId?: string;
-    itemId?:        string;
-  } = {}
-): Promise<PaginatedResponse<DetailItem>> {
-  const { search, categoryId, subcategoryId, itemId } = options;
-
+    itemId?: string;
+    condition?: string; 
+  }
+): Promise<any> {
   const params = new URLSearchParams({
     room_id: roomId,
-    status:  "Tersedia",
-    page:    String(page),
-    limit:   String(limit),
-    ...(search        ? { search }                        : {}),
-    ...(itemId        ? { item_id: itemId }               : {}),
-    ...(categoryId    ? { category_id: categoryId }       : {}),
-    ...(subcategoryId ? { subcategory_id: subcategoryId } : {}),
+    page: String(page),
+    limit: String(limit),
+    status: "Tersedia", 
   });
 
-  return api(`/api/detail-items?${params.toString()}`);
+  if (filters?.search)        params.set("search", filters.search);
+  if (filters?.subcategoryId) params.set("subcategory_id", filters.subcategoryId);
+  if (filters?.itemId)        params.set("item_id", filters.itemId);
+  if (filters?.condition)     params.set("condition", filters.condition);
+
+  return await api(`/api/detail-items?${params.toString()}`, {
+    method: "GET",
+  });
 }
 
 // ── Cascade: kategori flat (untuk pemutihan) ───────────────────────────────

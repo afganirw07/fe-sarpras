@@ -28,6 +28,7 @@ import { updatePurging, getPurgingById, Purging } from "@/lib/purging";
 import { useSession } from "next-auth/react";
 import Pagination from "@/components/tables/Pagination";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import DatePickerTanggalSurat from "./datePickerPemutihan";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface DetailItem {
@@ -104,6 +105,7 @@ export default function DialogEditPemutihan({
   const [rooms, setRooms]                           = useState<Room[]>([]);
   const [categoriesWithSubs, setCategoriesWithSubs] = useState<CategoryWithSubcategories[]>([]);
   const [itemOptions, setItemOptions]               = useState<ItemOption[]>([]);
+  const [tanggalDokumen, setTanggalDokumen] = useState<Date>(new Date());
 
   // ── Left panel ────────────────────────────────────────────────────────────
   const [leftItems, setLeftItems]           = useState<DetailItem[]>([]);
@@ -386,6 +388,7 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
         condition:     firstItem.condition,
         item_status:   "Rusak",
         letter_status: purging.letter_status ?? "Pending",
+        tanggal_dokumen: tanggalDokumen.toISOString(),
         notes,
         knowing,
         submission,
@@ -423,6 +426,7 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
     setWarehouseId(""); setSubcategoryId(""); setSelectedItemId(""); setNotes("");
     setLeftItems([]); setStagedItems([]); setSelectedIds([]);
     setSearchInput(""); setSearch(""); setSearchRight("");
+    setTanggalDokumen(new Date());
     setKnowing(""); setSubmission(""); setChargePerson("");
     setCategoriesWithSubs([]); setItemOptions([]);
     setLeftPage(1); setRightPage(1);
@@ -593,6 +597,10 @@ const existingItems: DetailItem[] = full.details.map((d: any) => ({
   </div>
 </div>
 
+        <DatePickerTanggalSurat
+          value={tanggalDokumen}
+          onChange={setTanggalDokumen}
+        />
         {/* ── Two-panel ── */}
         <div className="mt-6 grid grid-cols-2 gap-6">
 

@@ -91,6 +91,13 @@ const paginatedItems = useMemo(() => {
         : "-",
       icon: <Calendar size={15} />,
     },
+    {
+      label: "Tanggal Dokumen",
+      value: purging.tanggal_dokumen
+        ? new Date(purging.tanggal_dokumen).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })
+        : "-",
+      icon: <Calendar size={15} />,
+    },
   ] : [];
 
   const rightFields: FieldConfig[] = purging ? [
